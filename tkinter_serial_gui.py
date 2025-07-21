@@ -1,9 +1,12 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
 import serial
+import serial.tools.list_ports
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
+import glob
+import platform
 
 class SerialGUI:
     def __init__(self, root):
@@ -33,17 +36,31 @@ class SerialGUI:
     def setup_config_tab(self):
         # Port selection
         ttk.Label(self.config_tab, text="Porta:").grid(column=0, row=0, padx=10, pady=10)
-        self.port_entry = ttk.Entry(self.config_tab)
-        self.port_entry.grid(column=1, row=0, padx=10, pady=10)
+        self.port_combobox = ttk.Combobox(self.config_tab, state="readonly")
+        self.port_combobox.grid(column=1, row=0, padx=10, pady=10)
+        self.update_ports()
 
         # Baudrate selection
         ttk.Label(self.config_tab, text="Baudrate:").grid(column=0, row=1, padx=10, pady=10)
-        self.baudrate_entry = ttk.Entry(self.config_tab)
-        self.baudrate_entry.grid(column=1, row=1, padx=10, pady=10)
+        self.baudrate_combobox = ttk.Combobox(self.config_tab, state="readonly", values=["9600", "19200", "38400", "57600", "115200"])
+        self.baudrate_combobox.grid(column=1, row=1, padx=10, pady=10)
+        self.baudrate_combobox.set("9600")
 
         # Connect button
         self.connect_button = ttk.Button(self.config_tab, text="Conectar", command=self.connect_serial)
         self.connect_button.grid(column=0, row=2, columnspan=2, padx=10, pady=10)
+
+    def update_ports(self):
+        if platform.system() == "Linux":
+            # Include pseudo-terminals in Linux
+            pts_ports = glob.glob("/dev/pts/*")
+            ports = [port.device for port in serial.tools.list_ports.comports()] + pts_ports
+        else:
+            ports = [port.device for port in serial.tools.list_ports.comports()]
+
+        self.port_combobox["values"] = ports
+        if ports:
+            self.port_combobox.set(ports[0])
 
     def setup_data_tab(self):
         # Text area for data
@@ -73,14 +90,16 @@ class SerialGUI:
         self.canvas.get_tk_widget().grid(column=0, row=3, columnspan=2, padx=10, pady=10)
 
     def connect_serial(self):
-        port = self.port_entry.get()
-        baudrate = self.baudrate_entry.get()
+        port = self.port_combobox.get()
+        baudrate = self.baudrate_combobox.get()
 
         try:
             self.serial_port = serial.Serial(port, baudrate, timeout=1)
             threading.Thread(target=self.read_serial_data, daemon=True).start()
         except Exception as e:
-            self.data_text.insert("end", f"Erro ao conectar: {e}\n")
+            error_message = f"Erro ao conectar: {e}\n"
+            self.data_text.insert("end", error_message)
+            print(error_message)
 
     def read_serial_data(self):
         while self.serial_port and self.serial_port.is_open:
@@ -89,8 +108,16 @@ class SerialGUI:
                 if line:
                     self.data.append(line)
                     self.data_text.insert("end", line + "\n")
+            except serial.SerialException as e:
+                error_message = f"Erro ao ler dados: {e}\n"
+                self.data_text.insert("end", error_message)
+                print(error_message)
+                break
             except Exception as e:
-                self.data_text.insert("end", f"Erro ao ler dados: {e}\n")
+                error_message = f"Erro inesperado: {e}\n"
+                self.data_text.insert("end", error_message)
+                print(error_message)
+                break
 
     def save_data(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
