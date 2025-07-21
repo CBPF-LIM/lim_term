@@ -18,10 +18,15 @@ def mock_serial(port=None, baudrate=9600):
         print(f"Mock serial port opened on {port} with baudrate {baudrate}")
 
         def generate_data(master_fd):
+            index = 0
             while True:
                 # Generate artificial data
-                data = " ".join(str(i) for i in range(10))
+                col1 = index
+                col2 = col1
+                col3 = 3 * col2 + 2
+                data = f"{col1} {col2} {col3}"
                 os.write(master_fd, (data + "\n").encode("utf-8"))
+                index += 1
                 time.sleep(1)
 
         threading.Thread(target=generate_data, args=(master,), daemon=True).start()
