@@ -8,6 +8,67 @@ import threading
 import glob
 import platform
 
+class GraphOptionsMenu:
+    def __init__(self, parent, serial_gui):
+        self.window = tk.Toplevel(parent)
+        self.window.title("Opções de Gráfico")
+        self.serial_gui = serial_gui
+
+        # Tipo de gráfico
+        ttk.Label(self.window, text="Tipo de Gráfico:").grid(column=0, row=0, padx=10, pady=10)
+        self.graph_type_combobox = ttk.Combobox(self.window, state="readonly", values=["Linha", "Barras", "Dispersão"])
+        self.graph_type_combobox.grid(column=1, row=0, padx=10, pady=10)
+        self.graph_type_combobox.set("Linha")
+
+        # Cor
+        ttk.Label(self.window, text="Cor:").grid(column=0, row=1, padx=10, pady=10)
+        self.color_entry = ttk.Entry(self.window)
+        self.color_entry.grid(column=1, row=1, padx=10, pady=10)
+
+        # Min e Max dos eixos
+        ttk.Label(self.window, text="Min X:").grid(column=0, row=2, padx=10, pady=10)
+        self.min_x_entry = ttk.Entry(self.window)
+        self.min_x_entry.grid(column=1, row=2, padx=10, pady=10)
+
+        ttk.Label(self.window, text="Max X:").grid(column=0, row=3, padx=10, pady=10)
+        self.max_x_entry = ttk.Entry(self.window)
+        self.max_x_entry.grid(column=1, row=3, padx=10, pady=10)
+
+        ttk.Label(self.window, text="Min Y:").grid(column=0, row=4, padx=10, pady=10)
+        self.min_y_entry = ttk.Entry(self.window)
+        self.min_y_entry.grid(column=1, row=4, padx=10, pady=10)
+
+        ttk.Label(self.window, text="Max Y:").grid(column=0, row=5, padx=10, pady=10)
+        self.max_y_entry = ttk.Entry(self.window)
+        self.max_y_entry.grid(column=1, row=5, padx=10, pady=10)
+
+        # Formato dos pontos (apenas para dispersão)
+        ttk.Label(self.window, text="Formato dos Pontos:").grid(column=0, row=6, padx=10, pady=10)
+        self.marker_entry = ttk.Entry(self.window)
+        self.marker_entry.grid(column=1, row=6, padx=10, pady=10)
+
+        # Botão para aplicar configurações
+        self.apply_button = ttk.Button(self.window, text="Aplicar", command=self.apply_settings)
+        self.apply_button.grid(column=0, row=7, columnspan=2, padx=10, pady=10)
+
+    def apply_settings(self):
+        try:
+            self.serial_gui.graph_settings = {
+                key: value for key, value in {
+                    "type": self.graph_type_combobox.get(),
+                    "color": self.color_entry.get(),
+                    "min_x": self.min_x_entry.get(),
+                    "max_x": self.max_x_entry.get(),
+                    "min_y": self.min_y_entry.get(),
+                    "max_y": self.max_y_entry.get(),
+                    "marker": self.marker_entry.get()
+                }.items() if value
+            }
+            print("Configurações aplicadas:", self.serial_gui.graph_settings)
+            self.window.destroy()
+        except Exception as e:
+            print(f"Erro ao aplicar configurações: {e}")
+
 class SerialGUI:
     def __init__(self, root):
         self.root = root
@@ -15,6 +76,7 @@ class SerialGUI:
 
         self.serial_port = None
         self.data = []
+        self.graph_settings = {}
 
         # Tabs
         self.tab_control = ttk.Notebook(root)
@@ -89,6 +151,13 @@ class SerialGUI:
         self.canvas = FigureCanvasTkAgg(self.figure, self.graph_tab)
         self.canvas.get_tk_widget().grid(column=0, row=3, columnspan=2, padx=10, pady=10)
 
+        # Botão para abrir o menu de opções de gráfico
+        self.options_button = ttk.Button(self.graph_tab, text="Opções de Gráfico", command=self.open_graph_options)
+        self.options_button.grid(column=0, row=4, columnspan=2, padx=10, pady=10)
+
+    def open_graph_options(self):
+        GraphOptionsMenu(self.root, self)
+
     def connect_serial(self):
         port = self.port_combobox.get()
         baudrate = self.baudrate_combobox.get()
@@ -139,7 +208,24 @@ class SerialGUI:
                 y_data.append(float(columns[y_col]))
 
             self.ax.clear()
-            self.ax.plot(x_data, y_data)
+
+            graph_type = self.graph_settings.get("type", "Linha")
+            color = self.graph_settings.get("color", "blue")
+            min_x = float(self.graph_settings.get("min_x", "0")) if self.graph_settings.get("min_x") else None
+            max_x = float(self.graph_settings.get("max_x", "0")) if self.graph_settings.get("max_x") else None
+            min_y = float(self.graph_settings.get("min_y", "0")) if self.graph_settings.get("min_y") else None
+            max_y = float(self.graph_settings.get("max_y", "0")) if self.graph_settings.get("max_y") else None
+            marker = self.graph_settings.get("marker", "o")
+
+            if graph_type == "Linha":
+                self.ax.plot(x_data, y_data, color=color)
+            elif graph_type == "Barras":
+                self.ax.bar(x_data, y_data, color=color)
+            elif graph_type == "Dispersão":
+                self.ax.scatter(x_data, y_data, color=color, marker=marker)
+
+            self.ax.set_xlim(min_x, max_x)
+            self.ax.set_ylim(min_y, max_y)
             self.ax.set_title("Gráfico")
             self.ax.set_xlabel(f"Coluna {x_col + 1}")
             self.ax.set_ylabel(f"Coluna {y_col + 1}")
