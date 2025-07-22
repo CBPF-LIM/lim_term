@@ -77,3 +77,6 @@ venv/
 *.bak
 *.swp
 *.swo
+
+# Autosaved files
+autosave

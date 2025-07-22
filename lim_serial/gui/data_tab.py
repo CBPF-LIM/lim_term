@@ -40,6 +40,43 @@ class DataTab:
         # Botão de limpar
         self.clear_button = ttk.Button(self.frame, text="Limpar", command=self._clear_data)
         self.clear_button.pack(side="left", padx=10, pady=10)
+
+        # Autosave checkbox
+        self.autosave_var = tk.BooleanVar(value=False)
+        self.autosave_checkbox = ttk.Checkbutton(self.frame, text="Autosave", variable=self.autosave_var, command=self._on_autosave_toggle)
+        self.autosave_checkbox.pack(side="left", padx=10, pady=10)
+
+        self.autosave_file = None
+        self.autosave_filename = None
+
+        # Autoscroll flag
+        self.autoscroll = True
+        self.data_text.bind("<Button-1>", self._on_user_scroll)
+        self.data_text.bind("<MouseWheel>", self._on_user_scroll)
+        self.data_text.bind("<Key>", self._on_user_scroll)
+        self.data_text.bind("<ButtonRelease-1>", self._on_user_scroll)
+        self.data_text.bind("<Configure>", self._on_user_scroll)
+
+    def _on_autosave_toggle(self):
+        """Callback para ativar/desativar autosave"""
+        import os
+        import datetime
+        if self.autosave_var.get():
+            # Ativa autosave: cria pasta e arquivo
+            output_dir = "autosave"
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            now = datetime.datetime.now()
+            fname = f"data-{now.strftime('%Y-%m-%d-%H%M')}.txt"
+            self.autosave_filename = os.path.join(output_dir, fname)
+            self.autosave_file = open(self.autosave_filename, "a", encoding="utf-8")
+        else:
+            # Desativa autosave: fecha arquivo
+            if self.autosave_file:
+                self.autosave_file.close()
+                self.autosave_file = None
+                self.autosave_filename = None
+
     def _clear_data(self):
         """Remove todo o conteúdo da área de dados"""
         self.data.clear()
@@ -56,6 +93,10 @@ class DataTab:
     def add_data(self, line):
         """Adiciona linha de dados"""
         self.data.append({"type": "data", "value": line})
+        # Autosave se ativado
+        if self.autosave_var.get() and self.autosave_file:
+            self.autosave_file.write(line + "\n")
+            self.autosave_file.flush()
         # Verifica se o usuário está no final antes de inserir
         at_end = self._is_scrolled_to_end()
         self.data_text.insert("end", line + "\n")
