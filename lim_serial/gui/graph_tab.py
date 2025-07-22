@@ -22,34 +22,33 @@ class GraphTab:
     
     def _create_widgets(self):
         """Cria os widgets da tab"""
-        # Configuração de colunas
-        ttk.Label(self.frame, text="Coluna X:").grid(column=0, row=0, padx=10, pady=10, sticky="w")
-        self.x_column_entry = ttk.Entry(self.frame, width=10)
-        self.x_column_entry.grid(column=1, row=0, padx=10, pady=10, sticky="w")
+        # Linha superior: Coluna X, Coluna Y, e botões, todos alinhados à esquerda
+        top_row = ttk.Frame(self.frame)
+        top_row.grid(column=0, row=0, sticky="w", padx=10, pady=10)
+
+        ttk.Label(top_row, text="Coluna X:").pack(side="left", padx=(0,5))
+        self.x_column_entry = ttk.Entry(top_row, width=10)
+        self.x_column_entry.pack(side="left", padx=(0,15))
         self.x_column_entry.insert(0, DEFAULT_X_COLUMN)
         self.x_column_entry.bind("<KeyRelease>", self._on_setting_change)
-        
-        ttk.Label(self.frame, text="Coluna Y:").grid(column=2, row=0, padx=10, pady=10, sticky="w")
-        self.y_column_entry = ttk.Entry(self.frame, width=10)
-        self.y_column_entry.grid(column=3, row=0, padx=10, pady=10, sticky="w")
+
+        ttk.Label(top_row, text="Coluna Y:").pack(side="left", padx=(0,5))
+        self.y_column_entry = ttk.Entry(top_row, width=10)
+        self.y_column_entry.pack(side="left", padx=(0,15))
         self.y_column_entry.insert(0, DEFAULT_Y_COLUMN)
         self.y_column_entry.bind("<KeyRelease>", self._on_setting_change)
-        
-        # Botão de atualizar gráfico
-        self.plot_button = ttk.Button(self.frame, text="Atualizar Gráfico", command=self.plot_graph)
-        self.plot_button.grid(column=0, row=1, padx=10, pady=10)
-        
-        # Botão de pause/resume
-        self.pause_button = ttk.Button(self.frame, text="Pausar", command=self._toggle_pause)
-        self.pause_button.grid(column=1, row=1, padx=10, pady=10)
-        
-        # Botão de opções (toggle)
-        self.options_button = ttk.Button(self.frame, text="Mostrar Opções", command=self._toggle_options)
-        self.options_button.grid(column=2, row=1, padx=10, pady=10)
-        
-        # Botão de salvar gráfico
-        self.save_button = ttk.Button(self.frame, text="Salvar PNG", command=self._save_chart)
-        self.save_button.grid(column=3, row=1, padx=10, pady=10)
+
+        self.plot_button = ttk.Button(top_row, text="Atualizar Gráfico", command=self.plot_graph)
+        self.plot_button.pack(side="left", padx=(0,10))
+
+        self.pause_button = ttk.Button(top_row, text="Pausar", command=self._toggle_pause)
+        self.pause_button.pack(side="left", padx=(0,10))
+
+        self.options_button = ttk.Button(top_row, text="Mostrar Opções", command=self._toggle_options)
+        self.options_button.pack(side="left", padx=(0,10))
+
+        self.save_button = ttk.Button(top_row, text="Salvar PNG", command=self._save_chart)
+        self.save_button.pack(side="left", padx=(0,10))
         
         # Frame para opções (inicialmente oculto)
         self.options_frame = ttk.LabelFrame(self.frame, text="Opções do Gráfico")
