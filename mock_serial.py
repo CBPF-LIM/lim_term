@@ -4,6 +4,7 @@ import time
 import platform
 import os
 import pty
+import math
 
 def mock_serial(port=None, baudrate=9600):
     try:
@@ -23,7 +24,7 @@ def mock_serial(port=None, baudrate=9600):
                 # Generate artificial data
                 col1 = index
                 col2 = col1
-                col3 = 3 * col2 + 2
+                col3 = math.sin(col2 / 10.0) * 100  # Simulated sensor data
                 data = f"{col1} {col2} {col3}"
                 os.write(master_fd, (data + "\n").encode("utf-8"))
                 index += 1
