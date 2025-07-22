@@ -37,6 +37,10 @@ class DataTab:
         self.save_button = ttk.Button(self.frame, text="Salvar", command=self._save_data)
         self.save_button.pack(side="left", padx=10, pady=10)
 
+        # Botão de carregar
+        self.load_button = ttk.Button(self.frame, text="Carregar", command=self._load_data)
+        self.load_button.pack(side="left", padx=10, pady=10)
+
         # Botão de limpar
         self.clear_button = ttk.Button(self.frame, text="Limpar", command=self._clear_data)
         self.clear_button.pack(side="left", padx=10, pady=10)
@@ -48,6 +52,36 @@ class DataTab:
 
         self.autosave_file = None
         self.autosave_filename = None
+    def _load_data(self):
+        """Carrega dados válidos de um arquivo txt, com confirmação de sobrescrita"""
+        from tkinter import filedialog, messagebox
+        # Confirmação antes de sobrescrever
+        if self.data:
+            result = messagebox.askquestion(
+                "Sobrescrever dados",
+                "Os dados atuais serão sobrescritos. Deseja continuar?",
+                icon='warning'
+            )
+            if result != 'yes':
+                return
+        file_path = filedialog.askopenfilename(
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+            title="Carregar dados"
+        )
+        if file_path:
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    lines = f.read().splitlines()
+                self._clear_data()
+                for line in lines:
+                    # Adiciona como dado válido
+                    self.data.append({"type": "data", "value": line})
+                    self.data_text.insert("end", line + "\n")
+                self.data_text.see("end")
+                self.add_message(f"Dados carregados de: {file_path}")
+            except Exception as e:
+                self.add_message(f"Erro ao carregar dados: {e}")
 
         # Autoscroll flag
         self.autoscroll = True
