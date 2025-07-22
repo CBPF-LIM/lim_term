@@ -85,7 +85,7 @@ class GraphTab:
         ttk.Label(self.options_frame, text="Janela:").grid(column=0, row=1, padx=5, pady=5, sticky="w")
         self.data_window_entry = ttk.Entry(self.options_frame, width=12)
         self.data_window_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
-        self.data_window_entry.insert(0, "0")
+        self.data_window_entry.insert(0, "100")
         self.data_window_entry.bind("<KeyRelease>", self._on_setting_change)
         
         # Tipo de ponto
