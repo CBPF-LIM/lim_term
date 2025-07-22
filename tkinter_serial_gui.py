@@ -51,9 +51,17 @@ class GraphOptionsMenu:
         self.marker_entry = ttk.Entry(self.window)
         self.marker_entry.grid(column=1, row=6, padx=10, pady=10)
 
+        # Tipo de ponto
+        ttk.Label(self.window, text="Tipo de Ponto:").grid(column=0, row=7, padx=10, pady=10)
+        self.dot_type_combobox = ttk.Combobox(self.window, state="readonly", values=[
+            "Círculo (o)", "Quadrado (s)", "Triângulo (^)" , "Diamante (D)", "Estrela (*)", "Mais (+)", "X (x)", "Barra Vertical (|)", "Barra Horizontal (_)", "Hexágono (h)"
+        ])
+        self.dot_type_combobox.grid(column=1, row=7, padx=10, pady=10)
+        self.dot_type_combobox.set("Círculo (o)")  # Tipo de ponto padrão
+
         # Botão para aplicar configurações
         self.apply_button = ttk.Button(self.window, text="Aplicar", command=self.apply_settings)
-        self.apply_button.grid(column=0, row=7, columnspan=2, padx=10, pady=10)
+        self.apply_button.grid(column=0, row=8, columnspan=2, padx=10, pady=10)
 
     def apply_settings(self):
         try:
@@ -65,7 +73,19 @@ class GraphOptionsMenu:
                     "max_x": self.max_x_entry.get(),
                     "min_y": self.min_y_entry.get(),
                     "max_y": self.max_y_entry.get(),
-                    "marker": self.marker_entry.get()
+                    "marker": self.marker_entry.get(),
+                    "dot_type": {
+                        "Círculo (o)": "o",
+                        "Quadrado (s)": "s",
+                        "Triângulo (^)": "^",
+                        "Diamante (D)": "D",
+                        "Estrela (*)": "*",
+                        "Mais (+)": "+",
+                        "X (x)": "x",
+                        "Barra Vertical (|)": "|",
+                        "Barra Horizontal (_)": "_",
+                        "Hexágono (h)": "h"
+                    }.get(self.dot_type_combobox.get(), "o")  # Map descriptive label to internal value
                 }.items() if value
             }
             print("Configurações aplicadas:", self.serial_gui.graph_settings)
@@ -223,13 +243,14 @@ class SerialGUI:
             min_y = float(self.graph_settings.get("min_y", "0")) if self.graph_settings.get("min_y") else None
             max_y = float(self.graph_settings.get("max_y", "0")) if self.graph_settings.get("max_y") else None
             marker = self.graph_settings.get("marker", "o")
+            dot_type = self.graph_settings.get("dot_type", "o")
 
             if graph_type == "Linha":
-                self.ax.plot(x_data, y_data, color=color)
+                self.ax.plot(x_data, y_data, color=color, marker=dot_type)  # Added marker for line graph
             elif graph_type == "Barras":
                 self.ax.bar(x_data, y_data, color=color)
             elif graph_type == "Dispersão":
-                self.ax.scatter(x_data, y_data, color=color, marker=marker)
+                self.ax.scatter(x_data, y_data, color=color, marker=dot_type)
 
             self.ax.set_xlim(min_x, max_x)
             self.ax.set_ylim(min_y, max_y)
