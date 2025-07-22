@@ -29,32 +29,30 @@ class GraphOptionsWindow:
         self.color_combobox = ttk.Combobox(self.window, state="readonly", values=AVAILABLE_COLORS)
         self.color_combobox.grid(column=1, row=1, padx=10, pady=10)
         
-        # Min e Max dos eixos
-        ttk.Label(self.window, text="Min X:").grid(column=0, row=2, padx=10, pady=10)
-        self.min_x_entry = ttk.Entry(self.window)
-        self.min_x_entry.grid(column=1, row=2, padx=10, pady=10)
+        # Janela de dados
+        ttk.Label(self.window, text="Janela de Dados (N últimos pontos):").grid(column=0, row=2, padx=10, pady=10)
+        self.data_window_entry = ttk.Entry(self.window)
+        self.data_window_entry.grid(column=1, row=2, padx=10, pady=10)
+        self.data_window_entry.insert(0, "0")  # Valor padrão
         
-        ttk.Label(self.window, text="Max X:").grid(column=0, row=3, padx=10, pady=10)
-        self.max_x_entry = ttk.Entry(self.window)
-        self.max_x_entry.grid(column=1, row=3, padx=10, pady=10)
-        
-        ttk.Label(self.window, text="Min Y:").grid(column=0, row=4, padx=10, pady=10)
+        # Min e Max dos eixos Y
+        ttk.Label(self.window, text="Min Y:").grid(column=0, row=3, padx=10, pady=10)
         self.min_y_entry = ttk.Entry(self.window)
-        self.min_y_entry.grid(column=1, row=4, padx=10, pady=10)
+        self.min_y_entry.grid(column=1, row=3, padx=10, pady=10)
         
-        ttk.Label(self.window, text="Max Y:").grid(column=0, row=5, padx=10, pady=10)
+        ttk.Label(self.window, text="Max Y:").grid(column=0, row=4, padx=10, pady=10)
         self.max_y_entry = ttk.Entry(self.window)
-        self.max_y_entry.grid(column=1, row=5, padx=10, pady=10)
+        self.max_y_entry.grid(column=1, row=4, padx=10, pady=10)
         
         # Tipo de ponto
-        ttk.Label(self.window, text="Tipo de Ponto:").grid(column=0, row=6, padx=10, pady=10)
+        ttk.Label(self.window, text="Tipo de Ponto:").grid(column=0, row=5, padx=10, pady=10)
         self.dot_type_combobox = ttk.Combobox(self.window, state="readonly", 
                                             values=list(MARKER_TYPES.keys()))
-        self.dot_type_combobox.grid(column=1, row=6, padx=10, pady=10)
+        self.dot_type_combobox.grid(column=1, row=5, padx=10, pady=10)
         
         # Botão para aplicar configurações
         self.apply_button = ttk.Button(self.window, text="Aplicar", command=self._apply_settings)
-        self.apply_button.grid(column=0, row=7, columnspan=2, padx=10, pady=10)
+        self.apply_button.grid(column=0, row=6, columnspan=2, padx=10, pady=10)
     
     def _load_current_settings(self):
         """Carrega as configurações atuais"""
@@ -62,9 +60,11 @@ class GraphOptionsWindow:
         
         self.graph_type_combobox.set(settings.get("type", "Linha"))
         self.color_combobox.set(settings.get("color", "Blue"))
-        self.min_x_entry.insert(0, settings.get("min_x", ""))
-        self.max_x_entry.insert(0, settings.get("max_x", ""))
+        self.data_window_entry.delete(0, "end")
+        self.data_window_entry.insert(0, str(settings.get("data_window", "0")))
+        self.min_y_entry.delete(0, "end")
         self.min_y_entry.insert(0, settings.get("min_y", ""))
+        self.max_y_entry.delete(0, "end")
         self.max_y_entry.insert(0, settings.get("max_y", ""))
         
         # Carrega tipo de ponto
@@ -86,10 +86,8 @@ class GraphOptionsWindow:
                 settings["type"] = self.graph_type_combobox.get()
             if self.color_combobox.get():
                 settings["color"] = self.color_combobox.get()
-            if self.min_x_entry.get():
-                settings["min_x"] = self.min_x_entry.get()
-            if self.max_x_entry.get():
-                settings["max_x"] = self.max_x_entry.get()
+            if self.data_window_entry.get():
+                settings["data_window"] = int(self.data_window_entry.get())
             if self.min_y_entry.get():
                 settings["min_y"] = self.min_y_entry.get()
             if self.max_y_entry.get():

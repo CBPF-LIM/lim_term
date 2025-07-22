@@ -59,6 +59,11 @@ class GraphTab:
                 self.data_tab.add_message("Nenhum dado disponível para plotar")
                 return
             
+            # Aplica janela de dados
+            data_window = self.graph_settings.get("data_window", 0)
+            if data_window > 0:
+                data_lines = data_lines[-data_window:]
+            
             x_data, y_data = DataParser.extract_columns(data_lines, x_col, y_col)
             
             if not x_data or not y_data:
