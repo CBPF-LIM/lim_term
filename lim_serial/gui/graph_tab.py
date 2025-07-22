@@ -16,6 +16,7 @@ class GraphTab:
         self.data_tab = data_tab
         self.graph_settings = {}
         self.options_visible = False
+        self.is_paused = False
         
         self._create_widgets()
     
@@ -36,11 +37,19 @@ class GraphTab:
         
         # Botão de atualizar gráfico
         self.plot_button = ttk.Button(self.frame, text="Atualizar Gráfico", command=self.plot_graph)
-        self.plot_button.grid(column=0, row=1, columnspan=2, padx=10, pady=10)
+        self.plot_button.grid(column=0, row=1, padx=10, pady=10)
+        
+        # Botão de pause/resume
+        self.pause_button = ttk.Button(self.frame, text="Pausar", command=self._toggle_pause)
+        self.pause_button.grid(column=1, row=1, padx=10, pady=10)
         
         # Botão de opções (toggle)
         self.options_button = ttk.Button(self.frame, text="Mostrar Opções", command=self._toggle_options)
-        self.options_button.grid(column=2, row=1, columnspan=2, padx=10, pady=10)
+        self.options_button.grid(column=2, row=1, padx=10, pady=10)
+        
+        # Botão de salvar gráfico
+        self.save_button = ttk.Button(self.frame, text="Salvar PNG", command=self._save_chart)
+        self.save_button.grid(column=3, row=1, padx=10, pady=10)
         
         # Frame para opções (inicialmente oculto)
         self.options_frame = ttk.LabelFrame(self.frame, text="Opções do Gráfico")
@@ -110,6 +119,69 @@ class GraphTab:
             self.options_button.config(text="Ocultar Opções")
             self.options_visible = True
     
+    def _toggle_pause(self):
+        """Pausa/resume a atualização do gráfico"""
+        self.is_paused = not self.is_paused
+        if self.is_paused:
+            self.pause_button.config(text="Retomar")
+        else:
+            self.pause_button.config(text="Pausar")
+    
+    def _save_chart(self):
+        """Salva o gráfico atual como PNG"""
+        from tkinter import filedialog
+        import matplotlib.pyplot as plt
+        import io
+        
+        # Captura o estado atual do gráfico ANTES de abrir o diálogo
+        # Cria uma cópia da figura em memória
+        fig_copy = plt.figure(figsize=self.graph_manager.figure.get_size_inches(), 
+                             dpi=self.graph_manager.figure.dpi)
+        
+        # Copia o conteúdo da figura atual para a nova figura
+        ax_original = self.graph_manager.ax
+        ax_copy = fig_copy.add_subplot(111)
+        
+        # Copia todos os elementos do plot
+        for line in ax_original.get_lines():
+            ax_copy.plot(line.get_xdata(), line.get_ydata(), 
+                        color=line.get_color(), marker=line.get_marker(),
+                        linestyle=line.get_linestyle(), linewidth=line.get_linewidth(),
+                        markersize=line.get_markersize())
+        
+        # Copia as barras se existirem
+        for patch in ax_original.patches:
+            if hasattr(patch, 'get_height'):  # É uma barra
+                ax_copy.bar(patch.get_x() + patch.get_width()/2, patch.get_height(),
+                           width=patch.get_width(), color=patch.get_facecolor(),
+                           alpha=patch.get_alpha())
+        
+        # Copia as configurações dos eixos
+        ax_copy.set_xlim(ax_original.get_xlim())
+        ax_copy.set_ylim(ax_original.get_ylim())
+        ax_copy.set_xlabel(ax_original.get_xlabel())
+        ax_copy.set_ylabel(ax_original.get_ylabel())
+        ax_copy.set_title(ax_original.get_title())
+        ax_copy.grid(ax_original.get_xgridlines() or ax_original.get_ygridlines())
+        
+        # AGORA abre o diálogo para salvar
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[("PNG files", "*.png"), ("All files", "*.*")],
+            title="Salvar gráfico como PNG"
+        )
+        
+        if file_path:
+            try:
+                # Salva a figura copiada (estado do momento 1)
+                fig_copy.savefig(file_path, dpi=300, bbox_inches='tight')
+                self.data_tab.add_message(f"Gráfico salvo em: {file_path}")
+            except Exception as e:
+                self.data_tab.add_message(f"Erro ao salvar gráfico: {e}")
+            finally:
+                # Limpa a figura copiada da memória
+                plt.close(fig_copy)
+    
     def _on_setting_change(self, event=None):
         """Callback chamado quando qualquer configuração muda"""
         try:
@@ -131,7 +203,7 @@ class GraphTab:
             
             # Atualiza configurações e reaplica gráfico
             self.graph_settings.update(settings)
-            if self.data_tab.get_data():
+            if self.data_tab.get_data() and not self.is_paused:
                 self.plot_graph()
                 
         except (ValueError, KeyError):
@@ -193,7 +265,7 @@ class GraphTab:
                     self.dot_type_combobox.set(label)
                     break
         # Replot automaticamente se houver dados
-        if self.data_tab.get_data():
+        if self.data_tab.get_data() and not self.is_paused:
             self.plot_graph()
     
     def get_frame(self):

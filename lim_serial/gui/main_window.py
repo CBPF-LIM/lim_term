@@ -49,8 +49,9 @@ class MainWindow:
     def _on_data_received(self, line):
         """Callback chamado quando dados são recebidos"""
         self.data_tab.add_data(line)
-        # Atualiza gráfico automaticamente se configurado
-        self.graph_tab.plot_graph()
+        # Atualiza gráfico automaticamente se configurado e não pausado
+        if not self.graph_tab.is_paused:
+            self.graph_tab.plot_graph()
     
     def _on_error(self, error_message):
         """Callback chamado quando ocorre um erro"""
