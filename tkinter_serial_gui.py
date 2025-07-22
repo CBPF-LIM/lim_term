@@ -138,10 +138,12 @@ class SerialGUI:
         ttk.Label(self.graph_tab, text="Coluna X:").grid(column=0, row=0, padx=10, pady=10)
         self.x_column_entry = ttk.Entry(self.graph_tab)
         self.x_column_entry.grid(column=1, row=0, padx=10, pady=10)
+        self.x_column_entry.insert(0, "2")  # Valor padrão para coluna X
 
         ttk.Label(self.graph_tab, text="Coluna Y:").grid(column=0, row=1, padx=10, pady=10)
         self.y_column_entry = ttk.Entry(self.graph_tab)
         self.y_column_entry.grid(column=1, row=1, padx=10, pady=10)
+        self.y_column_entry.insert(0, "3")  # Valor padrão para coluna Y
 
         self.plot_button = ttk.Button(self.graph_tab, text="Gerar Gráfico", command=self.plot_graph)
         self.plot_button.grid(column=0, row=2, columnspan=2, padx=10, pady=10)
