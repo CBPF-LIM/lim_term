@@ -50,18 +50,12 @@ class GraphOptionsMenu:
         self.max_y_entry.grid(column=1, row=5, padx=10, pady=10)
         self.max_y_entry.insert(0, self.serial_gui.graph_settings.get("max_y", ""))  # Load saved value
 
-        # Formato dos pontos (apenas para dispersão)
-        ttk.Label(self.window, text="Formato dos Pontos:").grid(column=0, row=6, padx=10, pady=10)
-        self.marker_entry = ttk.Entry(self.window)
-        self.marker_entry.grid(column=1, row=6, padx=10, pady=10)
-        self.marker_entry.insert(0, self.serial_gui.graph_settings.get("marker", ""))  # Load saved value
-
         # Tipo de ponto
-        ttk.Label(self.window, text="Tipo de Ponto:").grid(column=0, row=7, padx=10, pady=10)
+        ttk.Label(self.window, text="Tipo de Ponto:").grid(column=0, row=6, padx=10, pady=10)
         self.dot_type_combobox = ttk.Combobox(self.window, state="readonly", values=[
             "Círculo (o)", "Quadrado (s)", "Triângulo (^)" , "Diamante (D)", "Estrela (*)", "Mais (+)", "X (x)", "Barra Vertical (|)", "Barra Horizontal (_)", "Hexágono (h)"
         ])
-        self.dot_type_combobox.grid(column=1, row=7, padx=10, pady=10)
+        self.dot_type_combobox.grid(column=1, row=6, padx=10, pady=10)
         self.dot_type_combobox.set({
             "o": "Círculo (o)",
             "s": "Quadrado (s)",
@@ -77,7 +71,7 @@ class GraphOptionsMenu:
 
         # Botão para aplicar configurações
         self.apply_button = ttk.Button(self.window, text="Aplicar", command=self.apply_settings)
-        self.apply_button.grid(column=0, row=8, columnspan=2, padx=10, pady=10)
+        self.apply_button.grid(column=0, row=7, columnspan=2, padx=10, pady=10)
 
     def apply_settings(self):
         try:
@@ -89,7 +83,6 @@ class GraphOptionsMenu:
                     "max_x": self.max_x_entry.get(),
                     "min_y": self.min_y_entry.get(),
                     "max_y": self.max_y_entry.get(),
-                    "marker": self.marker_entry.get(),
                     "dot_type": {
                         "Círculo (o)": "o",
                         "Quadrado (s)": "s",
@@ -258,7 +251,6 @@ class SerialGUI:
             max_x = float(self.graph_settings.get("max_x", "0")) if self.graph_settings.get("max_x") else None
             min_y = float(self.graph_settings.get("min_y", "0")) if self.graph_settings.get("min_y") else None
             max_y = float(self.graph_settings.get("max_y", "0")) if self.graph_settings.get("max_y") else None
-            marker = self.graph_settings.get("marker", "o")
             dot_type = self.graph_settings.get("dot_type", "o")
 
             if graph_type == "Linha":
