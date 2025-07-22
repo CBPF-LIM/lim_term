@@ -35,7 +35,15 @@ class DataTab:
         
         # Botão de salvar
         self.save_button = ttk.Button(self.frame, text="Salvar", command=self._save_data)
-        self.save_button.pack(pady=10)
+        self.save_button.pack(side="left", padx=10, pady=10)
+
+        # Botão de limpar
+        self.clear_button = ttk.Button(self.frame, text="Limpar", command=self._clear_data)
+        self.clear_button.pack(side="left", padx=10, pady=10)
+    def _clear_data(self):
+        """Remove todo o conteúdo da área de dados"""
+        self.data.clear()
+        self.data_text.delete("1.0", "end")
         
         # Autoscroll flag
         self.autoscroll = True
