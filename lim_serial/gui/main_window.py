@@ -8,7 +8,6 @@ from ..core import SerialManager
 from .config_tab import ConfigTab
 from .data_tab import DataTab
 from .graph_tab import GraphTab
-from .graph_options import GraphOptionsWindow
 
 
 class MainWindow:
@@ -37,7 +36,7 @@ class MainWindow:
         # Cria as abas
         self.config_tab = ConfigTab(self.tab_control, self.serial_manager)
         self.data_tab = DataTab(self.tab_control)
-        self.graph_tab = GraphTab(self.tab_control, self.data_tab, self._open_graph_options)
+        self.graph_tab = GraphTab(self.tab_control, self.data_tab, None)
         
         # Adiciona as abas ao controle
         self.tab_control.add(self.config_tab.get_frame(), text="Configuração")
@@ -56,10 +55,6 @@ class MainWindow:
     def _on_error(self, error_message):
         """Callback chamado quando ocorre um erro"""
         self.data_tab.add_message(error_message)
-    
-    def _open_graph_options(self):
-        """Abre janela de opções do gráfico"""
-        GraphOptionsWindow(self.root, self.graph_tab)
     
     def run(self):
         """Executa a aplicação"""
