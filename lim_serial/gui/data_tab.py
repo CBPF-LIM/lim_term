@@ -27,20 +27,23 @@ class DataTab:
     
     def add_data(self, line):
         """Adiciona linha de dados"""
-        self.data.append(line)
+        self.data.append({"type": "data", "value": line})
         self.data_text.insert("end", line + "\n")
         # Auto-scroll para o final
         self.data_text.see("end")
     
     def add_message(self, message):
         """Adiciona mensagem (erro, status, etc.)"""
+        self.data.append({"type": "msg", "value": message})
         self.data_text.insert("end", message + "\n")
         self.data_text.see("end")
     
     def _save_data(self):
         """Salva os dados em arquivo"""
-        if self.data:
-            file_path = FileManager.save_data_to_file(self.data)
+        # Salva apenas linhas de dados válidos
+        valid_lines = [item["value"] for item in self.data if item["type"] == "data"]
+        if valid_lines:
+            file_path = FileManager.save_data_to_file(valid_lines)
             if file_path:
                 self.add_message(f"Dados salvos em: {file_path}")
     
@@ -49,5 +52,5 @@ class DataTab:
         return self.frame
     
     def get_data(self):
-        """Retorna os dados coletados"""
-        return self.data.copy()
+        """Retorna apenas os dados válidos coletados"""
+        return [item["value"] for item in self.data if item["type"] == "data"]
