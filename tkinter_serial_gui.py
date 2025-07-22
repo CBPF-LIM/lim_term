@@ -22,8 +22,12 @@ class GraphOptionsMenu:
 
         # Cor
         ttk.Label(self.window, text="Cor:").grid(column=0, row=1, padx=10, pady=10)
-        self.color_entry = ttk.Entry(self.window)
-        self.color_entry.grid(column=1, row=1, padx=10, pady=10)
+        self.color_combobox = ttk.Combobox(self.window, state="readonly", values=[
+            "Blue", "Cyan", "Teal", "Green", "Lime", "Yellow", "Amber", "Orange", "Red", "Magenta",
+            "Indigo", "Violet", "Turquoise", "Aquamarine", "SpringGreen", "Chartreuse", "Gold", "Coral", "Crimson", "Pink"
+        ])
+        self.color_combobox.grid(column=1, row=1, padx=10, pady=10)
+        self.color_combobox.set("Blue")  # Cor padrão
 
         # Min e Max dos eixos
         ttk.Label(self.window, text="Min X:").grid(column=0, row=2, padx=10, pady=10)
@@ -56,7 +60,7 @@ class GraphOptionsMenu:
             self.serial_gui.graph_settings = {
                 key: value for key, value in {
                     "type": self.graph_type_combobox.get(),
-                    "color": self.color_entry.get(),
+                    "color": self.color_combobox.get(),  # Atualizado para usar o menu suspenso
                     "min_x": self.min_x_entry.get(),
                     "max_x": self.max_x_entry.get(),
                     "min_y": self.min_y_entry.get(),
