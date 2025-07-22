@@ -177,6 +177,7 @@ class SerialGUI:
                 if line:
                     self.data.append(line)
                     self.data_text.insert("end", line + "\n")
+                    self.plot_graph()  # Atualiza o gráfico automaticamente ao receber novos dados
             except serial.SerialException as e:
                 error_message = f"Erro ao ler dados: {e}\n"
                 self.data_text.insert("end", error_message)
