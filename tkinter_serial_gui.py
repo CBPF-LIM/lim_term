@@ -18,7 +18,7 @@ class GraphOptionsMenu:
         ttk.Label(self.window, text="Tipo de Gráfico:").grid(column=0, row=0, padx=10, pady=10)
         self.graph_type_combobox = ttk.Combobox(self.window, state="readonly", values=["Linha", "Barras", "Dispersão"])
         self.graph_type_combobox.grid(column=1, row=0, padx=10, pady=10)
-        self.graph_type_combobox.set("Linha")
+        self.graph_type_combobox.set(self.serial_gui.graph_settings.get("type", "Linha"))  # Load saved value
 
         # Cor
         ttk.Label(self.window, text="Cor:").grid(column=0, row=1, padx=10, pady=10)
@@ -27,29 +27,34 @@ class GraphOptionsMenu:
             "Indigo", "Violet", "Turquoise", "Aquamarine", "SpringGreen", "Chartreuse", "Gold", "Coral", "Crimson", "Pink"
         ])
         self.color_combobox.grid(column=1, row=1, padx=10, pady=10)
-        self.color_combobox.set("Blue")  # Cor padrão
+        self.color_combobox.set(self.serial_gui.graph_settings.get("color", "Blue"))  # Load saved value
 
         # Min e Max dos eixos
         ttk.Label(self.window, text="Min X:").grid(column=0, row=2, padx=10, pady=10)
         self.min_x_entry = ttk.Entry(self.window)
         self.min_x_entry.grid(column=1, row=2, padx=10, pady=10)
+        self.min_x_entry.insert(0, self.serial_gui.graph_settings.get("min_x", ""))  # Load saved value
 
         ttk.Label(self.window, text="Max X:").grid(column=0, row=3, padx=10, pady=10)
         self.max_x_entry = ttk.Entry(self.window)
         self.max_x_entry.grid(column=1, row=3, padx=10, pady=10)
+        self.max_x_entry.insert(0, self.serial_gui.graph_settings.get("max_x", ""))  # Load saved value
 
         ttk.Label(self.window, text="Min Y:").grid(column=0, row=4, padx=10, pady=10)
         self.min_y_entry = ttk.Entry(self.window)
         self.min_y_entry.grid(column=1, row=4, padx=10, pady=10)
+        self.min_y_entry.insert(0, self.serial_gui.graph_settings.get("min_y", ""))  # Load saved value
 
         ttk.Label(self.window, text="Max Y:").grid(column=0, row=5, padx=10, pady=10)
         self.max_y_entry = ttk.Entry(self.window)
         self.max_y_entry.grid(column=1, row=5, padx=10, pady=10)
+        self.max_y_entry.insert(0, self.serial_gui.graph_settings.get("max_y", ""))  # Load saved value
 
         # Formato dos pontos (apenas para dispersão)
         ttk.Label(self.window, text="Formato dos Pontos:").grid(column=0, row=6, padx=10, pady=10)
         self.marker_entry = ttk.Entry(self.window)
         self.marker_entry.grid(column=1, row=6, padx=10, pady=10)
+        self.marker_entry.insert(0, self.serial_gui.graph_settings.get("marker", ""))  # Load saved value
 
         # Tipo de ponto
         ttk.Label(self.window, text="Tipo de Ponto:").grid(column=0, row=7, padx=10, pady=10)
@@ -57,7 +62,18 @@ class GraphOptionsMenu:
             "Círculo (o)", "Quadrado (s)", "Triângulo (^)" , "Diamante (D)", "Estrela (*)", "Mais (+)", "X (x)", "Barra Vertical (|)", "Barra Horizontal (_)", "Hexágono (h)"
         ])
         self.dot_type_combobox.grid(column=1, row=7, padx=10, pady=10)
-        self.dot_type_combobox.set("Círculo (o)")  # Tipo de ponto padrão
+        self.dot_type_combobox.set({
+            "o": "Círculo (o)",
+            "s": "Quadrado (s)",
+            "^": "Triângulo (^)",
+            "D": "Diamante (D)",
+            "*": "Estrela (*)",
+            "+": "Mais (+)",
+            "x": "X (x)",
+            "|": "Barra Vertical (|)",
+            "_": "Barra Horizontal (_)",
+            "h": "Hexágono (h)"
+        }.get(self.serial_gui.graph_settings.get("dot_type", "o"), "Círculo (o)"))  # Load saved value
 
         # Botão para aplicar configurações
         self.apply_button = ttk.Button(self.window, text="Aplicar", command=self.apply_settings)
