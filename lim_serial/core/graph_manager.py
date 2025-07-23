@@ -41,7 +41,7 @@ class GraphManager:
         if min_y is not None or max_y is not None:
             self.ax.set_ylim(min_y, max_y)
     
-    def set_labels(self, title="Gráfico", xlabel="X", ylabel="Y"):
+    def set_labels(self, title="Graph", xlabel="X", ylabel="Y"):
         """Define rótulos do gráfico"""
         self.ax.set_title(title)
         self.ax.set_xlabel(xlabel)
@@ -51,7 +51,7 @@ class GraphManager:
         """Atualiza o canvas"""
         self.canvas.draw()
     
-    def plot_from_settings(self, x_data, y_data, settings, x_col=0, y_col=1):
+    def plot_from_settings(self, x_data, y_data, settings, x_col=0, y_col=1, title=None, xlabel=None, ylabel=None):
         """Plota gráfico baseado nas configurações"""
         self.clear()
         
@@ -81,8 +81,8 @@ class GraphManager:
         
         self.set_limits(min_x, max_x, min_y, max_y)
         self.set_labels(
-            title="Gráfico",
-            xlabel=f"Coluna {x_col + 1}",
-            ylabel=f"Coluna {y_col + 1}"
+            title=title or "Graph",
+            xlabel=xlabel or f"Column {x_col + 1}",
+            ylabel=ylabel or f"Column {y_col + 1}"
         )
         self.update()

@@ -58,6 +58,9 @@ ui:
     parameter_error: "Parameter error: {error}"
     graph_error: "Error generating graph: {error}"
     positive_numbers: "Column numbers must be positive"
+    chart_title: "Graph"
+    chart_xlabel: "Column {column}"
+    chart_ylabel: "Column {column}"
   
   graph_types:
     line: "Line"

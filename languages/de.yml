@@ -58,6 +58,9 @@ ui:
     parameter_error: "Parameterfehler: {error}"
     graph_error: "Fehler beim Generieren der Grafik: {error}"
     positive_numbers: "Spaltennummern müssen positiv sein"
+    chart_title: "Grafik"
+    chart_xlabel: "Spalte {column}"
+    chart_ylabel: "Spalte {column}"
   
   graph_types:
     line: "Linie"

@@ -253,7 +253,12 @@ class GraphTab:
                 self.data_tab.add_message(t("ui.graph_tab.could_not_extract_data"))
                 return
             
-            self.graph_manager.plot_from_settings(x_data, y_data, self.graph_settings, x_col, y_col)
+            # Generate translated labels
+            title = t("ui.graph_tab.chart_title")
+            xlabel = t("ui.graph_tab.chart_xlabel").format(column=x_col + 1)
+            ylabel = t("ui.graph_tab.chart_ylabel").format(column=y_col + 1)
+            
+            self.graph_manager.plot_from_settings(x_data, y_data, self.graph_settings, x_col, y_col, title, xlabel, ylabel)
             
         except ValueError as e:
             self.data_tab.add_message(t("ui.graph_tab.parameter_error").format(error=e))
