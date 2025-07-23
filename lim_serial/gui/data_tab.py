@@ -95,12 +95,12 @@ class DataTab:
         import datetime
 
         if self.autosave_var.get():
-            # Enable autosave - create new file with fresh timestamp
+
             output_dir = "autosave"
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
 
-            # Always generate a new timestamp when enabling autosave
+
             now = datetime.datetime.now()
             fname = f"data-{now.strftime('%Y-%m-%d-%H%M%S')}.txt"
             self.autosave_filename = os.path.join(output_dir, fname)
@@ -110,11 +110,11 @@ class DataTab:
                 print(f"Autosave enabled: {self.autosave_filename}")
             except Exception as e:
                 print(f"Error opening autosave file: {e}")
-                self.autosave_var.set(False)  # Revert checkbox if file creation fails
+                self.autosave_var.set(False)
                 self.autosave_file = None
                 self.autosave_filename = None
         else:
-            # Disable autosave - properly close file and reset variables
+
             if self.autosave_file:
                 try:
                     self.autosave_file.close()
@@ -122,7 +122,7 @@ class DataTab:
                 except Exception as e:
                     print(f"Error closing autosave file: {e}")
                 finally:
-                    # Always reset variables even if close fails
+
                     self.autosave_file = None
                     self.autosave_filename = None
 
@@ -144,24 +144,24 @@ class DataTab:
         if save_to_history:
             self.data.append({"type": "data", "value": line})
 
-            # Write to autosave file if enabled and file is open
+
             if self.autosave_var.get() and self.autosave_file:
                 try:
                     self.autosave_file.write(line + "\n")
                     self.autosave_file.flush()
                 except Exception as e:
                     print(f"Error writing to autosave file: {e}")
-                    # Could disable autosave or try to recreate file here
 
-        # Add to UI display
+
+
         try:
-            # Check if we're at the end for auto-scroll
+
             at_end = self._is_scrolled_to_end()
             self.data_text.insert("end", line + "\n")
             if at_end:
                 self.data_text.see("end")
         except tk.TclError:
-            # Widget has been destroyed, silently ignore
+
             pass
 
     def add_message(self, message):

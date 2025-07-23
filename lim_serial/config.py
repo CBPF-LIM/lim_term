@@ -15,7 +15,7 @@ DEFAULT_X_COLUMN = "2"
 DEFAULT_Y_COLUMN = "3"
 
 # Chart refresh rate configuration
-DEFAULT_REFRESH_RATE = 10  # FPS
+DEFAULT_REFRESH_RATE = 10
 
 # Color names for internal use (translation keys)
 COLOR_KEYS = [
@@ -27,7 +27,7 @@ COLOR_KEYS = [
 # Marker type mappings for internal use
 MARKER_MAPPING = {
     "circle": "o",
-    "square": "s", 
+    "square": "s",
     "triangle": "^",
     "diamond": "D",
     "star": "*",

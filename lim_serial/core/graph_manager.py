@@ -131,52 +131,51 @@ class GraphManager:
         self.update()
 
     def plot_stacked_series(self, x_data, y_series_data, colors, normalize_100=False, title=None, xlabel=None, ylabel=None):
-
-        import numpy as np
-
+        """Plot stacked area chart using pure Python without numpy dependency"""
         self.clear()
 
         if not y_series_data or not x_data:
             return
 
 
-        x_array = np.array(x_data)
-        y_arrays = []
+        x_list = list(x_data)
+        y_lists = []
         labels = []
         actual_colors = []
 
 
         for i, y_data in enumerate(y_series_data):
             if y_data:
-                y_arrays.append(np.array(y_data))
+                y_lists.append(list(y_data))
                 labels.append(f"Y{i+1}")
                 actual_colors.append(colors[i] if i < len(colors) else "#1f77b4")
 
-        if not y_arrays:
+        if not y_lists:
             return
 
 
-        min_length = min(len(x_array), min(len(y) for y in y_arrays))
-        x_array = x_array[:min_length]
-        y_arrays = [y[:min_length] for y in y_arrays]
-
-
-        y_stack = np.vstack(y_arrays)
+        min_length = min(len(x_list), min(len(y) for y in y_lists))
+        x_list = x_list[:min_length]
+        y_lists = [y[:min_length] for y in y_lists]
 
 
         if normalize_100:
 
-            totals = np.sum(y_stack, axis=0)
+            normalized_y_lists = []
+            for i in range(min_length):
+                total = sum(y_list[i] for y_list in y_lists)
+                if total == 0:
+                    total = 1
+                normalized_y_lists.append([y_list[i] / total * 100 for y_list in y_lists])
 
-            totals[totals == 0] = 1
 
-            y_stack = (y_stack / totals) * 100
+            y_lists = [[normalized_y_lists[i][j] for i in range(min_length)] for j in range(len(y_lists))]
             ylabel_text = ylabel or "Percentage (%)"
         else:
             ylabel_text = ylabel or "Value"
 
 
-        self.ax.stackplot(x_array, *y_stack, labels=labels, colors=actual_colors, alpha=0.8)
+        self.ax.stackplot(x_list, *y_lists, labels=labels, colors=actual_colors, alpha=0.8)
 
 
         self.ax.legend(loc='upper left')

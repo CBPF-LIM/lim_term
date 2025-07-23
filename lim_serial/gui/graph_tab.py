@@ -508,7 +508,7 @@ class GraphTab:
         for key, value in MARKER_MAPPING.items():
             if value == original_marker:
                 return t(f"ui.markers.{key}")
-        return t("ui.markers.circle")  # Default to circle
+        return t("ui.markers.circle")
 
     def _get_original_graph_type(self, translated_type):
 
