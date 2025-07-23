@@ -65,10 +65,6 @@ venv/
 # Logs
 *.log
 
-# Matplotlib
-*.png
-*.svg
-
 # User data
 *.sqlite3
 *.db
