@@ -126,7 +126,10 @@ class MainWindow:
 
         finally:
             self._running = False
-
+            # Clean up data tab autosave
+            if hasattr(self, 'data_tab'):
+                self.data_tab.cleanup()
+            # Garante que a conexão serial seja fechada
             self.serial_manager.disconnect()
 
     def _game_loop(self):
