@@ -64,12 +64,15 @@ class MockSerial:
         while self.is_running and self.master_fd:
             try:
                 # Gera dados artificiais
-                col1 = index
-                col2 = col1 * 1.5
-                col3 = math.sin(col2 / 10.0) * 100 + 50  # Sensor simulado
-                col4 = math.cos(col1 / 15.0) * 75 + 25   # Outro sensor
+                col1 = int(index)
+                col2 = col1 * 0.01
+                col3 = math.sin(10 * col2)
+                col4 = math.sin(20 * col2) + 0.1
+                col5 = math.sin(30 * col2) + 0.2
+                col6 = math.sin(40 * col2) + 0.3
+                col7 = math.sin(50 * col2) + 0.4
                 
-                data = f"{col1:.1f} {col2:.2f} {col3:.2f} {col4:.2f}"
+                data = f"{col1:d} {col2:.2f} {col3:.2f} {col4:.2f} {col5:.2f} {col6:.2f} {col7:.2f}"
                 os.write(self.master_fd, (data + "\n").encode("utf-8"))
                 
                 index += 1

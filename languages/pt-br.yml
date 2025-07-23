@@ -13,7 +13,7 @@ ui:
   
   config_tab:
     configuration_frame: "Configuração"
-    connection_info_frame: "Informações da Conexão"
+    connection_info_frame: "Informações de Conexão"
     mode_label: "Modo:"
     mode_hardware: "Hardware"
     mode_simulated: "Simulado"
@@ -28,7 +28,7 @@ ui:
     save: "Salvar"
     load: "Carregar"
     clear: "Limpar"
-    autosave: "Autosave"
+    autosave: "Auto-Salvar"
     data_saved: "Dados salvos em: {path}"
     data_loaded: "Dados carregados de: {path}"
     error_loading: "Erro ao carregar dados: {error}"
@@ -39,6 +39,12 @@ ui:
   graph_tab:
     column_x: "Coluna X:"
     column_y: "Coluna Y:"
+    column_y1: "Y1:"
+    column_y2: "Y2:"
+    column_y3: "Y3:"
+    column_y4: "Y4:"
+    column_y5: "Y5:"
+    y_columns: "Colunas Y"
     update_graph: "Atualizar Gráfico"
     pause: "Pausar"
     resume: "Retomar"
@@ -53,9 +59,9 @@ ui:
     min_y_label: "Min Y:"
     max_y_label: "Max Y:"
     graph_saved: "Gráfico salvo em: {path}"
-    no_data_available: "Nenhum dado disponível para plotar"
+    no_data_available: "Nenhum dado disponível para plotagem"
     could_not_extract_data: "Não foi possível extrair dados das colunas especificadas"
-    parameter_error: "Erro nos parâmetros: {error}"
+    parameter_error: "Erro de parâmetro: {error}"
     graph_error: "Erro ao gerar gráfico: {error}"
     positive_numbers: "Números de coluna devem ser positivos"
     chart_title: "Gráfico"
@@ -102,7 +108,7 @@ ui:
     hexagon: "Hexágono (h)"
 
 errors:
-  connection_error: "Erro ao conectar: {error}"
+  connection_error: "Erro de conexão: {error}"
   data_read_error: "Erro ao ler dados: {error}"
   virtual_port_error: "Erro ao criar porta simulada: {error}"
 
@@ -111,4 +117,4 @@ messages:
   connected: "Conectado"
   disconnected: "Desconectado"
   data_generation_started: "Geração de dados iniciada"
-  data_generation_stopped: "Geração de dados interrompida"
+  data_generation_stopped: "Geração de dados parada"

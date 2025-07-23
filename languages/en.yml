@@ -39,6 +39,12 @@ ui:
   graph_tab:
     column_x: "Column X:"
     column_y: "Column Y:"
+    column_y1: "Y1:"
+    column_y2: "Y2:"
+    column_y3: "Y3:"
+    column_y4: "Y4:"
+    column_y5: "Y5:"
+    y_columns: "Y Columns"
     update_graph: "Update Graph"
     pause: "Pause"
     resume: "Resume"

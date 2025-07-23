@@ -86,3 +86,55 @@ class GraphManager:
             ylabel=ylabel or f"Column {y_col + 1}"
         )
         self.update()
+    
+    def plot_multi_series(self, x_data, y_series_data, settings_list, x_col=0, title=None, xlabel=None, ylabel=None):
+        """Plota múltiplas séries Y no mesmo gráfico"""
+        self.clear()
+        
+        plotted_series = 0
+        # Plot each Y series
+        for i, (y_data, settings) in enumerate(zip(y_series_data, settings_list)):
+            if not y_data:  # Skip empty series
+                continue
+                
+            graph_type = settings.get("type", "Line")
+            color = settings.get("color", "blue").lower()
+            marker = settings.get("marker", "o")
+            
+            # Converte nomes de cores se necessário
+            if color in ["blue", "cyan", "teal", "green", "lime", "yellow", "amber", 
+                        "orange", "red", "magenta", "indigo", "violet", "turquoise", 
+                        "aquamarine", "springgreen", "chartreuse", "gold", "coral", 
+                        "crimson", "pink"]:
+                color = color.lower()
+            
+            # Create proper label for legend
+            series_label = f"Y{i+1}"
+            
+            # Plot based on type
+            if graph_type in ["Linha", "Line", "line"]:
+                self.ax.plot(x_data, y_data, color=color, marker=marker, label=series_label)
+            elif graph_type in ["Barras", "Bars", "bars"]:
+                self.ax.bar(x_data, y_data, color=color, alpha=0.7, label=series_label)
+            elif graph_type in ["Dispersão", "Scatter", "scatter"]:
+                self.ax.scatter(x_data, y_data, color=color, marker=marker, label=series_label)
+            
+            plotted_series += 1
+        
+        # Add legend only if multiple series were plotted
+        if plotted_series > 1:
+            self.ax.legend()
+        
+        # Apply Y limits from first series settings (global settings)
+        if settings_list:
+            first_settings = settings_list[0]
+            min_y = float(first_settings.get("min_y", "0")) if first_settings.get("min_y") else None
+            max_y = float(first_settings.get("max_y", "0")) if first_settings.get("max_y") else None
+            self.set_limits(None, None, min_y, max_y)
+        
+        self.set_labels(
+            title=title or "Graph",
+            xlabel=xlabel or f"Column {x_col + 1}",
+            ylabel=ylabel or "Value"
+        )
+        self.update()
