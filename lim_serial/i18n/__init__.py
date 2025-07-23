@@ -48,4 +48,4 @@ def initialize():
     if saved_language:
         get_language_manager().set_language(saved_language)
 
-__all__ = ['t', 'get_available_languages', 'set_language', 'get_current_language', 'initialize']
+__all__ = ['t', 'get_available_languages', 'set_language', 'get_current_language', 'get_config_manager', 'initialize']

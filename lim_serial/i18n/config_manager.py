@@ -3,7 +3,7 @@ Configuration Manager for saving/loading user preferences
 """
 import os
 import yaml
-from typing import Optional
+from typing import Optional, Any, Dict
 
 
 class ConfigManager:
@@ -11,7 +11,7 @@ class ConfigManager:
     
     def __init__(self):
         self.config_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config")
-        self.config_file = os.path.join(self.config_dir, "user_config.yml")
+        self.config_file = os.path.join(self.config_dir, "prefs.yml")
         self._ensure_config_dir()
     
     def _ensure_config_dir(self):
@@ -53,13 +53,44 @@ class ConfigManager:
         config['language'] = language_code
         self._save_config(config)
     
+    def load_tab_setting(self, tab_name: str, key: str, default=None) -> Any:
+        """Load a specific tab setting"""
+        config = self._load_config()
+        tabs = config.get('tabs', {})
+        tab_config = tabs.get(tab_name, {})
+        return tab_config.get(key, default)
+    
+    def save_tab_setting(self, tab_name: str, key: str, value: Any):
+        """Save a specific tab setting"""
+        config = self._load_config()
+        if 'tabs' not in config:
+            config['tabs'] = {}
+        if tab_name not in config['tabs']:
+            config['tabs'][tab_name] = {}
+        config['tabs'][tab_name][key] = value
+        self._save_config(config)
+    
+    def load_tab_settings(self, tab_name: str) -> Dict[str, Any]:
+        """Load all settings for a specific tab"""
+        config = self._load_config()
+        tabs = config.get('tabs', {})
+        return tabs.get(tab_name, {})
+    
+    def save_tab_settings(self, tab_name: str, settings: Dict[str, Any]):
+        """Save all settings for a specific tab"""
+        config = self._load_config()
+        if 'tabs' not in config:
+            config['tabs'] = {}
+        config['tabs'][tab_name] = settings
+        self._save_config(config)
+    
     def load_setting(self, key: str, default=None):
-        """Load a specific setting"""
+        """Load a specific setting (legacy method)"""
         config = self._load_config()
         return config.get(key, default)
     
     def save_setting(self, key: str, value):
-        """Save a specific setting"""
+        """Save a specific setting (legacy method)"""
         config = self._load_config()
         config[key] = value
         self._save_config(config)

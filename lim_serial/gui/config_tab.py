@@ -5,7 +5,7 @@ import tkinter as tk
 from tkinter import ttk
 from ..config import DEFAULT_BAUDRATES, DEFAULT_BAUDRATE
 from ..utils import MockSerial
-from ..i18n import t
+from ..i18n import t, get_config_manager
 
 
 class ConfigTab:
@@ -15,9 +15,11 @@ class ConfigTab:
         self.frame = ttk.Frame(parent)
         self.serial_manager = serial_manager
         self.mock_serial = None
+        self.config_manager = get_config_manager()
         
         self._create_widgets()
         self._update_ports()
+        self._load_preferences()
     
     def _create_widgets(self):
         """Cria os widgets da tab"""
@@ -33,6 +35,7 @@ class ConfigTab:
         self.mode_combobox.grid(column=1, row=0, padx=10, pady=10, sticky="w")
         self.mode_combobox.set(t("ui.config_tab.mode_hardware"))
         self.mode_combobox.bind("<<ComboboxSelected>>", self._on_mode_changed)
+        self.mode_combobox.bind("<<ComboboxSelected>>", self._on_preference_changed, add="+")
         
         # Seleção de porta
         self.port_label = ttk.Label(self.config_frame, text=t("ui.config_tab.port_label"))
@@ -44,6 +47,7 @@ class ConfigTab:
         
         self.port_combobox = ttk.Combobox(port_frame, state="readonly")
         self.port_combobox.grid(column=0, row=0, sticky="w")
+        self.port_combobox.bind("<<ComboboxSelected>>", self._on_preference_changed)
         
         self.refresh_button = ttk.Button(port_frame, text="🔄", width=3, 
                                        command=self._update_ports)
@@ -59,6 +63,7 @@ class ConfigTab:
                                             values=DEFAULT_BAUDRATES)
         self.baudrate_combobox.grid(column=1, row=2, padx=10, pady=10, sticky="w")
         self.baudrate_combobox.set(DEFAULT_BAUDRATE)
+        self.baudrate_combobox.bind("<<ComboboxSelected>>", self._on_preference_changed)
         
         # Configura peso das colunas do config_frame
         self.config_frame.columnconfigure(1, weight=1)
@@ -103,7 +108,11 @@ class ConfigTab:
             ports = self.serial_manager.get_available_ports()
             self.port_combobox["values"] = ports
             if ports:
-                self.port_combobox.set(ports[0])
+                # Try to apply preferred port if it exists in the list
+                if hasattr(self, '_preferred_port') and self._preferred_port and self._preferred_port in ports:
+                    self.port_combobox.set(self._preferred_port)
+                else:
+                    self.port_combobox.set(ports[0])
     
     def _connect(self):
         """Conecta à porta serial"""
@@ -211,6 +220,51 @@ class ConfigTab:
             port = self.port_combobox.get() if hasattr(self, 'port_combobox') else ""
             baudrate = self.baudrate_combobox.get() if hasattr(self, 'baudrate_combobox') else ""
             self._show_connection_info(mode, port, baudrate)
+    
+    def _load_preferences(self):
+        """Load saved preferences"""
+        # Load mode preference
+        saved_mode = self.config_manager.load_tab_setting('config', 'mode')
+        if saved_mode:
+            if saved_mode == "Hardware":
+                self.mode_combobox.set(t("ui.config_tab.mode_hardware"))
+            elif saved_mode == "Simulated":
+                self.mode_combobox.set(t("ui.config_tab.mode_simulated"))
+        
+        # Load baudrate preference
+        saved_baudrate = self.config_manager.load_tab_setting('config', 'baudrate', DEFAULT_BAUDRATE)
+        if saved_baudrate in DEFAULT_BAUDRATES:
+            self.baudrate_combobox.set(saved_baudrate)
+        
+        # Load port preference (with safe loading)
+        saved_port = self.config_manager.load_tab_setting('config', 'port')
+        if saved_port:
+            # Will be applied in _update_ports after ports are loaded
+            self._preferred_port = saved_port
+        else:
+            self._preferred_port = None
+        
+        # Apply mode changes
+        self._on_mode_changed()
+    
+    def _save_preferences(self):
+        """Save current preferences"""
+        # Save mode (convert from translated to English)
+        current_mode = self.mode_combobox.get()
+        if current_mode == t("ui.config_tab.mode_hardware"):
+            mode_value = "Hardware"
+        elif current_mode == t("ui.config_tab.mode_simulated"):
+            mode_value = "Simulated"
+        else:
+            mode_value = "Hardware"  # default
+        
+        self.config_manager.save_tab_setting('config', 'mode', mode_value)
+        self.config_manager.save_tab_setting('config', 'port', self.port_combobox.get())
+        self.config_manager.save_tab_setting('config', 'baudrate', self.baudrate_combobox.get())
+    
+    def _on_preference_changed(self, event=None):
+        """Called when any preference changes"""
+        self._save_preferences()
     
     def get_frame(self):
         """Retorna o frame da tab"""

@@ -6,7 +6,7 @@ from tkinter import ttk
 from ..core import GraphManager
 from ..utils import DataParser
 from ..config import DEFAULT_X_COLUMN, DEFAULT_Y_COLUMN, GRAPH_TYPES, AVAILABLE_COLORS, MARKER_TYPES
-from ..i18n import t
+from ..i18n import t, get_config_manager
 
 
 class GraphTab:
@@ -18,8 +18,10 @@ class GraphTab:
         self.graph_settings = {}
         self.options_visible = False
         self.is_paused = False
+        self.config_manager = get_config_manager()
         
         self._create_widgets()
+        self._load_preferences()
     
     def _create_widgets(self):
         """Cria os widgets da tab"""
@@ -33,6 +35,7 @@ class GraphTab:
         self.x_column_entry.pack(side="left", padx=(0,15))
         self.x_column_entry.insert(0, DEFAULT_X_COLUMN)
         self.x_column_entry.bind("<KeyRelease>", self._on_setting_change)
+        self.x_column_entry.bind("<FocusOut>", self._on_preference_changed)
 
         self.y_label = ttk.Label(top_row, text=t("ui.graph_tab.column_y"))
         self.y_label.pack(side="left", padx=(0,5))
@@ -40,6 +43,7 @@ class GraphTab:
         self.y_column_entry.pack(side="left", padx=(0,15))
         self.y_column_entry.insert(0, DEFAULT_Y_COLUMN)
         self.y_column_entry.bind("<KeyRelease>", self._on_setting_change)
+        self.y_column_entry.bind("<FocusOut>", self._on_preference_changed)
 
         self.plot_button = ttk.Button(top_row, text=t("ui.graph_tab.update_graph"), command=self.plot_graph)
         self.plot_button.pack(side="left", padx=(0,10))
@@ -77,6 +81,7 @@ class GraphTab:
         self.graph_type_combobox.grid(column=1, row=0, padx=5, pady=5, sticky="w")
         self.graph_type_combobox.set(t("ui.graph_types.line"))
         self.graph_type_combobox.bind("<<ComboboxSelected>>", self._on_setting_change)
+        self.graph_type_combobox.bind("<<ComboboxSelected>>", self._on_preference_changed, add="+")
         
         # Cor
         self.color_label = ttk.Label(self.options_frame, text=t("ui.graph_tab.color_label"))
@@ -85,6 +90,7 @@ class GraphTab:
         self.color_combobox.grid(column=3, row=0, padx=5, pady=5, sticky="w")
         self.color_combobox.set(t("ui.colors.blue"))
         self.color_combobox.bind("<<ComboboxSelected>>", self._on_setting_change)
+        self.color_combobox.bind("<<ComboboxSelected>>", self._on_preference_changed, add="+")
         
         # Janela de dados
         self.window_label = ttk.Label(self.options_frame, text=t("ui.graph_tab.window_label"))
@@ -93,6 +99,7 @@ class GraphTab:
         self.data_window_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
         self.data_window_entry.insert(0, "100")
         self.data_window_entry.bind("<KeyRelease>", self._on_setting_change)
+        self.data_window_entry.bind("<FocusOut>", self._on_preference_changed)
         
         # Tipo de ponto
         self.point_label = ttk.Label(self.options_frame, text=t("ui.graph_tab.point_label"))
@@ -102,6 +109,7 @@ class GraphTab:
         self.dot_type_combobox.grid(column=3, row=1, padx=5, pady=5, sticky="w")
         self.dot_type_combobox.set(t("ui.markers.circle"))
         self.dot_type_combobox.bind("<<ComboboxSelected>>", self._on_setting_change)
+        self.dot_type_combobox.bind("<<ComboboxSelected>>", self._on_preference_changed, add="+")
         
         # Min e Max Y
         self.min_y_label = ttk.Label(self.options_frame, text=t("ui.graph_tab.min_y_label"))
@@ -109,12 +117,14 @@ class GraphTab:
         self.min_y_entry = ttk.Entry(self.options_frame, width=12)
         self.min_y_entry.grid(column=1, row=2, padx=5, pady=5, sticky="w")
         self.min_y_entry.bind("<KeyRelease>", self._on_setting_change)
+        self.min_y_entry.bind("<FocusOut>", self._on_preference_changed)
         
         self.max_y_label = ttk.Label(self.options_frame, text=t("ui.graph_tab.max_y_label"))
         self.max_y_label.grid(column=2, row=2, padx=5, pady=5, sticky="w")
         self.max_y_entry = ttk.Entry(self.options_frame, width=12)
         self.max_y_entry.grid(column=3, row=2, padx=5, pady=5, sticky="w")
         self.max_y_entry.bind("<KeyRelease>", self._on_setting_change)
+        self.max_y_entry.bind("<FocusOut>", self._on_preference_changed)
     
     def _toggle_options(self):
         """Mostra/oculta opções"""
@@ -349,6 +359,120 @@ class GraphTab:
         self.graph_type_combobox.set(t("ui.graph_types.line"))
         self.color_combobox.set(t("ui.colors.blue"))
         self.dot_type_combobox.set(t("ui.markers.circle"))
+    
+    def _load_preferences(self):
+        """Load saved preferences"""
+        # Load column settings
+        x_col = self.config_manager.load_tab_setting('graph', 'x_column', DEFAULT_X_COLUMN)
+        y_col = self.config_manager.load_tab_setting('graph', 'y_column', DEFAULT_Y_COLUMN)
+        self.x_column_entry.delete(0, "end")
+        self.x_column_entry.insert(0, str(x_col))
+        self.y_column_entry.delete(0, "end")
+        self.y_column_entry.insert(0, str(y_col))
+        
+        # Load graph type
+        graph_type = self.config_manager.load_tab_setting('graph', 'type', 'Line')
+        type_translation_map = {
+            'Line': t("ui.graph_types.line"),
+            'Bars': t("ui.graph_types.bars"),
+            'Scatter': t("ui.graph_types.scatter")
+        }
+        if graph_type in type_translation_map:
+            self.graph_type_combobox.set(type_translation_map[graph_type])
+        
+        # Load color
+        color = self.config_manager.load_tab_setting('graph', 'color', 'Blue')
+        color_translation_map = {
+            'Blue': t("ui.colors.blue"), 'Cyan': t("ui.colors.cyan"), 'Teal': t("ui.colors.teal"),
+            'Green': t("ui.colors.green"), 'Lime': t("ui.colors.lime"), 'Yellow': t("ui.colors.yellow"),
+            'Amber': t("ui.colors.amber"), 'Orange': t("ui.colors.orange"), 'Red': t("ui.colors.red"),
+            'Magenta': t("ui.colors.magenta"), 'Indigo': t("ui.colors.indigo"), 'Violet': t("ui.colors.violet"),
+            'Turquoise': t("ui.colors.turquoise"), 'Aquamarine': t("ui.colors.aquamarine"), 
+            'Springgreen': t("ui.colors.springgreen"), 'Chartreuse': t("ui.colors.chartreuse"),
+            'Gold': t("ui.colors.gold"), 'Coral': t("ui.colors.coral"), 'Crimson': t("ui.colors.crimson"),
+            'Pink': t("ui.colors.pink")
+        }
+        if color in color_translation_map:
+            self.color_combobox.set(color_translation_map[color])
+        
+        # Load window size
+        window_size = self.config_manager.load_tab_setting('graph', 'window_size', '100')
+        self.data_window_entry.delete(0, "end")
+        self.data_window_entry.insert(0, str(window_size))
+        
+        # Load marker type
+        marker = self.config_manager.load_tab_setting('graph', 'marker', 'circle')
+        marker_translation_map = {
+            'circle': t("ui.markers.circle"), 'square': t("ui.markers.square"), 'triangle': t("ui.markers.triangle"),
+            'diamond': t("ui.markers.diamond"), 'star': t("ui.markers.star"), 'plus': t("ui.markers.plus"),
+            'x': t("ui.markers.x"), 'vline': t("ui.markers.vline"), 'hline': t("ui.markers.hline"),
+            'hexagon': t("ui.markers.hexagon")
+        }
+        if marker in marker_translation_map:
+            self.dot_type_combobox.set(marker_translation_map[marker])
+        
+        # Load Y range
+        min_y = self.config_manager.load_tab_setting('graph', 'min_y', '')
+        max_y = self.config_manager.load_tab_setting('graph', 'max_y', '')
+        if min_y:
+            self.min_y_entry.delete(0, "end")
+            self.min_y_entry.insert(0, str(min_y))
+        if max_y:
+            self.max_y_entry.delete(0, "end")
+            self.max_y_entry.insert(0, str(max_y))
+    
+    def _save_preferences(self):
+        """Save current preferences"""
+        # Save column settings
+        self.config_manager.save_tab_setting('graph', 'x_column', self.x_column_entry.get())
+        self.config_manager.save_tab_setting('graph', 'y_column', self.y_column_entry.get())
+        
+        # Save graph type (convert from translated to English)
+        current_type = self.graph_type_combobox.get()
+        type_reverse_map = {
+            t("ui.graph_types.line"): 'Line',
+            t("ui.graph_types.bars"): 'Bars',
+            t("ui.graph_types.scatter"): 'Scatter'
+        }
+        type_value = type_reverse_map.get(current_type, 'Line')
+        self.config_manager.save_tab_setting('graph', 'type', type_value)
+        
+        # Save color (convert from translated to English)
+        current_color = self.color_combobox.get()
+        color_reverse_map = {
+            t("ui.colors.blue"): 'Blue', t("ui.colors.cyan"): 'Cyan', t("ui.colors.teal"): 'Teal',
+            t("ui.colors.green"): 'Green', t("ui.colors.lime"): 'Lime', t("ui.colors.yellow"): 'Yellow',
+            t("ui.colors.amber"): 'Amber', t("ui.colors.orange"): 'Orange', t("ui.colors.red"): 'Red',
+            t("ui.colors.magenta"): 'Magenta', t("ui.colors.indigo"): 'Indigo', t("ui.colors.violet"): 'Violet',
+            t("ui.colors.turquoise"): 'Turquoise', t("ui.colors.aquamarine"): 'Aquamarine',
+            t("ui.colors.springgreen"): 'Springgreen', t("ui.colors.chartreuse"): 'Chartreuse',
+            t("ui.colors.gold"): 'Gold', t("ui.colors.coral"): 'Coral', t("ui.colors.crimson"): 'Crimson',
+            t("ui.colors.pink"): 'Pink'
+        }
+        color_value = color_reverse_map.get(current_color, 'Blue')
+        self.config_manager.save_tab_setting('graph', 'color', color_value)
+        
+        # Save window size
+        self.config_manager.save_tab_setting('graph', 'window_size', self.data_window_entry.get())
+        
+        # Save marker type (convert from translated to English)
+        current_marker = self.dot_type_combobox.get()
+        marker_reverse_map = {
+            t("ui.markers.circle"): 'circle', t("ui.markers.square"): 'square', t("ui.markers.triangle"): 'triangle',
+            t("ui.markers.diamond"): 'diamond', t("ui.markers.star"): 'star', t("ui.markers.plus"): 'plus',
+            t("ui.markers.x"): 'x', t("ui.markers.vline"): 'vline', t("ui.markers.hline"): 'hline',
+            t("ui.markers.hexagon"): 'hexagon'
+        }
+        marker_value = marker_reverse_map.get(current_marker, 'circle')
+        self.config_manager.save_tab_setting('graph', 'marker', marker_value)
+        
+        # Save Y range
+        self.config_manager.save_tab_setting('graph', 'min_y', self.min_y_entry.get())
+        self.config_manager.save_tab_setting('graph', 'max_y', self.max_y_entry.get())
+    
+    def _on_preference_changed(self, event=None):
+        """Called when any preference changes"""
+        self._save_preferences()
     
     def get_frame(self):
         """Retorna o frame da tab"""
