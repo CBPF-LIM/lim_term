@@ -5,6 +5,7 @@ language:
 ui:
   main_window:
     title: "LIM Serial - GUI"
+    restart_required: "Para actualizar el idioma, cierre y reabra la aplicación."
   
   tabs:
     configuration: "Configuración"
@@ -51,6 +52,10 @@ ui:
     show_options: "Mostrar Opciones"
     hide_options: "Ocultar Opciones"
     save_png: "Guardar PNG"
+    save_dialog_title: "Guardar gráfico como PNG"
+    load_dialog_title: "Cargar datos"
+    graph_options_title: "Opciones de Gráfico"
+    apply_button: "Aplicar"
     options_frame: "Opciones del Gráfico"
     type_label: "Tipo:"
     color_label: "Color:"
@@ -58,6 +63,12 @@ ui:
     point_label: "Punto:"
     min_y_label: "Min Y:"
     max_y_label: "Max Y:"
+    refresh_rate_label: "Tasa de Actualización (FPS):"
+    visualization_group_label: "Grupo de Visualización:"
+    global_settings: "Configuración Global"
+    series_settings: "Configuración de Series"
+    time_series_settings: "Configuración de Serie Temporal"
+    series_label: "Serie"
     graph_saved: "Gráfico guardado en: {path}"
     no_data_available: "No hay datos disponibles para graficar"
     could_not_extract_data: "No se pudieron extraer datos de las columnas especificadas"
@@ -67,10 +78,18 @@ ui:
     chart_title: "Gráfico"
     chart_xlabel: "Columna {column}"
     chart_ylabel: "Columna {column}"
+    stacked_chart_title: "Gráfico Apilado"
+    stacked_chart_ylabel: "Valor"
+    stacked_chart_ylabel_percent: "Porcentaje (%)"
+    normalize_100_percent: "Normalizar al 100%"
   
   graph_types:
     line: "Línea"
     scatter: "Dispersión"
+  
+  visualization_groups:
+    time_series: "Serie Temporal"
+    stacked: "Apilado"
   
   colors:
     blue: "Azul"

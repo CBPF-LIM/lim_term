@@ -5,6 +5,7 @@ language:
 ui:
   main_window:
     title: "LIM Serial - GUI"
+    restart_required: "Pour mettre à jour la langue, fermez et rouvrez l'application."
   
   tabs:
     configuration: "Configuration"
@@ -51,6 +52,10 @@ ui:
     show_options: "Afficher les Options"
     hide_options: "Masquer les Options"
     save_png: "Sauvegarder PNG"
+    save_dialog_title: "Sauvegarder le graphique au format PNG"
+    load_dialog_title: "Charger des données"
+    graph_options_title: "Options de Graphique"
+    apply_button: "Appliquer"
     options_frame: "Options du Graphique"
     type_label: "Type:"
     color_label: "Couleur:"
@@ -58,6 +63,12 @@ ui:
     point_label: "Point:"
     min_y_label: "Min Y:"
     max_y_label: "Max Y:"
+    refresh_rate_label: "Taux de Rafraîchissement (FPS):"
+    visualization_group_label: "Groupe de Visualisation:"
+    global_settings: "Paramètres Globaux"
+    series_settings: "Paramètres des Séries"
+    time_series_settings: "Paramètres de Série Temporelle"
+    series_label: "Série"
     graph_saved: "Graphique sauvegardé dans: {path}"
     no_data_available: "Aucune donnée disponible pour tracer"
     could_not_extract_data: "Impossible d'extraire les données des colonnes spécifiées"
@@ -67,10 +78,18 @@ ui:
     chart_title: "Graphique"
     chart_xlabel: "Colonne {column}"
     chart_ylabel: "Colonne {column}"
+    stacked_chart_title: "Graphique Empilé"
+    stacked_chart_ylabel: "Valeur"
+    stacked_chart_ylabel_percent: "Pourcentage (%)"
+    normalize_100_percent: "Normaliser à 100%"
   
   graph_types:
     line: "Ligne"
     scatter: "Dispersion"
+  
+  visualization_groups:
+    time_series: "Série Temporelle"
+    stacked: "Empilé"
   
   colors:
     blue: "Bleu"

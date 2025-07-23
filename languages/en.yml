@@ -5,6 +5,7 @@ language:
 ui:
   main_window:
     title: "LIM Serial - GUI"
+    restart_required: "To update the language, close and reopen the application."
   
   tabs:
     configuration: "Configuration"
@@ -51,6 +52,10 @@ ui:
     show_options: "Show Options"
     hide_options: "Hide Options"
     save_png: "Save PNG"
+    save_dialog_title: "Save graph as PNG"
+    load_dialog_title: "Load data"
+    graph_options_title: "Graph Options"
+    apply_button: "Apply"
     options_frame: "Graph Options"
     type_label: "Type:"
     color_label: "Color:"
@@ -58,6 +63,12 @@ ui:
     point_label: "Point:"
     min_y_label: "Min Y:"
     max_y_label: "Max Y:"
+    refresh_rate_label: "Refresh Rate (FPS):"
+    visualization_group_label: "Visualization Group:"
+    global_settings: "Global Settings"
+    series_settings: "Series Settings"
+    time_series_settings: "Time Series Settings"
+    series_label: "Series"
     graph_saved: "Graph saved to: {path}"
     no_data_available: "No data available to plot"
     could_not_extract_data: "Could not extract data from specified columns"
@@ -67,10 +78,18 @@ ui:
     chart_title: "Graph"
     chart_xlabel: "Column {column}"
     chart_ylabel: "Column {column}"
+    stacked_chart_title: "Stacked Chart"
+    stacked_chart_ylabel: "Value"
+    stacked_chart_ylabel_percent: "Percentage (%)"
+    normalize_100_percent: "Normalize to 100%"
   
   graph_types:
     line: "Line"
     scatter: "Scatter"
+  
+  visualization_groups:
+    time_series: "Time Series"
+    stacked: "Stacked"
   
   colors:
     blue: "Blue"

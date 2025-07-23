@@ -5,6 +5,7 @@ language:
 ui:
   main_window:
     title: "LIM Serial - GUI"
+    restart_required: "Um die Sprache zu aktualisieren, schließen und öffnen Sie die Anwendung erneut."
   
   tabs:
     configuration: "Konfiguration"
@@ -51,6 +52,10 @@ ui:
     show_options: "Optionen Anzeigen"
     hide_options: "Optionen Ausblenden"
     save_png: "PNG Speichern"
+    save_dialog_title: "Diagramm als PNG speichern"
+    load_dialog_title: "Daten laden"
+    graph_options_title: "Grafik-Optionen"
+    apply_button: "Anwenden"
     options_frame: "Grafik-Optionen"
     type_label: "Typ:"
     color_label: "Farbe:"
@@ -58,6 +63,12 @@ ui:
     point_label: "Punkt:"
     min_y_label: "Min Y:"
     max_y_label: "Max Y:"
+    refresh_rate_label: "Aktualisierungsrate (FPS):"
+    visualization_group_label: "Visualisierungsgruppe:"
+    global_settings: "Globale Einstellungen"
+    series_settings: "Serieneinstellungen"
+    time_series_settings: "Zeitreihen-Einstellungen"
+    series_label: "Serie"
     graph_saved: "Grafik gespeichert in: {path}"
     no_data_available: "Keine Daten zum Zeichnen verfügbar"
     could_not_extract_data: "Konnte keine Daten aus den angegebenen Spalten extrahieren"
@@ -67,11 +78,19 @@ ui:
     chart_title: "Grafik"
     chart_xlabel: "Spalte {column}"
     chart_ylabel: "Spalte {column}"
+    stacked_chart_title: "Gestapelte Grafik"
+    stacked_chart_ylabel: "Wert"
+    stacked_chart_ylabel_percent: "Prozent (%)"
+    normalize_100_percent: "Auf 100% normalisieren"
   
   graph_types:
     line: "Linie"
     bars: "Balken"
     scatter: "Streuung"
+  
+  visualization_groups:
+    time_series: "Zeitreihe"
+    stacked: "Gestapelt"
   
   colors:
     blue: "Blau"

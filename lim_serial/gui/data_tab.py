@@ -68,7 +68,7 @@ class DataTab:
         file_path = filedialog.askopenfilename(
             defaultextension=".txt",
             filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
-            title="Carregar dados"
+            title=t("ui.graph_tab.load_dialog_title")
         )
         if file_path:
             try:
@@ -125,33 +125,48 @@ class DataTab:
         self.data_text.bind("<ButtonRelease-1>", self._on_user_scroll)
         self.data_text.bind("<Configure>", self._on_user_scroll)
     
-    def add_data(self, line):
+    def add_data(self, line, save_to_history=True):
         """Adiciona linha de dados"""
-        self.data.append({"type": "data", "value": line})
-        # Autosave se ativado
-        if self.autosave_var.get() and self.autosave_file:
-            self.autosave_file.write(line + "\n")
-            self.autosave_file.flush()
-        # Verifica se o usuário está no final antes de inserir
-        at_end = self._is_scrolled_to_end()
-        self.data_text.insert("end", line + "\n")
-        if at_end:
-            self.data_text.see("end")
+        if save_to_history:
+            self.data.append({"type": "data", "value": line})
+            # Autosave se ativado
+            if self.autosave_var.get() and self.autosave_file:
+                self.autosave_file.write(line + "\n")
+                self.autosave_file.flush()
+        
+        # Verifica se o widget ainda existe antes de tentar acessá-lo
+        try:
+            # Verifica se o usuário está no final antes de inserir
+            at_end = self._is_scrolled_to_end()
+            self.data_text.insert("end", line + "\n")
+            if at_end:
+                self.data_text.see("end")
+        except tk.TclError:
+            # Widget foi destruído, ignorar tentativa de inserção
+            pass
     
     def add_message(self, message):
         """Adiciona mensagem (erro, status, etc.)"""
         self.data.append({"type": "msg", "value": message})
-        at_end = self._is_scrolled_to_end()
-        self.data_text.insert("end", message + "\n")
-        if at_end:
-            self.data_text.see("end")
+        try:
+            at_end = self._is_scrolled_to_end()
+            self.data_text.insert("end", message + "\n")
+            if at_end:
+                self.data_text.see("end")
+        except tk.TclError:
+            # Widget foi destruído, ignorar tentativa de inserção
+            pass
     def _is_scrolled_to_end(self):
         """Retorna True se o usuário está no final do texto"""
-        # Obtém a posição do último caractere visível
-        last_visible = self.data_text.index("@0,%d" % self.data_text.winfo_height())
-        end_index = self.data_text.index("end-1c")
-        # Se o último visível está próximo do fim, considera que está no final
-        return last_visible >= end_index
+        try:
+            # Obtém a posição do último caractere visível
+            last_visible = self.data_text.index("@0,%d" % self.data_text.winfo_height())
+            end_index = self.data_text.index("end-1c")
+            # Se o último visível está próximo do fim, considera que está no final
+            return last_visible >= end_index
+        except tk.TclError:
+            # Widget foi destruído, retorna True para não quebrar
+            return True
     
     def _save_data(self):
         """Salva os dados em arquivo"""
@@ -162,12 +177,6 @@ class DataTab:
             if file_path:
                 self.add_message(t("ui.data_tab.data_saved").format(path=file_path))
     
-    def refresh_translations(self):
-        """Atualiza as traduções na interface"""
-        self.save_button.config(text=t("ui.data_tab.save"))
-        self.load_button.config(text=t("ui.data_tab.load"))
-        self.clear_button.config(text=t("ui.data_tab.clear"))
-        self.autosave_checkbox.config(text=t("ui.data_tab.autosave"))
     
     def get_frame(self):
         """Retorna o frame da tab"""
