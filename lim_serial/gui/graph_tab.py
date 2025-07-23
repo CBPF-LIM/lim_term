@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from ..core import GraphManager
 from ..utils import DataParser
-from ..config import DEFAULT_X_COLUMN, DEFAULT_Y_COLUMN, GRAPH_TYPES, AVAILABLE_COLORS, MARKER_TYPES
+from ..config import DEFAULT_X_COLUMN, DEFAULT_Y_COLUMN, MARKER_MAPPING
 from ..i18n import t, get_config_manager
 
 
@@ -464,10 +464,8 @@ class GraphTab:
             self.max_y_entry.delete(0, "end")
             self.max_y_entry.insert(0, settings["max_y"])
         if "dot_type" in settings:
-            for label, value in MARKER_TYPES.items():
-                if value == settings["dot_type"]:
-                    self.dot_type_combobox.set(label)
-                    break
+            translated_marker = self._get_translated_marker_from_original(settings["dot_type"])
+            self.dot_type_combobox.set(translated_marker)
 
         if self.data_tab.get_data() and not self.is_paused:
             self.plot_graph()
@@ -504,6 +502,13 @@ class GraphTab:
             t("ui.markers.hexagon"): "h"
         }
         return marker_mapping.get(translated_marker, "o")
+
+    def _get_translated_marker_from_original(self, original_marker):
+        """Convert matplotlib marker to translated marker text"""
+        for key, value in MARKER_MAPPING.items():
+            if value == original_marker:
+                return t(f"ui.markers.{key}")
+        return t("ui.markers.circle")  # Default to circle
 
     def _get_original_graph_type(self, translated_type):
 
