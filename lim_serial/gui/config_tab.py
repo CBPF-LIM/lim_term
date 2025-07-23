@@ -89,17 +89,22 @@ class ConfigTab:
     def _on_mode_changed(self, event=None):
         """Callback para mudança de modo"""
         mode = self.mode_combobox.get()
-        
         if mode == t("ui.config_tab.mode_simulated"):
             # Desabilita seleção de porta e baudrate para modo simulado
             self.port_combobox.config(state="disabled")
             self.baudrate_combobox.config(state="disabled")
             self.refresh_button.config(state="disabled")
+            self.port_combobox.set("")
+            self.baudrate_combobox.set("")
         else:
             # Habilita seleção para modo hardware
             self.port_combobox.config(state="readonly")
             self.baudrate_combobox.config(state="readonly")
             self.refresh_button.config(state="normal")
+            # Se baudrate estiver vazio, seleciona o primeiro
+            if not self.baudrate_combobox.get():
+                if hasattr(self.baudrate_combobox, 'config'):
+                    self.baudrate_combobox.set(DEFAULT_BAUDRATES[0])
             self._update_ports()
     
     def _update_ports(self):
