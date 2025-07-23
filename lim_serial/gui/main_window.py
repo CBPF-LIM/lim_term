@@ -1,6 +1,3 @@
-"""
-Interface gráfica principal
-"""
 import tkinter as tk
 from tkinter import ttk
 import time
@@ -13,7 +10,7 @@ from .graph_tab import GraphTab
 
 
 class MainWindow:
-    """Janela principal da aplicação"""
+
 
     def __init__(self):
 
@@ -28,14 +25,14 @@ class MainWindow:
         self._create_tabs()
 
     def _setup_serial_manager(self):
-        """Configura o gerenciador serial"""
+
         self.serial_manager = SerialManager(
             data_callback=self._on_data_received,
             error_callback=self._on_error
         )
 
     def _create_menu(self):
-        """Cria o menu da aplicação"""
+
         menubar = tk.Menu(self.root)
         self.root.config(menu=menubar)
 
@@ -66,7 +63,7 @@ class MainWindow:
             self.language_vars[current_lang].set(True)
 
     def _change_language(self, language_code):
-        """Change the interface language and show restart message"""
+
 
         for code, var in self.language_vars.items():
             var.set(False)
@@ -83,7 +80,7 @@ class MainWindow:
         )
 
     def _create_tabs(self):
-        """Cria as abas da interface"""
+
 
         self.tab_control = ttk.Notebook(self.root)
 
@@ -101,16 +98,16 @@ class MainWindow:
         self.tab_control.pack(expand=1, fill="both")
 
     def _on_data_received(self, line):
-        """Callback chamado quando dados são recebidos"""
+
         self.data_tab.add_data(line)
 
 
     def _on_error(self, error_message):
-        """Callback chamado quando ocorre um erro"""
+
         self.data_tab.add_message(error_message)
 
     def run(self):
-        """Executa a aplicação com game-loop style architecture"""
+
         import time
 
         try:
@@ -133,7 +130,7 @@ class MainWindow:
             self.serial_manager.disconnect()
 
     def _game_loop(self):
-        """Game-engine style main loop: doEvents() + timed render()"""
+
         if not self._running:
             return
 

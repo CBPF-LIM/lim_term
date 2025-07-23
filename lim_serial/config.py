@@ -1,8 +1,3 @@
-"""
-Configurações principais da aplicação
-"""
-
-
 WINDOW_TITLE = "LIM Serial - GUI"
 DEFAULT_GEOMETRY = "800x600"
 

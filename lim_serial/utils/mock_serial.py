@@ -1,6 +1,3 @@
-"""
-Simulador de porta serial integrado
-"""
 import os
 import pty
 import threading
@@ -10,7 +7,7 @@ import platform
 
 
 class MockSerial:
-    """Simulador de porta serial"""
+
 
     def __init__(self):
         self.master_fd = None
@@ -19,7 +16,7 @@ class MockSerial:
         self.data_thread = None
 
     def create_virtual_port(self):
-        """Cria uma porta serial virtual"""
+
         try:
             if platform.system() == "Linux":
                 self.master_fd, slave_fd = pty.openpty()
@@ -39,7 +36,7 @@ class MockSerial:
             raise Exception(f"Erro ao criar porta virtual: {e}")
 
     def start_data_generation(self):
-        """Inicia geração de dados"""
+
         if not self.master_fd or self.is_running:
             return
 
@@ -48,7 +45,7 @@ class MockSerial:
         self.data_thread.start()
 
     def stop_data_generation(self):
-        """Para a geração de dados"""
+
         self.is_running = False
         if self.master_fd:
             try:
@@ -59,7 +56,7 @@ class MockSerial:
         self.slave_port = None
 
     def _generate_data(self):
-        """Gera dados simulados"""
+
         index = 0
         while self.is_running and self.master_fd:
             try:
@@ -83,5 +80,5 @@ class MockSerial:
                 break
 
     def get_port(self):
-        """Retorna a porta criada"""
+
         return self.slave_port

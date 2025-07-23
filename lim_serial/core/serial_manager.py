@@ -1,13 +1,10 @@
-"""
-Gerenciador de comunicação serial
-"""
 import threading
 from ..utils import SerialPortManager
 from ..config import SERIAL_TIMEOUT
 
 
 class SerialManager:
-    """Gerenciador de comunicação serial"""
+
 
     def __init__(self, data_callback=None, error_callback=None):
         self.serial_port = None
@@ -17,7 +14,7 @@ class SerialManager:
         self._stop_reading = False
 
     def connect(self, port, baudrate):
-        """Conecta à porta serial"""
+
         try:
             self.serial_port = SerialPortManager.create_connection(
                 port, baudrate, SERIAL_TIMEOUT
@@ -35,14 +32,14 @@ class SerialManager:
             return False
 
     def disconnect(self):
-        """Desconecta da porta serial"""
+
         self._stop_reading = True
         if self.serial_port and self.serial_port.is_open:
             self.serial_port.close()
         self.is_connected = False
 
     def _read_data(self):
-        """Lê dados da porta serial (executado em thread separada)"""
+
         while self.serial_port and self.serial_port.is_open and not self._stop_reading:
             try:
                 line = self.serial_port.readline().decode("utf-8").strip()
@@ -55,5 +52,5 @@ class SerialManager:
                 break
 
     def get_available_ports(self):
-        """Retorna portas seriais disponíveis"""
+
         return SerialPortManager.get_available_ports()

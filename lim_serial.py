@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Ponto de entrada principal da aplicação LIM Serial
-"""
-
 import sys
 import os
 
@@ -13,7 +9,7 @@ from lim_serial.gui import MainWindow
 
 
 def main():
-    """Função principal"""
+
     try:
         app = MainWindow()
         app.run()

@@ -1,6 +1,3 @@
-"""
-Tab de visualização de gráficos
-"""
 import tkinter as tk
 from tkinter import ttk
 from ..core import GraphManager
@@ -10,7 +7,7 @@ from ..i18n import t, get_config_manager
 
 
 class GraphTab:
-    """Tab de gráficos"""
+
 
     def __init__(self, parent, data_tab, open_options_callback):
         self.frame = ttk.Frame(parent)
@@ -31,7 +28,7 @@ class GraphTab:
         self._load_preferences()
 
     def _create_widgets(self):
-        """Cria os widgets da tab"""
+
 
         top_row = ttk.Frame(self.frame)
         top_row.grid(column=0, row=0, sticky="w", padx=10, pady=10)
@@ -90,7 +87,7 @@ class GraphTab:
         self.frame.columnconfigure(3, weight=1)
 
     def _create_options_widgets(self):
-        """Cria os widgets de opções com configuração por série Y"""
+
 
         global_frame = ttk.LabelFrame(self.options_frame, text=t("ui.graph_tab.global_settings"))
         global_frame.grid(column=0, row=0, columnspan=6, padx=5, pady=5, sticky="ew")
@@ -173,7 +170,7 @@ class GraphTab:
         self._create_series_widgets()
 
     def _create_series_row(self, parent, row, label, index):
-        """Cria uma linha de configuração para uma série Y"""
+
         ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
 
 
@@ -204,7 +201,7 @@ class GraphTab:
         })
 
     def _toggle_options(self):
-        """Mostra/oculta opções"""
+
         if self.options_visible:
             self.options_frame.grid_remove()
             self.options_button.config(text=t("ui.graph_tab.show_options"))
@@ -215,12 +212,12 @@ class GraphTab:
             self.options_visible = True
 
     def _on_series_setting_change(self, series_index):
-        """Handle changes to series-specific settings"""
+
         self._save_preferences()
         self._on_setting_change()
 
     def _toggle_pause(self):
-        """Pausa/resume a atualização do gráfico"""
+
         self.is_paused = not self.is_paused
         if self.is_paused:
             self.pause_button.config(text=t("ui.graph_tab.resume"))
@@ -228,7 +225,7 @@ class GraphTab:
             self.pause_button.config(text=t("ui.graph_tab.pause"))
 
     def _save_chart(self):
-        """Salva o gráfico atual como PNG"""
+
         from tkinter import filedialog
         import matplotlib.pyplot as plt
         import io
@@ -276,12 +273,12 @@ class GraphTab:
                 plt.close(fig_copy)
 
     def _on_setting_change(self, event=None):
-        """Callback called when any configuration changes - no longer triggers immediate plot"""
+
 
         pass
 
     def plot_graph(self):
-        """Gera o gráfico com múltiplas séries Y"""
+
         try:
 
             if not hasattr(self, 'x_column_entry') or not self.x_column_entry.winfo_exists():
@@ -329,7 +326,7 @@ class GraphTab:
             self.data_tab.add_message(t("ui.graph_tab.graph_error").format(error=e))
 
     def _plot_time_series_chart(self, x_data, data_lines, x_col):
-        """Plot Time Series chart (original behavior)"""
+
 
         y_series_data = []
         settings_list = []
@@ -371,7 +368,7 @@ class GraphTab:
         self.graph_manager.plot_multi_series(x_data, y_series_data, settings_list, x_col, title, xlabel, ylabel)
 
     def _plot_stacked_chart(self, x_data, data_lines, x_col):
-        """Plot Stacked chart"""
+
 
         y_series_data = []
         colors = []
@@ -419,7 +416,7 @@ class GraphTab:
         self.graph_manager.plot_stacked_series(x_data, y_series_data, colors, normalize_100, title, xlabel, ylabel)
 
     def _get_series_settings(self, series_index):
-        """Get settings for a specific Y series"""
+
 
         color = self._get_stacked_color(series_index)
 
@@ -450,7 +447,7 @@ class GraphTab:
         }
 
     def update_graph_settings(self, settings):
-        """Atualiza configurações do gráfico (compatibilidade)"""
+
         self.graph_settings.update(settings)
 
         if "type" in settings:
@@ -476,24 +473,24 @@ class GraphTab:
             self.plot_graph()
 
     def _get_translated_graph_types(self):
-        """Retorna lista de tipos de gráfico traduzidos"""
+
         return [t("ui.graph_types.line"), t("ui.graph_types.scatter")]
 
     def _get_translated_colors(self):
-        """Retorna lista de cores traduzidas"""
+
         color_keys = ["blue", "cyan", "teal", "green", "lime", "yellow", "amber", "orange",
                      "red", "magenta", "indigo", "violet", "turquoise", "aquamarine",
                      "springgreen", "chartreuse", "gold", "coral", "crimson", "pink"]
         return [t(f"ui.colors.{color}") for color in color_keys]
 
     def _get_translated_markers(self):
-        """Retorna lista de marcadores traduzidos"""
+
         marker_keys = ["circle", "square", "triangle", "diamond", "star", "plus",
                       "x", "vline", "hline", "hexagon"]
         return [t(f"ui.markers.{marker}") for marker in marker_keys]
 
     def _get_original_marker(self, translated_marker):
-        """Retorna o valor original do marcador a partir da tradução"""
+
         marker_mapping = {
             t("ui.markers.circle"): "o",
             t("ui.markers.square"): "s",
@@ -509,7 +506,7 @@ class GraphTab:
         return marker_mapping.get(translated_marker, "o")
 
     def _get_original_graph_type(self, translated_type):
-        """Retorna o valor original do tipo de gráfico a partir da tradução"""
+
         type_mapping = {
             t("ui.graph_types.line"): "line",
             t("ui.graph_types.scatter"): "scatter"
@@ -517,7 +514,7 @@ class GraphTab:
         return type_mapping.get(translated_type, "line")
 
     def _get_original_color(self, translated_color):
-        """Retorna o valor original da cor a partir da tradução"""
+
         color_mapping = {
             t("ui.colors.blue"): "#1f77b4",
             t("ui.colors.cyan"): "#17becf",
@@ -545,7 +542,7 @@ class GraphTab:
 
 
     def _load_preferences(self):
-        """Load saved preferences with new structure"""
+
 
         x_col = self.config_manager.load_tab_setting('graph.general', 'x_column', DEFAULT_X_COLUMN)
         self.x_column_entry.delete(0, "end")
@@ -612,14 +609,14 @@ class GraphTab:
         self._load_group_preferences(vis_group)
 
     def _load_group_preferences(self, group):
-        """Load group-specific preferences"""
+
         if group == "Time Series":
             self._load_time_series_preferences()
         elif group == "Stacked":
             self._load_stacked_preferences()
 
     def _load_time_series_preferences(self):
-        """Load Time Series group preferences"""
+
 
         for i in range(5):
             if i < len(self.series_widgets) and 'type' in self.series_widgets[i]:
@@ -647,14 +644,14 @@ class GraphTab:
                     widgets['marker'].set(marker_translation_map[marker])
 
     def _load_stacked_preferences(self):
-        """Load Stacked group preferences"""
+
 
         if hasattr(self, 'normalize_100_var'):
             normalize_100 = self.config_manager.load_tab_setting('graph.group.stacked', 'normalize_100', False)
             self.normalize_100_var.set(normalize_100)
 
     def _save_preferences(self):
-        """Save current preferences with new structure"""
+
         try:
 
             try:
@@ -729,7 +726,7 @@ class GraphTab:
             print(f"Note: Could not save preferences during UI transition: {e}")
 
     def _save_time_series_preferences(self):
-        """Save Time Series group preferences"""
+
         try:
 
             for i in range(5):
@@ -766,7 +763,7 @@ class GraphTab:
             print(f"Note: Could not save preferences during UI transition: {e}")
 
     def _save_stacked_preferences(self):
-        """Save Stacked group preferences"""
+
         try:
 
             if hasattr(self, 'normalize_100_var'):
@@ -776,7 +773,7 @@ class GraphTab:
             print(f"Note: Could not save stacked preferences during UI transition: {e}")
 
     def _on_preference_changed(self, event=None):
-        """Called when any preference changes"""
+
         try:
             self._save_preferences()
         except Exception as e:
@@ -784,7 +781,7 @@ class GraphTab:
             print(f"Note: Could not save preferences during UI transition: {e}")
 
     def _on_group_change(self, event=None):
-        """Handle visualization group change"""
+
         self._create_series_widgets()
 
 
@@ -795,7 +792,7 @@ class GraphTab:
         self._on_setting_change()
 
     def _create_series_widgets(self):
-        """Create series widgets based on the selected visualization group"""
+
 
         for widget in self.series_config_frame.winfo_children():
             widget.destroy()
@@ -808,7 +805,7 @@ class GraphTab:
             self._create_stacked_widgets()
 
     def _create_time_series_widgets(self):
-        """Create Time Series configuration widgets (without colors - they're in Global)"""
+
         self.series_config_frame.config(text=t("ui.graph_tab.time_series_settings"))
 
 
@@ -822,7 +819,7 @@ class GraphTab:
             self._create_time_series_row(self.series_config_frame, i, f"Y{i}", i-1)
 
     def _create_time_series_row(self, parent, row, label, index):
-        """Create a Time Series configuration row (without color)"""
+
         ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
 
 
@@ -843,7 +840,7 @@ class GraphTab:
         })
 
     def _create_stacked_widgets(self):
-        """Create Stacked configuration widgets (without colors - they're in Global)"""
+
         self.series_config_frame.config(text="Stack Settings")
 
 
@@ -860,7 +857,7 @@ class GraphTab:
         self.series_widgets = []
 
     def _get_stacked_color(self, series_index):
-        """Get color for stacked chart from global color combos"""
+
         if series_index < len(self.y_color_combos):
             translated_color = self.y_color_combos[series_index].get()
             return self._get_original_color(translated_color)
@@ -870,20 +867,20 @@ class GraphTab:
         return default_colors[series_index % len(default_colors)]
 
     def get_frame(self):
-        """Retorna o frame da tab"""
+
         return self.frame
 
     def _on_color_setting_change(self, color_index):
-        """Handle changes to color settings"""
+
         self._save_preferences()
         self._on_setting_change()
 
     def _start_refresh_timer(self):
-        """Start the chart refresh timer (30 FPS)"""
+
         self._refresh_chart()
 
     def _refresh_chart(self):
-        """Refresh chart at fixed intervals - completely decoupled from data arrival"""
+
         try:
 
 
@@ -914,7 +911,7 @@ class GraphTab:
                 self.refresh_timer_id = self.frame.after(self.refresh_rate_ms, self._refresh_chart)
 
     def _stop_refresh_timer(self):
-        """Stop the chart refresh timer"""
+
         if self.refresh_timer_id:
             try:
                 self.frame.after_cancel(self.refresh_timer_id)
@@ -923,22 +920,22 @@ class GraphTab:
             self.refresh_timer_id = None
 
     def _set_refresh_rate(self, fps):
-        """Set chart refresh rate"""
+
         self.refresh_rate_ms = int(1000 / fps)
 
     def cleanup(self):
-        """Clean up resources when tab is destroyed"""
+
         self._stop_refresh_timer()
 
     def __del__(self):
-        """Destructor to ensure cleanup"""
+
         try:
             self.cleanup()
         except:
             pass
 
     def _on_fps_change(self, event=None):
-        """Handle refresh rate (FPS) change"""
+
         try:
             fps = int(self.fps_combobox.get())
             self._set_refresh_rate(fps)
@@ -957,7 +954,7 @@ class GraphTab:
             pass
 
     def should_render_now(self, current_time):
-        """Game-loop style: Check if it's time to render (independent of events)"""
+
         if self.is_paused:
             return False
 
@@ -967,7 +964,7 @@ class GraphTab:
         return (current_time - self.last_render_time) >= refresh_interval
 
     def render_frame(self):
-        """Game-loop style: Render the chart frame (completely decoupled from data events)"""
+
         import time
         try:
 

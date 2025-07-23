@@ -1,13 +1,10 @@
-"""
-Language Manager for handling translations
-"""
 import os
 import yaml
 from typing import Dict, Any, List, Optional
 
 
 class LanguageManager:
-    """Manages language loading and translation"""
+
 
     def __init__(self):
         self.languages = {}
@@ -17,7 +14,7 @@ class LanguageManager:
         self._load_all_languages()
 
     def _load_all_languages(self):
-        """Load all available language files"""
+
         if not os.path.exists(self.languages_dir):
             print(f"Warning: Languages directory not found: {self.languages_dir}")
             return
@@ -31,7 +28,7 @@ class LanguageManager:
                     print(f"Error loading language {language_code}: {e}")
 
     def _load_language(self, language_code: str):
-        """Load a specific language file"""
+
         file_path = os.path.join(self.languages_dir, f"{language_code}.yml")
         if os.path.exists(file_path):
             try:
@@ -41,7 +38,7 @@ class LanguageManager:
                 print(f"Error loading language file {file_path}: {e}")
 
     def get_available_languages(self) -> List[Dict[str, str]]:
-        """Get list of available languages with their display names"""
+
         languages = []
         for code, data in self.languages.items():
             if data and 'language' in data:
@@ -53,7 +50,7 @@ class LanguageManager:
         return languages
 
     def set_language(self, language_code: str):
-        """Set the current language"""
+
         if language_code in self.languages:
             self.current_language = language_code
         else:
@@ -61,11 +58,11 @@ class LanguageManager:
             self.current_language = self.fallback_language
 
     def get_current_language(self) -> str:
-        """Get the current language code"""
+
         return self.current_language
 
     def translate(self, key: str, **kwargs) -> str:
-        """Translate a key with optional parameters"""
+
 
         translation = self._get_translation(key, self.current_language)
 
@@ -89,7 +86,7 @@ class LanguageManager:
         return translation
 
     def _get_translation(self, key: str, language_code: str) -> Optional[str]:
-        """Get translation for a specific key and language"""
+
         if language_code not in self.languages:
             return None
 

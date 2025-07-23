@@ -1,6 +1,3 @@
-"""
-Janela de opções de gráfico
-"""
 import tkinter as tk
 from tkinter import ttk
 from ..config import GRAPH_TYPES, AVAILABLE_COLORS, MARKER_TYPES
@@ -8,7 +5,7 @@ from ..i18n import t
 
 
 class GraphOptionsWindow:
-    """Janela de configuração de opções de gráfico"""
+
 
     def __init__(self, parent, serial_gui):
         self.window = tk.Toplevel(parent)
@@ -19,7 +16,7 @@ class GraphOptionsWindow:
         self._load_current_settings()
 
     def _create_widgets(self):
-        """Cria os widgets da janela"""
+
 
         ttk.Label(self.window, text=t("ui.graph_tab.type_label")).grid(column=0, row=0, padx=10, pady=10)
         self.graph_type_combobox = ttk.Combobox(self.window, state="readonly", values=GRAPH_TYPES)
@@ -56,7 +53,7 @@ class GraphOptionsWindow:
         self.apply_button.grid(column=0, row=6, columnspan=2, padx=10, pady=10)
 
     def _load_current_settings(self):
-        """Carrega as configurações atuais"""
+
         settings = self.serial_gui.graph_settings
 
         self.graph_type_combobox.set(settings.get("type", "Linha"))
@@ -78,7 +75,7 @@ class GraphOptionsWindow:
             self.dot_type_combobox.set("Círculo (o)")
 
     def _apply_settings(self):
-        """Aplica as configurações selecionadas"""
+
         try:
             settings = {}
 

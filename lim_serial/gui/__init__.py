@@ -1,7 +1,3 @@
-"""
-Módulo da interface gráfica
-"""
-
 from .main_window import MainWindow
 from .config_tab import ConfigTab
 from .data_tab import DataTab

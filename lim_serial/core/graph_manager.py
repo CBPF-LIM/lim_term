@@ -1,13 +1,10 @@
-"""
-Gerenciador de gráficos usando matplotlib
-"""
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from ..config import FIGURE_SIZE, FIGURE_DPI
 
 
 class GraphManager:
-    """Gerenciador de gráficos"""
+
 
     def __init__(self, parent_widget):
         self.figure = plt.Figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
@@ -15,42 +12,42 @@ class GraphManager:
         self.canvas = FigureCanvasTkAgg(self.figure, parent_widget)
 
     def get_widget(self):
-        """Retorna o widget do canvas"""
+
         return self.canvas.get_tk_widget()
 
     def clear(self):
-        """Limpa o gráfico"""
+
         self.ax.clear()
 
     def plot_line(self, x_data, y_data, color="blue", marker="o"):
-        """Plota gráfico de linha"""
+
         self.ax.plot(x_data, y_data, color=color, marker=marker)
 
 
 
     def plot_scatter(self, x_data, y_data, color="blue", marker="o"):
-        """Plota gráfico de dispersão"""
+
         self.ax.scatter(x_data, y_data, color=color, marker=marker)
 
     def set_limits(self, min_x=None, max_x=None, min_y=None, max_y=None):
-        """Define limites dos eixos"""
+
         if min_x is not None or max_x is not None:
             self.ax.set_xlim(min_x, max_x)
         if min_y is not None or max_y is not None:
             self.ax.set_ylim(min_y, max_y)
 
     def set_labels(self, title="Graph", xlabel="X", ylabel="Y"):
-        """Define rótulos do gráfico"""
+
         self.ax.set_title(title)
         self.ax.set_xlabel(xlabel)
         self.ax.set_ylabel(ylabel)
 
     def update(self):
-        """Atualiza o canvas"""
+
         self.canvas.draw()
 
     def plot_from_settings(self, x_data, y_data, settings, x_col=0, y_col=1, title=None, xlabel=None, ylabel=None):
-        """Plota gráfico baseado nas configurações"""
+
         self.clear()
 
         graph_type = settings.get("type", "Linha")
@@ -84,7 +81,7 @@ class GraphManager:
         self.update()
 
     def plot_multi_series(self, x_data, y_series_data, settings_list, x_col=0, title=None, xlabel=None, ylabel=None):
-        """Plota múltiplas séries Y no mesmo gráfico"""
+
         self.clear()
 
         plotted_series = 0
@@ -134,7 +131,7 @@ class GraphManager:
         self.update()
 
     def plot_stacked_series(self, x_data, y_series_data, colors, normalize_100=False, title=None, xlabel=None, ylabel=None):
-        """Plota séries Y empilhadas (stacked)"""
+
         import numpy as np
 
         self.clear()

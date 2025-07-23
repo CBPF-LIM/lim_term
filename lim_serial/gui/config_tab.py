@@ -1,6 +1,3 @@
-"""
-Tab de configuração da comunicação serial
-"""
 import tkinter as tk
 from tkinter import ttk
 from ..config import DEFAULT_BAUDRATES, DEFAULT_BAUDRATE
@@ -9,7 +6,7 @@ from ..i18n import t, get_config_manager
 
 
 class ConfigTab:
-    """Tab de configuração"""
+
 
     def __init__(self, parent, serial_manager):
         self.frame = ttk.Frame(parent)
@@ -22,7 +19,7 @@ class ConfigTab:
         self._load_preferences()
 
     def _create_widgets(self):
-        """Cria os widgets da tab"""
+
 
         self.config_frame = ttk.LabelFrame(self.frame, text=t("ui.config_tab.configuration_frame"))
         self.config_frame.grid(column=0, row=0, padx=10, pady=10, sticky="ew")
@@ -87,7 +84,7 @@ class ConfigTab:
         self.frame.columnconfigure(0, weight=1)
 
     def _on_mode_changed(self, event=None):
-        """Callback para mudança de modo"""
+
         mode = self.mode_combobox.get()
         if mode == t("ui.config_tab.mode_simulated"):
 
@@ -108,7 +105,7 @@ class ConfigTab:
             self._update_ports()
 
     def _update_ports(self):
-        """Atualiza lista de portas disponíveis"""
+
         if self.mode_combobox.get() == t("ui.config_tab.mode_hardware"):
             ports = self.serial_manager.get_available_ports()
             self.port_combobox["values"] = ports
@@ -120,7 +117,7 @@ class ConfigTab:
                     self.port_combobox.set(ports[0])
 
     def _connect(self):
-        """Conecta à porta serial"""
+
         mode = self.mode_combobox.get()
 
         if self.serial_manager.is_connected:
@@ -171,13 +168,13 @@ class ConfigTab:
                 print(t("errors.virtual_port_error").format(error=e))
 
     def _show_config_interface(self):
-        """Mostra a interface de configuração e oculta as informações"""
+
         self.config_frame.grid()
         self.info_frame.grid_remove()
         self._on_mode_changed()
 
     def _show_connection_info(self, mode, port, baudrate):
-        """Mostra informações da conexão e oculta a interface de configuração"""
+
         self.config_frame.grid_remove()
         self.info_frame.grid()
 
@@ -192,7 +189,7 @@ class ConfigTab:
         self.info_label.config(text=info_text)
 
     def _load_preferences(self):
-        """Load saved preferences"""
+
 
         saved_mode = self.config_manager.load_tab_setting('config', 'mode')
         if saved_mode:
@@ -218,7 +215,7 @@ class ConfigTab:
         self._on_mode_changed()
 
     def _save_preferences(self):
-        """Save current preferences"""
+
 
         current_mode = self.mode_combobox.get()
         if current_mode == t("ui.config_tab.mode_hardware"):
@@ -233,9 +230,9 @@ class ConfigTab:
         self.config_manager.save_tab_setting('config', 'baudrate', self.baudrate_combobox.get())
 
     def _on_preference_changed(self, event=None):
-        """Called when any preference changes"""
+
         self._save_preferences()
 
     def get_frame(self):
-        """Retorna o frame da tab"""
+
         return self.frame

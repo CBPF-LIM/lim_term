@@ -1,6 +1,3 @@
-"""
-Tab de visualização dos dados
-"""
 import tkinter as tk
 from tkinter import ttk
 from ..utils import FileManager
@@ -9,9 +6,9 @@ from ..i18n import t
 
 class DataTab:
     def _on_user_scroll(self, event=None):
-        """Atualiza autoscroll flag conforme posição do scroll"""
+
         self.autoscroll = self._is_scrolled_to_end()
-    """Tab de dados"""
+
 
     def __init__(self, parent):
         self.frame = ttk.Frame(parent)
@@ -20,7 +17,7 @@ class DataTab:
         self._create_widgets()
 
     def _create_widgets(self):
-        """Cria os widgets da tab"""
+
 
         text_frame = ttk.Frame(self.frame)
         text_frame.pack(expand=1, fill="both", padx=10, pady=10)
@@ -54,7 +51,7 @@ class DataTab:
         self.autosave_file = None
         self.autosave_filename = None
     def _load_data(self):
-        """Carrega dados válidos de um arquivo txt, com confirmação de sobrescrita"""
+
         from tkinter import filedialog, messagebox
 
         if self.data:
@@ -93,21 +90,21 @@ class DataTab:
         self.data_text.bind("<Configure>", self._on_user_scroll)
 
     def _on_autosave_toggle(self):
-        """Callback para ativar/desativar autosave"""
+
         import os
         import datetime
-        
+
         if self.autosave_var.get():
             # Enable autosave - create new file with fresh timestamp
             output_dir = "autosave"
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            
+
             # Always generate a new timestamp when enabling autosave
             now = datetime.datetime.now()
             fname = f"data-{now.strftime('%Y-%m-%d-%H%M%S')}.txt"
             self.autosave_filename = os.path.join(output_dir, fname)
-            
+
             try:
                 self.autosave_file = open(self.autosave_filename, "a", encoding="utf-8")
                 print(f"Autosave enabled: {self.autosave_filename}")
@@ -130,7 +127,7 @@ class DataTab:
                     self.autosave_filename = None
 
     def _clear_data(self):
-        """Remove todo o conteúdo da área de dados"""
+
         self.data.clear()
         self.data_text.delete("1.0", "end")
 
@@ -143,7 +140,7 @@ class DataTab:
         self.data_text.bind("<Configure>", self._on_user_scroll)
 
     def add_data(self, line, save_to_history=True):
-        """Adiciona linha de dados"""
+
         if save_to_history:
             self.data.append({"type": "data", "value": line})
 
@@ -168,7 +165,7 @@ class DataTab:
             pass
 
     def add_message(self, message):
-        """Adiciona mensagem (erro, status, etc.)"""
+
         self.data.append({"type": "msg", "value": message})
         try:
             at_end = self._is_scrolled_to_end()
@@ -179,7 +176,7 @@ class DataTab:
 
             pass
     def _is_scrolled_to_end(self):
-        """Retorna True se o usuário está no final do texto"""
+
         try:
 
             last_visible = self.data_text.index("@0,%d" % self.data_text.winfo_height())
@@ -191,7 +188,7 @@ class DataTab:
             return True
 
     def _save_data(self):
-        """Salva os dados em arquivo"""
+
 
         valid_lines = [item["value"] for item in self.data if item["type"] == "data"]
         if valid_lines:
@@ -201,15 +198,15 @@ class DataTab:
 
 
     def get_frame(self):
-        """Retorna o frame da tab"""
+
         return self.frame
 
     def get_data(self):
-        """Retorna apenas os dados válidos coletados"""
+
         return [item["value"] for item in self.data if item["type"] == "data"]
 
     def cleanup(self):
-        """Clean up resources when tab is destroyed"""
+
         if self.autosave_file:
             try:
                 self.autosave_file.close()
