@@ -4,6 +4,7 @@ Tab de visualização dos dados
 import tkinter as tk
 from tkinter import ttk
 from ..utils import FileManager
+from ..i18n import t
 
 
 class DataTab:
@@ -34,20 +35,20 @@ class DataTab:
         self.data_text.config(yscrollcommand=self.scrollbar.set)
         
         # Botão de salvar
-        self.save_button = ttk.Button(self.frame, text="Salvar", command=self._save_data)
+        self.save_button = ttk.Button(self.frame, text=t("ui.data_tab.save"), command=self._save_data)
         self.save_button.pack(side="left", padx=10, pady=10)
 
         # Botão de carregar
-        self.load_button = ttk.Button(self.frame, text="Carregar", command=self._load_data)
+        self.load_button = ttk.Button(self.frame, text=t("ui.data_tab.load"), command=self._load_data)
         self.load_button.pack(side="left", padx=10, pady=10)
 
         # Botão de limpar
-        self.clear_button = ttk.Button(self.frame, text="Limpar", command=self._clear_data)
+        self.clear_button = ttk.Button(self.frame, text=t("ui.data_tab.clear"), command=self._clear_data)
         self.clear_button.pack(side="left", padx=10, pady=10)
 
         # Autosave checkbox
         self.autosave_var = tk.BooleanVar(value=False)
-        self.autosave_checkbox = ttk.Checkbutton(self.frame, text="Autosave", variable=self.autosave_var, command=self._on_autosave_toggle)
+        self.autosave_checkbox = ttk.Checkbutton(self.frame, text=t("ui.data_tab.autosave"), variable=self.autosave_var, command=self._on_autosave_toggle)
         self.autosave_checkbox.pack(side="left", padx=10, pady=10)
 
         self.autosave_file = None
@@ -58,8 +59,8 @@ class DataTab:
         # Confirmação antes de sobrescrever
         if self.data:
             result = messagebox.askquestion(
-                "Sobrescrever dados",
-                "Os dados atuais serão sobrescritos. Deseja continuar?",
+                t("ui.data_tab.overwrite_dialog_title"),
+                t("ui.data_tab.overwrite_dialog_message"),
                 icon='warning'
             )
             if result != 'yes':
@@ -79,9 +80,9 @@ class DataTab:
                     self.data.append({"type": "data", "value": line})
                     self.data_text.insert("end", line + "\n")
                 self.data_text.see("end")
-                self.add_message(f"Dados carregados de: {file_path}")
+                self.add_message(t("ui.data_tab.data_loaded").format(path=file_path))
             except Exception as e:
-                self.add_message(f"Erro ao carregar dados: {e}")
+                self.add_message(t("ui.data_tab.error_loading").format(error=e))
 
         # Autoscroll flag
         self.autoscroll = True
@@ -159,7 +160,14 @@ class DataTab:
         if valid_lines:
             file_path = FileManager.save_data_to_file(valid_lines)
             if file_path:
-                self.add_message(f"Dados salvos em: {file_path}")
+                self.add_message(t("ui.data_tab.data_saved").format(path=file_path))
+    
+    def refresh_translations(self):
+        """Atualiza as traduções na interface"""
+        self.save_button.config(text=t("ui.data_tab.save"))
+        self.load_button.config(text=t("ui.data_tab.load"))
+        self.clear_button.config(text=t("ui.data_tab.clear"))
+        self.autosave_checkbox.config(text=t("ui.data_tab.autosave"))
     
     def get_frame(self):
         """Retorna o frame da tab"""

@@ -1,0 +1,111 @@
+language:
+  name: "Deutsch"
+  code: "de"
+
+ui:
+  main_window:
+    title: "LIM Serial - GUI"
+  
+  tabs:
+    configuration: "Konfiguration"
+    data: "Daten"
+    graph: "Grafik"
+  
+  config_tab:
+    configuration_frame: "Konfiguration"
+    connection_info_frame: "Verbindungsinformationen"
+    mode_label: "Modus:"
+    mode_hardware: "Hardware"
+    mode_simulated: "Simuliert"
+    port_label: "Port:"
+    baudrate_label: "Baudrate:"
+    connect: "Verbinden"
+    disconnect: "Trennen"
+    connection_status: "🔗 Modus: {mode}\n📡 Port: {port}\n⚡ Baudrate: {baudrate} bps"
+    virtual_connection_status: "🔗 Modus: {mode}\n🖥️  Virtueller Port: {port}\n⚡ Baudrate: {baudrate} bps (automatisch)\n📊 Status: Simulierte Daten generieren"
+  
+  data_tab:
+    save: "Speichern"
+    load: "Laden"
+    clear: "Löschen"
+    autosave: "Auto-Speichern"
+    data_saved: "Daten gespeichert in: {path}"
+    data_loaded: "Daten geladen von: {path}"
+    error_loading: "Fehler beim Laden der Daten: {error}"
+    error_saving: "Fehler beim Speichern der Grafik: {error}"
+    overwrite_dialog_title: "Daten überschreiben"
+    overwrite_dialog_message: "Die aktuellen Daten werden überschrieben. Möchten Sie fortfahren?"
+  
+  graph_tab:
+    column_x: "Spalte X:"
+    column_y: "Spalte Y:"
+    update_graph: "Grafik Aktualisieren"
+    pause: "Pausieren"
+    resume: "Fortsetzen"
+    show_options: "Optionen Anzeigen"
+    hide_options: "Optionen Ausblenden"
+    save_png: "PNG Speichern"
+    options_frame: "Grafik-Optionen"
+    type_label: "Typ:"
+    color_label: "Farbe:"
+    window_label: "Fenster:"
+    point_label: "Punkt:"
+    min_y_label: "Min Y:"
+    max_y_label: "Max Y:"
+    graph_saved: "Grafik gespeichert in: {path}"
+    no_data_available: "Keine Daten zum Zeichnen verfügbar"
+    could_not_extract_data: "Konnte keine Daten aus den angegebenen Spalten extrahieren"
+    parameter_error: "Parameterfehler: {error}"
+    graph_error: "Fehler beim Generieren der Grafik: {error}"
+    positive_numbers: "Spaltennummern müssen positiv sein"
+  
+  graph_types:
+    line: "Linie"
+    bars: "Balken"
+    scatter: "Streuung"
+  
+  colors:
+    blue: "Blau"
+    cyan: "Cyan"
+    teal: "Blaugrün"
+    green: "Grün"
+    lime: "Limette"
+    yellow: "Gelb"
+    amber: "Bernstein"
+    orange: "Orange"
+    red: "Rot"
+    magenta: "Magenta"
+    indigo: "Indigo"
+    violet: "Violett"
+    turquoise: "Türkis"
+    aquamarine: "Aquamarin"
+    springgreen: "Frühlingsgrün"
+    chartreuse: "Chartreuse"
+    gold: "Gold"
+    coral: "Koralle"
+    crimson: "Karmesinrot"
+    pink: "Rosa"
+  
+  markers:
+    circle: "Kreis (o)"
+    square: "Quadrat (s)"
+    triangle: "Dreieck (^)"
+    diamond: "Diamant (D)"
+    star: "Stern (*)"
+    plus: "Plus (+)"
+    x: "X (x)"
+    vline: "Vertikaler Balken (|)"
+    hline: "Horizontaler Balken (_)"
+    hexagon: "Sechseck (h)"
+
+errors:
+  connection_error: "Verbindungsfehler: {error}"
+  data_read_error: "Fehler beim Lesen der Daten: {error}"
+  virtual_port_error: "Fehler beim Erstellen des simulierten Ports: {error}"
+
+messages:
+  connecting: "Verbinde..."
+  connected: "Verbunden"
+  disconnected: "Getrennt"
+  data_generation_started: "Datengenerierung gestartet"
+  data_generation_stopped: "Datengenerierung gestoppt"

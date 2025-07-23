@@ -1,0 +1,111 @@
+language:
+  name: "Español"
+  code: "es"
+
+ui:
+  main_window:
+    title: "LIM Serial - GUI"
+  
+  tabs:
+    configuration: "Configuración"
+    data: "Datos"
+    graph: "Gráfico"
+  
+  config_tab:
+    configuration_frame: "Configuración"
+    connection_info_frame: "Información de Conexión"
+    mode_label: "Modo:"
+    mode_hardware: "Hardware"
+    mode_simulated: "Simulado"
+    port_label: "Puerto:"
+    baudrate_label: "Baudrate:"
+    connect: "Conectar"
+    disconnect: "Desconectar"
+    connection_status: "🔗 Modo: {mode}\n📡 Puerto: {port}\n⚡ Baudrate: {baudrate} bps"
+    virtual_connection_status: "🔗 Modo: {mode}\n🖥️  Puerto Virtual: {port}\n⚡ Baudrate: {baudrate} bps (automático)\n📊 Estado: Generando datos simulados"
+  
+  data_tab:
+    save: "Guardar"
+    load: "Cargar"
+    clear: "Limpiar"
+    autosave: "Autoguardar"
+    data_saved: "Datos guardados en: {path}"
+    data_loaded: "Datos cargados desde: {path}"
+    error_loading: "Error al cargar datos: {error}"
+    error_saving: "Error al guardar gráfico: {error}"
+    overwrite_dialog_title: "Sobrescribir datos"
+    overwrite_dialog_message: "Los datos actuales serán sobrescritos. ¿Desea continuar?"
+  
+  graph_tab:
+    column_x: "Columna X:"
+    column_y: "Columna Y:"
+    update_graph: "Actualizar Gráfico"
+    pause: "Pausar"
+    resume: "Reanudar"
+    show_options: "Mostrar Opciones"
+    hide_options: "Ocultar Opciones"
+    save_png: "Guardar PNG"
+    options_frame: "Opciones del Gráfico"
+    type_label: "Tipo:"
+    color_label: "Color:"
+    window_label: "Ventana:"
+    point_label: "Punto:"
+    min_y_label: "Min Y:"
+    max_y_label: "Max Y:"
+    graph_saved: "Gráfico guardado en: {path}"
+    no_data_available: "No hay datos disponibles para graficar"
+    could_not_extract_data: "No se pudieron extraer datos de las columnas especificadas"
+    parameter_error: "Error en parámetros: {error}"
+    graph_error: "Error al generar gráfico: {error}"
+    positive_numbers: "Los números de columna deben ser positivos"
+  
+  graph_types:
+    line: "Línea"
+    bars: "Barras"
+    scatter: "Dispersión"
+  
+  colors:
+    blue: "Azul"
+    cyan: "Cian"
+    teal: "Verde azulado"
+    green: "Verde"
+    lime: "Lima"
+    yellow: "Amarillo"
+    amber: "Ámbar"
+    orange: "Naranja"
+    red: "Rojo"
+    magenta: "Magenta"
+    indigo: "Índigo"
+    violet: "Violeta"
+    turquoise: "Turquesa"
+    aquamarine: "Aguamarina"
+    springgreen: "Verde Primavera"
+    chartreuse: "Chartreuse"
+    gold: "Oro"
+    coral: "Coral"
+    crimson: "Carmesí"
+    pink: "Rosa"
+  
+  markers:
+    circle: "Círculo (o)"
+    square: "Cuadrado (s)"
+    triangle: "Triángulo (^)"
+    diamond: "Diamante (D)"
+    star: "Estrella (*)"
+    plus: "Más (+)"
+    x: "X (x)"
+    vline: "Barra Vertical (|)"
+    hline: "Barra Horizontal (_)"
+    hexagon: "Hexágono (h)"
+
+errors:
+  connection_error: "Error de conexión: {error}"
+  data_read_error: "Error al leer datos: {error}"
+  virtual_port_error: "Error al crear puerto simulado: {error}"
+
+messages:
+  connecting: "Conectando..."
+  connected: "Conectado"
+  disconnected: "Desconectado"
+  data_generation_started: "Generación de datos iniciada"
+  data_generation_stopped: "Generación de datos detenida"

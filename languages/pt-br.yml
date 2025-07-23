@@ -1,0 +1,111 @@
+language:
+  name: "Português (Brasil)"
+  code: "pt-br"
+
+ui:
+  main_window:
+    title: "LIM Serial - GUI"
+  
+  tabs:
+    configuration: "Configuração"
+    data: "Dados"
+    graph: "Gráfico"
+  
+  config_tab:
+    configuration_frame: "Configuração"
+    connection_info_frame: "Informações da Conexão"
+    mode_label: "Modo:"
+    mode_hardware: "Hardware"
+    mode_simulated: "Simulado"
+    port_label: "Porta:"
+    baudrate_label: "Baudrate:"
+    connect: "Conectar"
+    disconnect: "Desconectar"
+    connection_status: "🔗 Modo: {mode}\n📡 Porta: {port}\n⚡ Baudrate: {baudrate} bps"
+    virtual_connection_status: "🔗 Modo: {mode}\n🖥️  Porta Virtual: {port}\n⚡ Baudrate: {baudrate} bps (automático)\n📊 Status: Gerando dados simulados"
+  
+  data_tab:
+    save: "Salvar"
+    load: "Carregar"
+    clear: "Limpar"
+    autosave: "Autosave"
+    data_saved: "Dados salvos em: {path}"
+    data_loaded: "Dados carregados de: {path}"
+    error_loading: "Erro ao carregar dados: {error}"
+    error_saving: "Erro ao salvar gráfico: {error}"
+    overwrite_dialog_title: "Sobrescrever dados"
+    overwrite_dialog_message: "Os dados atuais serão sobrescritos. Deseja continuar?"
+  
+  graph_tab:
+    column_x: "Coluna X:"
+    column_y: "Coluna Y:"
+    update_graph: "Atualizar Gráfico"
+    pause: "Pausar"
+    resume: "Retomar"
+    show_options: "Mostrar Opções"
+    hide_options: "Ocultar Opções"
+    save_png: "Salvar PNG"
+    options_frame: "Opções do Gráfico"
+    type_label: "Tipo:"
+    color_label: "Cor:"
+    window_label: "Janela:"
+    point_label: "Ponto:"
+    min_y_label: "Min Y:"
+    max_y_label: "Max Y:"
+    graph_saved: "Gráfico salvo em: {path}"
+    no_data_available: "Nenhum dado disponível para plotar"
+    could_not_extract_data: "Não foi possível extrair dados das colunas especificadas"
+    parameter_error: "Erro nos parâmetros: {error}"
+    graph_error: "Erro ao gerar gráfico: {error}"
+    positive_numbers: "Números de coluna devem ser positivos"
+  
+  graph_types:
+    line: "Linha"
+    bars: "Barras"
+    scatter: "Dispersão"
+  
+  colors:
+    blue: "Azul"
+    cyan: "Ciano"
+    teal: "Verde-azulado"
+    green: "Verde"
+    lime: "Lima"
+    yellow: "Amarelo"
+    amber: "Âmbar"
+    orange: "Laranja"
+    red: "Vermelho"
+    magenta: "Magenta"
+    indigo: "Índigo"
+    violet: "Violeta"
+    turquoise: "Turquesa"
+    aquamarine: "Água-marinha"
+    springgreen: "Verde Primavera"
+    chartreuse: "Chartreuse"
+    gold: "Ouro"
+    coral: "Coral"
+    crimson: "Carmesim"
+    pink: "Rosa"
+  
+  markers:
+    circle: "Círculo (o)"
+    square: "Quadrado (s)"
+    triangle: "Triângulo (^)"
+    diamond: "Diamante (D)"
+    star: "Estrela (*)"
+    plus: "Mais (+)"
+    x: "X (x)"
+    vline: "Barra Vertical (|)"
+    hline: "Barra Horizontal (_)"
+    hexagon: "Hexágono (h)"
+
+errors:
+  connection_error: "Erro ao conectar: {error}"
+  data_read_error: "Erro ao ler dados: {error}"
+  virtual_port_error: "Erro ao criar porta simulada: {error}"
+
+messages:
+  connecting: "Conectando..."
+  connected: "Conectado"
+  disconnected: "Desconectado"
+  data_generation_started: "Geração de dados iniciada"
+  data_generation_stopped: "Geração de dados interrompida"

@@ -1,0 +1,111 @@
+language:
+  name: "English"
+  code: "en"
+
+ui:
+  main_window:
+    title: "LIM Serial - GUI"
+  
+  tabs:
+    configuration: "Configuration"
+    data: "Data"
+    graph: "Graph"
+  
+  config_tab:
+    configuration_frame: "Configuration"
+    connection_info_frame: "Connection Information"
+    mode_label: "Mode:"
+    mode_hardware: "Hardware"
+    mode_simulated: "Simulated"
+    port_label: "Port:"
+    baudrate_label: "Baudrate:"
+    connect: "Connect"
+    disconnect: "Disconnect"
+    connection_status: "🔗 Mode: {mode}\n📡 Port: {port}\n⚡ Baudrate: {baudrate} bps"
+    virtual_connection_status: "🔗 Mode: {mode}\n🖥️  Virtual Port: {port}\n⚡ Baudrate: {baudrate} bps (automatic)\n📊 Status: Generating simulated data"
+  
+  data_tab:
+    save: "Save"
+    load: "Load"
+    clear: "Clear"
+    autosave: "Autosave"
+    data_saved: "Data saved to: {path}"
+    data_loaded: "Data loaded from: {path}"
+    error_loading: "Error loading data: {error}"
+    error_saving: "Error saving graph: {error}"
+    overwrite_dialog_title: "Overwrite data"
+    overwrite_dialog_message: "Current data will be overwritten. Do you want to continue?"
+  
+  graph_tab:
+    column_x: "Column X:"
+    column_y: "Column Y:"
+    update_graph: "Update Graph"
+    pause: "Pause"
+    resume: "Resume"
+    show_options: "Show Options"
+    hide_options: "Hide Options"
+    save_png: "Save PNG"
+    options_frame: "Graph Options"
+    type_label: "Type:"
+    color_label: "Color:"
+    window_label: "Window:"
+    point_label: "Point:"
+    min_y_label: "Min Y:"
+    max_y_label: "Max Y:"
+    graph_saved: "Graph saved to: {path}"
+    no_data_available: "No data available to plot"
+    could_not_extract_data: "Could not extract data from specified columns"
+    parameter_error: "Parameter error: {error}"
+    graph_error: "Error generating graph: {error}"
+    positive_numbers: "Column numbers must be positive"
+  
+  graph_types:
+    line: "Line"
+    bars: "Bars"
+    scatter: "Scatter"
+  
+  colors:
+    blue: "Blue"
+    cyan: "Cyan"
+    teal: "Teal"
+    green: "Green"
+    lime: "Lime"
+    yellow: "Yellow"
+    amber: "Amber"
+    orange: "Orange"
+    red: "Red"
+    magenta: "Magenta"
+    indigo: "Indigo"
+    violet: "Violet"
+    turquoise: "Turquoise"
+    aquamarine: "Aquamarine"
+    springgreen: "SpringGreen"
+    chartreuse: "Chartreuse"
+    gold: "Gold"
+    coral: "Coral"
+    crimson: "Crimson"
+    pink: "Pink"
+  
+  markers:
+    circle: "Circle (o)"
+    square: "Square (s)"
+    triangle: "Triangle (^)"
+    diamond: "Diamond (D)"
+    star: "Star (*)"
+    plus: "Plus (+)"
+    x: "X (x)"
+    vline: "Vertical Bar (|)"
+    hline: "Horizontal Bar (_)"
+    hexagon: "Hexagon (h)"
+
+errors:
+  connection_error: "Connection error: {error}"
+  data_read_error: "Error reading data: {error}"
+  virtual_port_error: "Error creating simulated port: {error}"
+
+messages:
+  connecting: "Connecting..."
+  connected: "Connected"
+  disconnected: "Disconnected"
+  data_generation_started: "Data generation started"
+  data_generation_stopped: "Data generation stopped"

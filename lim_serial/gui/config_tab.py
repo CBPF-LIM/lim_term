@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import ttk
 from ..config import DEFAULT_BAUDRATES, DEFAULT_BAUDRATE
 from ..utils import MockSerial
+from ..i18n import t
 
 
 class ConfigTab:
@@ -21,19 +22,21 @@ class ConfigTab:
     def _create_widgets(self):
         """Cria os widgets da tab"""
         # Frame para configurações (será ocultado quando conectado)
-        self.config_frame = ttk.LabelFrame(self.frame, text="Configuração")
+        self.config_frame = ttk.LabelFrame(self.frame, text=t("ui.config_tab.configuration_frame"))
         self.config_frame.grid(column=0, row=0, padx=10, pady=10, sticky="ew")
         
         # Seleção de modo (Hardware ou Simulado)
-        ttk.Label(self.config_frame, text="Modo:").grid(column=0, row=0, padx=10, pady=10, sticky="w")
+        self.mode_label = ttk.Label(self.config_frame, text=t("ui.config_tab.mode_label"))
+        self.mode_label.grid(column=0, row=0, padx=10, pady=10, sticky="w")
         self.mode_combobox = ttk.Combobox(self.config_frame, state="readonly", 
-                                         values=["Hardware", "Simulado"])
+                                         values=[t("ui.config_tab.mode_hardware"), t("ui.config_tab.mode_simulated")])
         self.mode_combobox.grid(column=1, row=0, padx=10, pady=10, sticky="w")
-        self.mode_combobox.set("Hardware")
+        self.mode_combobox.set(t("ui.config_tab.mode_hardware"))
         self.mode_combobox.bind("<<ComboboxSelected>>", self._on_mode_changed)
         
         # Seleção de porta
-        ttk.Label(self.config_frame, text="Porta:").grid(column=0, row=1, padx=10, pady=10, sticky="w")
+        self.port_label = ttk.Label(self.config_frame, text=t("ui.config_tab.port_label"))
+        self.port_label.grid(column=0, row=1, padx=10, pady=10, sticky="w")
         
         # Frame para porta e botão refresh
         port_frame = ttk.Frame(self.config_frame)
@@ -50,7 +53,8 @@ class ConfigTab:
         port_frame.columnconfigure(0, weight=1)
         
         # Seleção de baudrate
-        ttk.Label(self.config_frame, text="Baudrate:").grid(column=0, row=2, padx=10, pady=10, sticky="w")
+        self.baudrate_label = ttk.Label(self.config_frame, text=t("ui.config_tab.baudrate_label"))
+        self.baudrate_label.grid(column=0, row=2, padx=10, pady=10, sticky="w")
         self.baudrate_combobox = ttk.Combobox(self.config_frame, state="readonly", 
                                             values=DEFAULT_BAUDRATES)
         self.baudrate_combobox.grid(column=1, row=2, padx=10, pady=10, sticky="w")
@@ -60,7 +64,7 @@ class ConfigTab:
         self.config_frame.columnconfigure(1, weight=1)
         
         # Frame para informações de conexão (será mostrado quando conectado)
-        self.info_frame = ttk.LabelFrame(self.frame, text="Informações da Conexão")
+        self.info_frame = ttk.LabelFrame(self.frame, text=t("ui.config_tab.connection_info_frame"))
         self.info_frame.grid(column=0, row=1, padx=10, pady=10, sticky="ew")
         
         self.info_label = ttk.Label(self.info_frame, text="", justify="left", 
@@ -71,7 +75,7 @@ class ConfigTab:
         self.info_frame.grid_remove()
         
         # Botão de conectar (sempre visível)
-        self.connect_button = ttk.Button(self.frame, text="Conectar", command=self._connect)
+        self.connect_button = ttk.Button(self.frame, text=t("ui.config_tab.connect"), command=self._connect)
         self.connect_button.grid(column=0, row=2, padx=10, pady=10)
         
         # Configura peso das colunas
@@ -81,7 +85,7 @@ class ConfigTab:
         """Callback para mudança de modo"""
         mode = self.mode_combobox.get()
         
-        if mode == "Simulado":
+        if mode == t("ui.config_tab.mode_simulated"):
             # Desabilita seleção de porta e baudrate para modo simulado
             self.port_combobox.config(state="disabled")
             self.baudrate_combobox.config(state="disabled")
@@ -95,7 +99,7 @@ class ConfigTab:
     
     def _update_ports(self):
         """Atualiza lista de portas disponíveis"""
-        if self.mode_combobox.get() == "Hardware":
+        if self.mode_combobox.get() == t("ui.config_tab.mode_hardware"):
             ports = self.serial_manager.get_available_ports()
             self.port_combobox["values"] = ports
             if ports:
@@ -111,12 +115,12 @@ class ConfigTab:
             if self.mock_serial:
                 self.mock_serial.stop_data_generation()
                 self.mock_serial = None
-            self.connect_button.config(text="Conectar")
+            self.connect_button.config(text=t("ui.config_tab.connect"))
             self._show_config_interface()
             return
         
         # Conectar
-        if mode == "Hardware":
+        if mode == t("ui.config_tab.mode_hardware"):
             port = self.port_combobox.get()
             baudrate = self.baudrate_combobox.get()
             
@@ -124,10 +128,10 @@ class ConfigTab:
                 return
             
             if self.serial_manager.connect(port, baudrate):
-                self.connect_button.config(text="Desconectar")
+                self.connect_button.config(text=t("ui.config_tab.disconnect"))
                 self._show_connection_info(mode, port, baudrate)
                 
-        elif mode == "Simulado":
+        elif mode == t("ui.config_tab.mode_simulated"):
             try:
                 # Cria porta virtual
                 self.mock_serial = MockSerial()
@@ -136,7 +140,7 @@ class ConfigTab:
                 # Conecta à porta virtual
                 if self.serial_manager.connect(virtual_port, DEFAULT_BAUDRATE):
                     self.mock_serial.start_data_generation()
-                    self.connect_button.config(text="Desconectar")
+                    self.connect_button.config(text=t("ui.config_tab.disconnect"))
                     self._show_connection_info(mode, virtual_port, DEFAULT_BAUDRATE)
                     
                     # Atualiza a lista de portas para mostrar a porta virtual
@@ -150,7 +154,7 @@ class ConfigTab:
                     self.mock_serial = None
                     
             except Exception as e:
-                print(f"Erro ao criar porta simulada: {e}")
+                print(t("errors.virtual_port_error").format(error=e))
     
     def _show_config_interface(self):
         """Mostra a interface de configuração e oculta as informações"""
@@ -164,16 +168,49 @@ class ConfigTab:
         self.info_frame.grid()
         
         # Constrói texto informativo
-        info_text = f"🔗 Modo: {mode}\n"
-        if mode == "Hardware":
-            info_text += f"📡 Porta: {port}\n"
-            info_text += f"⚡ Baudrate: {baudrate} bps"
+        if mode == t("ui.config_tab.mode_hardware"):
+            info_text = t("ui.config_tab.connection_status").format(
+                mode=mode, port=port, baudrate=baudrate)
         else:
-            info_text += f"🖥️  Porta Virtual: {port}\n"
-            info_text += f"⚡ Baudrate: {baudrate} bps (automático)\n"
-            info_text += f"📊 Status: Gerando dados simulados"
+            info_text = t("ui.config_tab.virtual_connection_status").format(
+                mode=mode, port=port, baudrate=baudrate)
         
         self.info_label.config(text=info_text)
+    
+    def refresh_translations(self):
+        """Atualiza as traduções na interface"""
+        # Atualiza textos dos frames
+        self.config_frame.config(text=t("ui.config_tab.configuration_frame"))
+        self.info_frame.config(text=t("ui.config_tab.connection_info_frame"))
+        
+        # Atualiza labels estáticos
+        self.mode_label.config(text=t("ui.config_tab.mode_label"))
+        self.port_label.config(text=t("ui.config_tab.port_label"))
+        self.baudrate_label.config(text=t("ui.config_tab.baudrate_label"))
+        
+        # Atualiza botão de conectar
+        if self.serial_manager.is_connected:
+            self.connect_button.config(text=t("ui.config_tab.disconnect"))
+        else:
+            self.connect_button.config(text=t("ui.config_tab.connect"))
+        
+        # Atualiza valores do combobox de modo
+        current_mode = self.mode_combobox.get()
+        mode_values = [t("ui.config_tab.mode_hardware"), t("ui.config_tab.mode_simulated")]
+        self.mode_combobox["values"] = mode_values
+        
+        # Redefine valor atual traduzido
+        if "Hardware" in current_mode or current_mode == t("ui.config_tab.mode_hardware"):
+            self.mode_combobox.set(t("ui.config_tab.mode_hardware"))
+        else:
+            self.mode_combobox.set(t("ui.config_tab.mode_simulated"))
+        
+        # Atualiza info se conectado
+        if self.serial_manager.is_connected:
+            mode = self.mode_combobox.get()
+            port = self.port_combobox.get() if hasattr(self, 'port_combobox') else ""
+            baudrate = self.baudrate_combobox.get() if hasattr(self, 'baudrate_combobox') else ""
+            self._show_connection_info(mode, port, baudrate)
     
     def get_frame(self):
         """Retorna o frame da tab"""

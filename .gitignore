@@ -80,3 +80,6 @@ venv/
 
 # Autosaved files
 autosave
+
+# User config
+config/
