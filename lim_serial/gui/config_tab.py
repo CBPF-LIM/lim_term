@@ -81,7 +81,7 @@ class ConfigTab:
         
         # Botão de conectar (sempre visível)
         self.connect_button = ttk.Button(self.frame, text=t("ui.config_tab.connect"), command=self._connect)
-        self.connect_button.grid(column=0, row=2, padx=10, pady=10)
+        self.connect_button.grid(column=0, row=2, padx=10, pady=10, sticky="w")
         
         # Configura peso das colunas
         self.frame.columnconfigure(0, weight=1)
