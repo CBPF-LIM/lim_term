@@ -44,15 +44,19 @@ class MainWindow:
         
         # Store language variables for checkmarks
         self.language_vars = {}
-        
-        for lang in get_available_languages():
-            var = tk.BooleanVar()
-            self.language_vars[lang['code']] = var
-            self.language_menu.add_checkbutton(
-                label=lang['display_name'],
-                variable=var,
-                command=lambda code=lang['code']: self._change_language(code)
-            )
+        # Desired order
+        language_order = ["en", "pt-br", "fr", "es", "de"]
+        langs_by_code = {lang['code']: lang for lang in get_available_languages()}
+        for code in language_order:
+            if code in langs_by_code:
+                lang = langs_by_code[code]
+                var = tk.BooleanVar()
+                self.language_vars[lang['code']] = var
+                self.language_menu.add_checkbutton(
+                    label=lang['display_name'],
+                    variable=var,
+                    command=lambda code=lang['code']: self._change_language(code)
+                )
         
         # Set initial language selection (pt-br as default)
         from ..i18n import get_current_language
