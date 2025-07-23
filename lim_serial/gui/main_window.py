@@ -3,6 +3,7 @@ Interface gráfica principal
 """
 import tkinter as tk
 from tkinter import ttk
+import time
 from ..config import DEFAULT_GEOMETRY
 from ..core import SerialManager
 from ..i18n import t, initialize as init_i18n, get_available_languages, set_language
@@ -104,18 +105,54 @@ class MainWindow:
     def _on_data_received(self, line):
         """Callback chamado quando dados são recebidos"""
         self.data_tab.add_data(line)
-        # Atualiza gráfico automaticamente se configurado e não pausado
-        if not self.graph_tab.is_paused:
-            self.graph_tab.plot_graph()
+        # Chart will be updated by the independent refresh timer - completely decoupled!
     
     def _on_error(self, error_message):
         """Callback chamado quando ocorre um erro"""
         self.data_tab.add_message(error_message)
     
     def run(self):
-        """Executa a aplicação"""
+        """Executa a aplicação com game-loop style architecture"""
+        import time
+        
         try:
+            # Game-loop style main loop
+            self._running = True
+            self._last_render_time = time.time()
+            
+            # Start the game loop
+            self._game_loop()
+            
+            # Start tkinter's event processing
             self.root.mainloop()
+            
         finally:
+            self._running = False
             # Garante que a conexão serial seja fechada
             self.serial_manager.disconnect()
+            
+    def _game_loop(self):
+        """Game-engine style main loop: doEvents() + timed render()"""
+        if not self._running:
+            return
+            
+        try:
+            # Process tkinter events (doEvents equivalent)
+            self.root.update()
+            
+            # Check if we should render (independent of events)
+            current_time = time.time()
+            if hasattr(self.graph_tab, 'should_render_now'):
+                if self.graph_tab.should_render_now(current_time):
+                    self.graph_tab.render_frame()
+                    
+        except tk.TclError:
+            # Window was closed
+            self._running = False
+            return
+        except Exception as e:
+            print(f"Game loop error: {e}")
+            
+        # Schedule next loop iteration (~60 FPS for the main loop)
+        if self._running and self.root.winfo_exists():
+            self.root.after(16, self._game_loop)  # ~60 FPS main loop

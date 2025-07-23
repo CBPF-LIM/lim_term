@@ -20,8 +20,18 @@ class GraphTab:
         self.is_paused = False
         self.config_manager = get_config_manager()
 
+        # Chart refresh system - game-loop style rendering
+        self.refresh_rate_ms = 33  # 30 FPS default
+        self.refresh_timer_id = None
+        self.refresh_counter = 0  # Debug counter
+        self.debug_refresh = False  # Set to True to enable refresh debug output
+        self.last_render_time = 0  # For game-loop style rendering
+
         self._create_widgets()
         self._load_preferences()
+        # Initialize render time
+        import time
+        self.last_render_time = time.time()
 
     def _create_widgets(self):
         """Cria os widgets da tab"""
@@ -104,6 +114,22 @@ class GraphTab:
         self.data_window_entry.insert(0, "50")
         self.data_window_entry.bind("<KeyRelease>", self._on_setting_change)
         self.data_window_entry.bind("<FocusOut>", self._on_preference_changed)
+
+        # Refresh Rate (FPS) with debug info
+        self.fps_label = ttk.Label(global_frame, text="Refresh Rate (FPS):")
+        self.fps_label.grid(column=4, row=0, padx=5, pady=5, sticky="w")
+        
+        fps_frame = ttk.Frame(global_frame)
+        fps_frame.grid(column=5, row=0, padx=5, pady=5, sticky="w")
+        
+        self.fps_combobox = ttk.Combobox(fps_frame, state="readonly", values=["1", "5", "10", "15", "20", "30", "60"], width=5)
+        self.fps_combobox.pack(side="left")
+        self.fps_combobox.set("30")  # Default 30 FPS
+        self.fps_combobox.bind("<<ComboboxSelected>>", self._on_fps_change)
+        
+        # Debug label to show actual refresh info
+        self.fps_debug_label = ttk.Label(fps_frame, text="(33ms)", font=("TkDefaultFont", 8))
+        self.fps_debug_label.pack(side="left", padx=(5,0))
 
         # Min and Max Y (global for all series) - second row
         self.min_y_label = ttk.Label(global_frame, text=t("ui.graph_tab.min_y_label"))
@@ -253,14 +279,9 @@ class GraphTab:
                 plt.close(fig_copy)
 
     def _on_setting_change(self, event=None):
-        """Callback chamado quando qualquer configuração muda"""
-        try:
-            # Auto-update graph if not paused and has data
-            if self.data_tab.get_data() and not self.is_paused:
-                self.plot_graph()
-        except (ValueError, KeyError):
-            # Ignora erros durante digitação
-            pass
+        """Callback called when any configuration changes - no longer triggers immediate plot"""
+        # Settings changed, but chart will update on next scheduled refresh cycle
+        pass
 
     def plot_graph(self):
         """Gera o gráfico com múltiplas séries Y"""
@@ -567,10 +588,19 @@ class GraphTab:
             entry.delete(0, "end")
             entry.insert(0, str(y_col))
 
-        # Load window size, min/max Y
+        # Load window size, min/max Y, refresh rate
         window_size = self.config_manager.load_tab_setting('graph.general', 'window_size', '50')
         self.data_window_entry.delete(0, "end")
         self.data_window_entry.insert(0, str(window_size))
+
+        # Load refresh rate
+        refresh_rate = self.config_manager.load_tab_setting('graph.general', 'refresh_rate', '30')
+        self.fps_combobox.set(str(refresh_rate))
+        self._set_refresh_rate(int(refresh_rate))
+        
+        # Update debug label
+        if hasattr(self, 'fps_debug_label'):
+            self.fps_debug_label.config(text=f"({self.refresh_rate_ms}ms)")
 
         min_y = self.config_manager.load_tab_setting('graph.general', 'min_y', '')
         max_y = self.config_manager.load_tab_setting('graph.general', 'max_y', '')
@@ -655,6 +685,7 @@ class GraphTab:
         self.config_manager.save_tab_setting('graph.general', 'x_column', self.x_column_entry.get())
         self.config_manager.save_tab_setting('graph.general', 'visualization_group', self.group_combobox.get())
         self.config_manager.save_tab_setting('graph.general', 'window_size', self.data_window_entry.get())
+        self.config_manager.save_tab_setting('graph.general', 'refresh_rate', self.fps_combobox.get())
         self.config_manager.save_tab_setting('graph.general', 'min_y', self.min_y_entry.get())
         self.config_manager.save_tab_setting('graph.general', 'max_y', self.max_y_entry.get())
 
@@ -819,3 +850,117 @@ class GraphTab:
         """Handle changes to color settings"""
         self._save_preferences()
         self._on_setting_change()
+
+    def _start_refresh_timer(self):
+        """Start the chart refresh timer (30 FPS)"""
+        self._refresh_chart()
+    
+    def _refresh_chart(self):
+        """Refresh chart at fixed intervals - completely decoupled from data arrival"""
+        try:
+            # Always attempt to plot (even if paused, to maintain timer consistency)
+            # Only skip plotting if explicitly paused, but still refresh available data
+            if not self.is_paused:
+                data_lines = self.data_tab.get_data()
+                if data_lines:  # Only plot if we have any data at all
+                    if self.debug_refresh:
+                        self.refresh_counter += 1
+                        fps_actual = 1000 / self.refresh_rate_ms
+                        print(f"Chart refresh #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Fixed Rate")
+                    
+                    # Plot whatever data is currently available - this is the key decoupling
+                    self.plot_graph()
+                else:
+                    # No data available yet, but keep timer running
+                    pass
+            else:
+                # Paused - keep timer running but don't plot
+                pass
+                
+        except Exception as e:
+            # Don't crash on chart refresh errors, but log them
+            if self.debug_refresh:
+                print(f"Chart refresh error: {e}")
+        finally:
+            # ALWAYS schedule next refresh - this maintains fixed rate regardless of success/failure
+            if hasattr(self, 'frame') and self.frame.winfo_exists():
+                self.refresh_timer_id = self.frame.after(self.refresh_rate_ms, self._refresh_chart)
+    
+    def _stop_refresh_timer(self):
+        """Stop the chart refresh timer"""
+        if self.refresh_timer_id:
+            try:
+                self.frame.after_cancel(self.refresh_timer_id)
+            except:
+                pass
+            self.refresh_timer_id = None
+    
+    def _set_refresh_rate(self, fps):
+        """Set chart refresh rate"""
+        self.refresh_rate_ms = int(1000 / fps)  # Convert FPS to milliseconds
+
+    def cleanup(self):
+        """Clean up resources when tab is destroyed"""
+        self._stop_refresh_timer()
+        
+    def __del__(self):
+        """Destructor to ensure cleanup"""
+        try:
+            self.cleanup()
+        except:
+            pass
+
+    def _on_fps_change(self, event=None):
+        """Handle refresh rate (FPS) change"""
+        try:
+            fps = int(self.fps_combobox.get())
+            self._set_refresh_rate(fps)
+            
+            # Update debug label
+            self.fps_debug_label.config(text=f"({self.refresh_rate_ms}ms)")
+            
+            # Reset render timing for new rate
+            import time
+            self.last_render_time = time.time()
+            self.refresh_counter = 0
+            
+            self._save_preferences()
+        except ValueError:
+            # Invalid FPS value, keep current setting
+            pass
+
+    def should_render_now(self, current_time):
+        """Game-loop style: Check if it's time to render (independent of events)"""
+        if self.is_paused:
+            return False
+            
+        # Convert refresh_rate_ms to seconds for comparison
+        refresh_interval = self.refresh_rate_ms / 1000.0
+        
+        return (current_time - self.last_render_time) >= refresh_interval
+    
+    def render_frame(self):
+        """Game-loop style: Render the chart frame (completely decoupled from data events)"""
+        import time
+        try:
+            # Always render whatever data is currently available
+            data_lines = self.data_tab.get_data()
+            if data_lines:  # Only render if we have any data at all
+                self.refresh_counter += 1
+                
+                if self.debug_refresh:
+                    fps_actual = 1000 / self.refresh_rate_ms
+                    print(f"Render frame #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Game Loop Style")
+                
+                # Plot whatever data is currently available - this is true decoupling
+                self.plot_graph()
+                
+            # Update last render time
+            self.last_render_time = time.time()
+                
+        except Exception as e:
+            # Don't crash on render errors, but log them if debug is enabled
+            if self.debug_refresh:
+                print(f"Render frame error: {e}")
+            # Still update time to prevent getting stuck
+            self.last_render_time = time.time()
