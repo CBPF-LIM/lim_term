@@ -1,4 +1,4 @@
-# LIM Serial - Serial Communication & Data Visualization GUI
+# LIM Serial - Serial Communication & Data Visualization
 
 **README in:** [English](README.md) | [Português](docs/README_pt-br.md) | [Español](docs/README_es.md) | [Deutsch](docs/README_de.md) | [Français](docs/README_fr.md)
 
@@ -6,197 +6,149 @@
 
 ## Overview
 
-LIM Serial is a modern, internationalized GUI application for serial communication and real-time data visualization. Built with Python/Tkinter and matplotlib, it provides a user-friendly interface for connecting to serial devices, collecting data, and creating dynamic graphs.
+LIM Serial is a user-friendly application for serial communication and real-time data visualization. Connect to Arduino or other serial devices, collect data, and create dynamic graphs with professional visualization features. Available in 5 languages with automatic preferences saving.
 
 ![LIM Serial Screenshot](docs/shot.png)
 
+![LIM Serial Screenshot](docs/shot_stacked.png)
+
 ## Features
 
-### 🌍 **Internationalization**
-- **5 Languages**: English, Portuguese (Brazil), Spanish, German, French
-- **Real-time Language Switching**: Change language without restarting
-- **Persistent Preferences**: Language selection saved automatically
-- **YAML-based Translations**: Easy to extend with new languages
+### 🌍 **Multiple Languages**
+- Available in English, Portuguese, Spanish, German, and French
+- Change language from the menu (requires restart)
+- All settings preserved when switching languages
 
-### 📡 **Serial Communication**
-- **Hardware Mode**: Connect to real serial ports
-- **Simulated Mode**: Built-in virtual port with data generation
-- **Auto-detection**: Automatic port discovery and refresh
-- **Flexible Baudrate**: Support for all standard baudrates
-- **Real-time Status**: Connection information with visual feedback
+### 📡 **Easy Serial Connection**
+- Connect to real serial devices (Arduino, sensors, etc.)
+- Built-in simulation mode for testing without hardware
+- Automatic port detection with one-click refresh
+- Full Arduino IDE baudrate compatibility (300-2000000 bps)
 
-### 📊 **Data Visualization**
-- **Multiple Graph Types**: Line and Scatter plots
-- **Multi-Series Plotting**: Plot up to 5 Y series (Y1-Y5) simultaneously
-- **Individual Series Configuration**: Custom colors, markers, and types per series
-- **Real-time Updates**: Live data plotting with configurable refresh
-- **Legend Support**: Automatic legend for multi-series charts
-- **Customizable Appearance**: 20+ colors, 10+ marker types
-- **Axis Control**: Manual Y-axis limits and windowing
-- **PNG Export**: Save graphs as high-quality images
-- **Pause/Resume**: Control data flow without disconnecting
+### 📊 **Professional Data Visualization**
+- **Time Series Charts**: Plot up to 5 data columns simultaneously
+- **Stacked Area Charts**: Compare data as absolute values or percentages
+- **Customizable Appearance**: Choose colors, markers, and line types for each data series
+- **Real-time Updates**: Configurable refresh rates (1-30 FPS)
+- **Export**: Save graphs as high-quality PNG images
+- **Interactive Controls**: Pause/resume data collection, zoom, and pan
 
-### 💾 **Data Management**
-- **Save/Load**: Export and import data in text format
-- **Autosave**: Automatic data backup with user confirmation
-- **Clear Function**: Reset data with safety prompts
-- **Persistent Settings**: All preferences saved between sessions
+### 💾 **Smart Data Management**
+- **Manual Save/Load**: Export and import your data anytime
+- **Automatic Backup**: Optional autosave with timestamped filenames
+- **Data Safety**: Clear data with confirmation prompts
+- **All Settings Saved**: Preferences automatically preserved between sessions
 
-### 🎨 **User Interface**
-- **Tabbed Interface**: Organized Configuration, Data, and Graph tabs
-- **Responsive Design**: Adaptive layout with proper widget sizing
-- **Visual Feedback**: Status indicators and progress information
-- **Accessibility**: Clear labeling and intuitive navigation
-
-## Installation
+## Getting Started
 
 ### Requirements
-- Python 3.7+
-- tkinter (usually included with Python)
-- matplotlib
-- pyserial
-- PyYAML
+- Python 3.7 or newer
+- Internet connection for dependency installation
 
-### Install Dependencies
+### Installation
 ```bash
+# Install required packages
 pip install matplotlib pyserial PyYAML
-```
 
-### Quick Start
-```bash
-# Clone or download the project
-cd lim_serial
-
-# Run the application
+# Download and run LIM Serial
+cd lim_term
 python lim_serial.py
 ```
 
-## Usage Guide
+### First Steps
+1. **Language**: Choose your language from the Language menu
+2. **Connection**: Go to Configuration tab, select your serial port and baudrate
+3. **Data**: Switch to Data tab to see incoming data
+4. **Visualization**: Use Graph tab to create charts from your data
 
-### 1. Configuration Tab
-- **Mode Selection**: Choose between Hardware or Simulated mode
-- **Port Selection**: Select from available serial ports (auto-refreshed)
-- **Baudrate**: Set communication speed
-- **Connect/Disconnect**: Establish or close serial connection
+## How to Use
 
-### 2. Data Tab
-- **Real-time Display**: View incoming data in tabular format
-- **Save Data**: Export current dataset to text file
-- **Load Data**: Import previously saved data
-- **Clear Data**: Reset current dataset
-- **Autosave**: Automatic backup with user confirmation
+### Configuration Tab
+- **Mode**: Choose "Hardware" for real devices, "Simulated" for testing
+- **Port**: Select your serial port (click Refresh to update the list)
+- **Baudrate**: Set the communication speed (match your device settings)
+- **Connect**: Click to start receiving data
 
-### 3. Graph Tab
-- **Column Selection**: Choose X column and up to 5 Y columns (Y1-Y5) for plotting
-- **Multi-Series Support**: Plot multiple data series simultaneously with legend
-- **Individual Configuration**: Set graph type, color, and marker for each Y series
-- **Graph Types**: Select Line or Scatter plot per series
-- **Customization**: Colors, markers, axis limits, window size (default: 50 points)
-- **Export**: Save graphs as PNG images
-- **Pause/Resume**: Control real-time updates
+### Data Tab
+- **View Data**: See incoming data in real-time table format
+- **Save Data**: Export current data to a text file
+- **Load Data**: Import previously saved data files
+- **Clear Data**: Reset the current dataset (with confirmation)
+- **Autosave**: Toggle automatic backup with timestamped filenames
 
-### 4. Language Menu
-- **Language Selection**: Available in main menu bar
-- **Real-time Switching**: Changes apply immediately
-- **Persistent**: Language preference saved automatically
+### Graph Tab
+- **Choose Columns**: Select X-axis and up to 5 Y-axis columns from your data
+- **Chart Types**:
+  - **Time Series**: Individual line/scatter plots for each data series
+  - **Stacked Area**: Layered charts showing cumulative data or percentages
+- **Customize**: Expand "Show Advanced Options" to change colors, markers, refresh rate
+- **Export**: Save your graphs as PNG images
+- **Control**: Pause/resume real-time updates anytime
+
+### Language Menu
+- **Switch Language**: Select from 5 available languages
+- **Restart Required**: Application will prompt you to restart for language change
+- **Settings Preserved**: All your preferences are kept when changing languages
 
 ## Data Format
 
-Serial data should be sent in space-separated columns:
+Your serial device should send data in simple text format:
 
 ```
-# Header (optional)
+# Optional header line
 timestamp voltage current temperature
 
-# Data rows
+# Data rows (space or tab separated)
 1.0 3.3 0.125 25.4
 2.0 3.2 0.130 25.6
 3.0 3.4 0.122 25.2
 ```
 
-**Features:**
-- Space or tab-separated values
-- Automatic column detection
-- Numeric data parsing
-- Header row support (ignored during plotting)
+**Supported formats:**
+- Space or tab-separated columns
+- Numbers in any column
+- Optional header row (will be detected automatically)
+- Real-time streaming or batch data loading
 
-## Project Architecture
+## Troubleshooting
 
-### Configuration Management
-- **User Preferences**: Stored in `config/prefs.yml`
-- **Tab-specific Settings**: Organized by interface section
-- **Language Persistence**: Automatic language selection memory
-- **Safe Defaults**: Fallback values for all preferences
+**Connection Issues:**
+- Make sure your device is connected and powered on
+- Check that no other program is using the serial port
+- Try different baudrates if data appears garbled
+- Use Simulated mode to test the interface without hardware
 
-### Translation System
-- **YAML-based**: Human-readable translation files in `languages/`
-- **Hierarchical Keys**: Organized by UI component and context
-- **Fallback Support**: Missing translations fall back to English
-- **Real-time Updates**: Interface updates immediately on language change
+**Data Problems:**
+- Ensure data is space or tab-separated
+- Check that numbers are in standard format (use . for decimals)
+- Verify your device is sending data continuously
+- Try saving and reloading data to check format
+
+**Performance:**
+- Lower the refresh rate if charts are slow
+- Reduce the data window size for better performance
+- Close other programs if the system becomes unresponsive
 
 ## Development
 
-### Adding New Languages
-1. Create new YAML file in `languages/` directory
-2. Follow the structure of existing language files
-3. Test all interface strings
-4. Submit pull request
+This application is built with Python and uses tkinter for the interface and matplotlib for graphs.
 
-### Extending Functionality
-- **Serial Protocols**: Extend `SerialManager` for custom protocols
-- **Graph Types**: Add new plot types in `GraphManager`
-- **Data Formats**: Implement custom parsers in `utils/`
-- **UI Components**: Create new tabs following existing patterns
+**For developers:**
+- The codebase uses a modular architecture with separate components for GUI, data management, and visualization
+- Translations are stored in YAML files in the `languages/` directory
+- Configuration uses a hierarchical preference system saved in `config/prefs.yml`
+- The chart refresh system is decoupled from data arrival for optimal performance
 
-## Configuration Files
-
-### User Preferences (`config/prefs.yml`)
-```yaml
-language: en
-tabs:
-  config:
-    mode: Hardware
-    port: "/dev/ttyUSB0"
-    baudrate: "9600"
-  graph:
-    type: Line
-    color: Blue
-    marker: circle
-    window_size: "100"
-    x_column: "1"
-    y_column: "2"
-```
-
-### Language Files (`languages/*.yml`)
-Structured translation files with hierarchical organization by UI component.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly (especially internationalization)
-5. Submit a pull request
-
-### Areas for Contribution
-- New language translations
-- Additional graph types
-- Enhanced serial protocols
-- UI/UX improvements
-- Documentation improvements
+**Contributing:**
+- Fork the repository and create a feature branch
+- Test changes with multiple languages and data scenarios
+- Submit pull requests with clear descriptions
+- Focus areas: new languages, visualization types, protocol support
 
 ## License
 
 Developed by CBPF-LIM (Brazilian Center for Research in Physics - Light and Matter Laboratory).
 
-## Support
-
-For issues, feature requests, or questions:
-- Check existing documentation
-- Review translation files for UI strings
-- Test with different languages and configurations
-- Report bugs with detailed reproduction steps
-
 ---
 
-**LIM Serial** - Modern serial communication made simple with international accessibility.
+**LIM Serial** - Professional serial communication and data visualization made simple.

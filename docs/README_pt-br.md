@@ -1,202 +1,148 @@
-# LIM Serial - GUI de Comunicação Serial e Visualização de Dados
+# LIM Serial - Comunicação Serial & Visualização de Dados
 
-**README em:** [English](/README.md) | [Português](README_pt-br.md) | [Español](README_es.md) | [Deutsch](README_de.md) | [Français](README_fr.md)
+**README em:** [English](../README.md) | [Português](README_pt-br.md) | [Español](README_es.md) | [Deutsch](README_de.md) | [Français](README_fr.md)
 
 ---
 
 ## Visão Geral
 
-LIM Serial é uma aplicação GUI moderna e internacionalizada para comunicação serial e visualização de dados em tempo real. Construída com Python/Tkinter e matplotlib, oferece uma interface amigável para conectar a dispositivos seriais, coletar dados e criar gráficos dinâmicos.
+LIM Serial é uma aplicação amigável para comunicação serial e visualização de dados em tempo real. Conecte-se a Arduino ou outros dispositivos seriais, colete dados e crie gráficos dinâmicos com recursos de visualização profissionais. Disponível em 5 idiomas com salvamento automático de preferências.
 
-![Captura de Tela do LIM Serial](shot.png)
+![LIM Serial Screenshot](shot.png)
 
-## Características
+![LIM Serial Screenshot](shot_stacked.png)
 
-### 🌍 **Internacionalização**
-- **5 Idiomas**: Inglês, Português (Brasil), Espanhol, Alemão, Francês
-- **Troca em Tempo Real**: Altere o idioma sem reiniciar
-- **Preferências Persistentes**: Seleção de idioma salva automaticamente
-- **Traduções em YAML**: Fácil de estender com novos idiomas
+## Recursos
 
-### 📡 **Comunicação Serial**
-- **Modo Hardware**: Conecte a portas seriais reais
-- **Modo Simulado**: Porta virtual integrada com geração de dados
-- **Detecção Automática**: Descoberta e atualização automática de portas
-- **Baudrate Flexível**: Suporte para todos os baudrates padrão
-- **Status em Tempo Real**: Informações de conexão com feedback visual
+### 🌍 **Múltiplos Idiomas**
+- Disponível em inglês, português, espanhol, alemão e francês
+- Altere o idioma pelo menu (requer reinicialização)
+- Todas as configurações preservadas ao trocar idiomas
 
-### 📊 **Visualização de Dados**
-- **Múltiplos Tipos de Gráfico**: Linha e Dispersão
-- **Plotagem Multi-Séries**: Plotar até 5 séries Y (Y1-Y5) simultaneamente
-- **Configuração Individual de Séries**: Cores, marcadores e tipos personalizados por série
-- **Atualizações em Tempo Real**: Plotagem de dados ao vivo com atualização configurável
-- **Suporte a Legenda**: Legenda automática para gráficos multi-séries
-- **Aparência Customizável**: Mais de 20 cores, mais de 10 tipos de marcadores
-- **Controle de Eixos**: Limites manuais do eixo Y e janelamento
-- **Exportação PNG**: Salve gráficos como imagens de alta qualidade
-- **Pausar/Retomar**: Controle o fluxo de dados sem desconectar
+### 📡 **Conexão Serial Fácil**
+- Conecte a dispositivos seriais reais (Arduino, sensores, etc.)
+- Modo de simulação integrado para testes sem hardware
+- Detecção automática de portas com atualização em um clique
+- Compatibilidade completa com taxas de transmissão do Arduino IDE (300-2000000 bps)
 
-### 💾 **Gerenciamento de Dados**
-- **Salvar/Carregar**: Exportar e importar dados em formato texto
-- **Salvamento Automático**: Backup automático de dados com confirmação do usuário
-- **Função Limpar**: Resetar dados com prompts de segurança
-- **Configurações Persistentes**: Todas as preferências salvas entre sessões
+### 📊 **Visualização de Dados Profissional**
+- **Gráficos de Série Temporal**: Plote até 5 colunas de dados simultaneamente
+- **Gráficos de Área Empilhada**: Compare dados como valores absolutos ou porcentagens
+- **Aparência Personalizável**: Escolha cores, marcadores e tipos de linha para cada série de dados
+- **Atualizações em Tempo Real**: Taxas de atualização configuráveis (1-30 FPS)
+- **Exportação**: Salve gráficos como imagens PNG de alta qualidade
+- **Controles Interativos**: Pause/retome coleta de dados, zoom e panorâmica
 
-### 🎨 **Interface do Usuário**
-- **Interface com Abas**: Abas organizadas de Configuração, Dados e Gráfico
-- **Design Responsivo**: Layout adaptativo com dimensionamento adequado de widgets
-- **Feedback Visual**: Indicadores de status e informações de progresso
-- **Acessibilidade**: Rotulagem clara e navegação intuitiva
+### 💾 **Gerenciamento Inteligente de Dados**
+- **Salvar/Carregar Manual**: Exporte e importe seus dados a qualquer momento
+- **Backup Automático**: Salvamento automático opcional com nomes de arquivo com timestamp
+- **Segurança de Dados**: Limpe dados com confirmações
+- **Todas as Configurações Salvas**: Preferências automaticamente preservadas entre sessões
 
-## Instalação
+## Primeiros Passos
 
 ### Requisitos
-- Python 3.7+
-- tkinter (geralmente incluído com Python)
-- matplotlib
-- pyserial
-- PyYAML
+- Python 3.7 ou mais recente
+- Conexão com a internet para instalação de dependências
 
-### Instalar Dependências
+### Instalação
 ```bash
+# Instalar pacotes necessários
 pip install matplotlib pyserial PyYAML
-```
 
-### Início Rápido
-```bash
-# Clone ou baixe o projeto
-cd lim_serial
-
-# Execute a aplicação
+# Baixar e executar LIM Serial
+cd lim_term
 python lim_serial.py
 ```
 
-## Guia de Uso
+### Primeiros Passos
+1. **Idioma**: Escolha seu idioma no menu Idioma
+2. **Conexão**: Vá para a aba Configuração, selecione sua porta serial e taxa de transmissão
+3. **Dados**: Mude para a aba Dados para ver dados recebidos
+4. **Visualização**: Use a aba Gráfico para criar gráficos dos seus dados
 
-### 1. Aba de Configuração
-- **Seleção de Modo**: Escolha entre modo Hardware ou Simulado
-- **Seleção de Porta**: Selecione entre portas seriais disponíveis (auto-atualizadas)
-- **Baudrate**: Configure a velocidade de comunicação
-- **Conectar/Desconectar**: Estabeleça ou feche a conexão serial
+## Como Usar
 
-### 2. Aba de Dados
-- **Exibição em Tempo Real**: Visualize dados recebidos em formato tabular
-- **Salvar Dados**: Exporte o conjunto de dados atual para arquivo texto
-- **Carregar Dados**: Importe dados salvos anteriormente
-- **Limpar Dados**: Resete o conjunto de dados atual
-- **Salvamento Automático**: Backup automático com confirmação do usuário
+### Aba Configuração
+- **Modo**: Escolha "Hardware" para dispositivos reais, "Simulado" para testes
+- **Porta**: Selecione sua porta serial (clique em Atualizar para atualizar a lista)
+- **Taxa de Transmissão**: Defina a velocidade de comunicação (combine com as configurações do seu dispositivo)
+- **Conectar**: Clique para começar a receber dados
 
-### 3. Aba de Gráfico
-- **Seleção de Colunas**: Escolha coluna X e até 5 colunas Y (Y1-Y5) para plotagem
-- **Suporte Multi-Séries**: Plote múltiplas séries de dados simultaneamente com legenda
-- **Configuração Individual**: Defina tipo de gráfico, cor e marcador para cada série Y
-- **Tipos de Gráfico**: Selecione gráfico de Linha ou Dispersão por série
-- **Customização**: Cores, marcadores, limites de eixo, tamanho da janela (padrão: 50 pontos)
-- **Exportar**: Salve gráficos como imagens PNG
-- **Pausar/Retomar**: Controle atualizações em tempo real
+### Aba Dados
+- **Ver Dados**: Veja dados recebidos em formato de tabela em tempo real
+- **Salvar Dados**: Exporte dados atuais para um arquivo de texto
+- **Carregar Dados**: Importe arquivos de dados salvos anteriormente
+- **Limpar Dados**: Redefina o conjunto de dados atual (com confirmação)
+- **Salvamento Automático**: Ative/desative backup automático com nomes de arquivo com timestamp
 
-### 4. Menu de Idiomas
-- **Seleção de Idioma**: Disponível na barra de menu principal
-- **Troca em Tempo Real**: Mudanças aplicadas imediatamente
-- **Persistente**: Preferência de idioma salva automaticamente
+### Aba Gráfico
+- **Escolher Colunas**: Selecione eixo X e até 5 colunas do eixo Y dos seus dados
+- **Tipos de Gráfico**:
+  - **Série Temporal**: Gráficos de linha/dispersão individuais para cada série de dados
+  - **Área Empilhada**: Gráficos em camadas mostrando dados cumulativos ou porcentagens
+- **Personalizar**: Expanda "Mostrar Opções Avançadas" para alterar cores, marcadores, taxa de atualização
+- **Exportar**: Salve seus gráficos como imagens PNG
+- **Controle**: Pause/retome atualizações em tempo real a qualquer momento
 
-## Formato dos Dados
+### Menu Idioma
+- **Trocar Idioma**: Selecione entre 5 idiomas disponíveis
+- **Reinicialização Necessária**: A aplicação solicitará reinicialização para mudança de idioma
+- **Configurações Preservadas**: Todas as suas preferências são mantidas ao trocar idiomas
 
-Dados seriais devem ser enviados em colunas separadas por espaço:
+## Formato de Dados
+
+Seu dispositivo serial deve enviar dados em formato de texto simples:
 
 ```
-# Cabeçalho (opcional)
+# Linha de cabeçalho opcional
 timestamp voltage current temperature
 
-# Linhas de dados
+# Linhas de dados (separadas por espaço ou tab)
 1.0 3.3 0.125 25.4
 2.0 3.2 0.130 25.6
 3.0 3.4 0.122 25.2
 ```
 
-**Características:**
-- Valores separados por espaço ou tab
-- Detecção automática de colunas
-- Análise de dados numéricos
-- Suporte a linha de cabeçalho (ignorada durante plotagem)
+**Formatos suportados:**
+- Colunas separadas por espaço ou tab
+- Números em qualquer coluna
+- Linha de cabeçalho opcional (será detectada automaticamente)
+- Streaming em tempo real ou carregamento de dados em lote
 
-## Arquitetura do Projeto
+## Solução de Problemas
 
-### Gerenciamento de Configuração
-- **Preferências do Usuário**: Armazenadas em `config/prefs.yml`
-- **Configurações Específicas de Aba**: Organizadas por seção da interface
-- **Persistência de Idioma**: Memória automática de seleção de idioma
-- **Padrões Seguros**: Valores de fallback para todas as preferências
+**Problemas de Conexão:**
+- Certifique-se de que seu dispositivo está conectado e ligado
+- Verifique se nenhum outro programa está usando a porta serial
+- Tente diferentes taxas de transmissão se os dados aparecerem corrompidos
+- Use o modo Simulado para testar a interface sem hardware
 
-### Sistema de Tradução
-- **Baseado em YAML**: Arquivos de tradução legíveis em `languages/`
-- **Chaves Hierárquicas**: Organizadas por componente da UI e contexto
-- **Suporte a Fallback**: Traduções faltando voltam para o inglês
-- **Atualizações em Tempo Real**: Interface atualiza imediatamente na mudança de idioma
+**Problemas de Dados:**
+- Certifique-se de que os dados estão separados por espaço ou tab
+- Verifique se os números estão em formato padrão (use . para decimais)
+- Verifique se seu dispositivo está enviando dados continuamente
+- Tente salvar e recarregar dados para verificar o formato
+
+**Performance:**
+- Diminua a taxa de atualização se os gráficos estiverem lentos
+- Reduza o tamanho da janela de dados para melhor performance
+- Feche outros programas se o sistema ficar lento
 
 ## Desenvolvimento
 
-### Adicionando Novos Idiomas
-1. Crie novo arquivo YAML no diretório `languages/`
-2. Siga a estrutura dos arquivos de idioma existentes
-3. Teste todas as strings da interface
-4. Envie pull request
+Esta aplicação é construída com Python e usa tkinter para a interface e matplotlib para gráficos.
 
-### Estendendo Funcionalidade
-- **Protocolos Seriais**: Estenda `SerialManager` para protocolos customizados
-- **Tipos de Gráfico**: Adicione novos tipos de plot em `GraphManager`
-- **Formatos de Dados**: Implemente parsers customizados em `utils/`
-- **Componentes de UI**: Crie novas abas seguindo padrões existentes
-
-## Arquivos de Configuração
-
-### Preferências do Usuário (`config/prefs.yml`)
-```yaml
-language: pt-br
-tabs:
-  config:
-    mode: Hardware
-    port: "/dev/ttyUSB0"
-    baudrate: "9600"
-  graph:
-    type: Line
-    color: Blue
-    marker: circle
-    window_size: "100"
-    x_column: "1"
-    y_column: "2"
-```
-
-### Arquivos de Idioma (`languages/*.yml`)
-Arquivos de tradução estruturados com organização hierárquica por componente da UI.
-
-## Contribuindo
-
-1. Faça fork do repositório
-2. Crie uma branch de feature
-3. Faça suas alterações
-4. Teste completamente (especialmente internacionalização)
-5. Envie um pull request
-
-### Áreas para Contribuição
-- Novas traduções de idiomas
-- Tipos de gráfico adicionais
-- Protocolos seriais aprimorados
-- Melhorias de UI/UX
-- Melhorias de documentação
+**Para desenvolvedores:**
+- A base de código usa uma arquitetura modular com componentes separados para GUI, gerenciamento de dados e visualização
+- Traduções são armazenadas em arquivos YAML no diretório `languages/`
+- A configuração usa um sistema de preferências hierárquico salvo em `config/prefs.yml`
+- O sistema de atualização de gráficos é desacoplado da chegada de dados para performance ótima
 
 ## Licença
 
 Desenvolvido por CBPF-LIM (Centro Brasileiro de Pesquisas Físicas - Laboratório de Luz e Matéria).
 
-## Suporte
-
-Para problemas, solicitações de recursos ou dúvidas:
-- Verifique a documentação existente
-- Revise arquivos de tradução para strings da UI
-- Teste com diferentes idiomas e configurações
-- Reporte bugs com passos detalhados de reprodução
-
 ---
 
-**LIM Serial** - Comunicação serial moderna simplificada com acessibilidade internacional.
+**LIM Serial** - Comunicação serial e visualização de dados profissionais simplificadas.

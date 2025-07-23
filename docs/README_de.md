@@ -1,202 +1,148 @@
-# LIM Serial - GUI für Serielle Kommunikation und Datenvisualisierung
+# LIM Serial - Serielle Kommunikation & Datenvisualisierung
 
-**README in:** [English](/README.md) | [Português](README_pt-br.md) | [Español](README_es.md) | [Deutsch](README_de.md) | [Français](README_fr.md)
+**README in:** [English](../README.md) | [Português](README_pt-br.md) | [Español](README_es.md) | [Deutsch](README_de.md) | [Français](README_fr.md)
 
 ---
 
-## Überblick
+## Übersicht
 
-LIM Serial ist eine moderne, internationalisierte GUI-Anwendung für serielle Kommunikation und Echtzeit-Datenvisualisierung. Mit Python/Tkinter und matplotlib gebaut, bietet sie eine benutzerfreundliche Oberfläche für die Verbindung zu seriellen Geräten, das Sammeln von Daten und die Erstellung dynamischer Grafiken.
+LIM Serial ist eine benutzerfreundliche Anwendung für serielle Kommunikation und Echtzeit-Datenvisualisierung. Verbinden Sie Arduino oder andere serielle Geräte, sammeln Sie Daten und erstellen Sie dynamische Diagramme mit professionellen Visualisierungsfeatures. Verfügbar in 5 Sprachen mit automatischem Speichern der Einstellungen.
 
 ![LIM Serial Screenshot](shot.png)
 
-## Eigenschaften
+![LIM Serial Screenshot](shot_stacked.png)
 
-### 🌍 **Internationalisierung**
-- **5 Sprachen**: Englisch, Portugiesisch (Brasilien), Spanisch, Deutsch, Französisch
-- **Echtzeit-Sprachwechsel**: Sprache wechseln ohne Neustart
-- **Persistente Einstellungen**: Sprachauswahl automatisch gespeichert
-- **YAML-basierte Übersetzungen**: Einfach erweiterbar mit neuen Sprachen
+## Features
 
-### 📡 **Serielle Kommunikation**
-- **Hardware-Modus**: Verbindung zu echten seriellen Ports
-- **Simulierter Modus**: Integrierter virtueller Port mit Datengenerierung
-- **Automatische Erkennung**: Automatische Port-Erkennung und -Aktualisierung
-- **Flexible Baudrate**: Unterstützung für alle Standard-Baudraten
-- **Echtzeit-Status**: Verbindungsinformationen mit visueller Rückmeldung
+### 🌍 **Mehrere Sprachen**
+- Verfügbar in Englisch, Portugiesisch, Spanisch, Deutsch und Französisch
+- Sprachwechsel über das Menü (Neustart erforderlich)
+- Alle Einstellungen bleiben beim Sprachwechsel erhalten
 
-### 📊 **Datenvisualisierung**
-- **Mehrere Diagrammtypen**: Linien- und Streudiagramme
-- **Multi-Serien-Plotting**: Bis zu 5 Y-Serien (Y1-Y5) gleichzeitig plotten
-- **Individuelle Serienkonfiguration**: Benutzerdefinierte Farben, Markierungen und Typen pro Serie
-- **Echtzeit-Updates**: Live-Datenplotting mit konfigurierbarer Aktualisierung
-- **Legende-Unterstützung**: Automatische Legende für Multi-Serien-Diagramme
-- **Anpassbares Erscheinungsbild**: Über 20 Farben, über 10 Markierungstypen
-- **Achsenkontrolle**: Manuelle Y-Achsen-Grenzen und Fensterung
-- **PNG-Export**: Speichern Sie Grafiken als hochqualitative Bilder
-- **Pausieren/Fortsetzen**: Kontrolle des Datenflusses ohne Trennung
+### 📡 **Einfache Serielle Verbindung**
+- Verbindung zu echten seriellen Geräten (Arduino, Sensoren, etc.)
+- Integrierter Simulationsmodus zum Testen ohne Hardware
+- Automatische Port-Erkennung mit Ein-Klick-Aktualisierung
+- Vollständige Kompatibilität mit Arduino IDE Baudraten (300-2000000 bps)
 
-### 💾 **Datenmanagement**
-- **Speichern/Laden**: Export und Import von Daten im Textformat
-- **Automatisches Speichern**: Automatische Datensicherung mit Benutzerbestätigung
-- **Löschfunktion**: Daten zurücksetzen mit Sicherheitsabfragen
-- **Persistente Einstellungen**: Alle Einstellungen zwischen Sitzungen gespeichert
+### 📊 **Professionelle Datenvisualisierung**
+- **Zeitreihen-Diagramme**: Darstellung von bis zu 5 Datenspalten gleichzeitig
+- **Gestapelte Flächendiagramme**: Vergleich von Daten als absolute Werte oder Prozentsätze
+- **Anpassbares Aussehen**: Wählen Sie Farben, Marker und Linientypen für jede Datenreihe
+- **Echtzeit-Updates**: Konfigurierbare Aktualisierungsraten (1-30 FPS)
+- **Export**: Speichern Sie Diagramme als hochwertige PNG-Bilder
+- **Interaktive Bedienelemente**: Pausieren/Fortsetzen der Datensammlung, Zoomen und Schwenken
 
-### 🎨 **Benutzeroberfläche**
-- **Tab-Oberfläche**: Organisierte Konfiguration-, Daten- und Grafik-Tabs
-- **Responsive Design**: Adaptives Layout mit angemessener Widget-Größe
-- **Visueller Feedback**: Status-Indikatoren und Fortschrittsinformationen
-- **Barrierefreiheit**: Klare Beschriftung und intuitive Navigation
+### 💾 **Intelligente Datenverwaltung**
+- **Manuelles Speichern/Laden**: Exportieren und importieren Sie Ihre Daten jederzeit
+- **Automatische Sicherung**: Optionale automatische Speicherung mit zeitgestempelten Dateinamen
+- **Datensicherheit**: Daten löschen mit Bestätigungsaufforderungen
+- **Alle Einstellungen gespeichert**: Präferenzen werden automatisch zwischen Sitzungen gespeichert
 
-## Installation
+## Erste Schritte
 
-### Anforderungen
-- Python 3.7+
-- tkinter (normalerweise in Python enthalten)
-- matplotlib
-- pyserial
-- PyYAML
+### Voraussetzungen
+- Python 3.7 oder neuer
+- Internetverbindung für die Installation von Abhängigkeiten
 
-### Abhängigkeiten installieren
+### Installation
 ```bash
+# Erforderliche Pakete installieren
 pip install matplotlib pyserial PyYAML
-```
 
-### Schnellstart
-```bash
-# Projekt klonen oder herunterladen
-cd lim_serial
-
-# Anwendung ausführen
+# LIM Serial herunterladen und ausführen
+cd lim_term
 python lim_serial.py
 ```
 
-## Nutzungsanleitung
+### Erste Schritte
+1. **Sprache**: Wählen Sie Ihre Sprache aus dem Sprachmenü
+2. **Verbindung**: Gehen Sie zum Konfigurationsreiter, wählen Sie Ihren seriellen Port und die Baudrate
+3. **Daten**: Wechseln Sie zum Datenreiter, um eingehende Daten zu sehen
+4. **Visualisierung**: Verwenden Sie den Diagrammreiter, um Diagramme aus Ihren Daten zu erstellen
 
-### 1. Konfiguration-Tab
-- **Modusauswahl**: Wählen zwischen Hardware- oder Simuliertem Modus
-- **Port-Auswahl**: Auswahl aus verfügbaren seriellen Ports (auto-aktualisiert)
-- **Baudrate**: Kommunikationsgeschwindigkeit einstellen
-- **Verbinden/Trennen**: Serielle Verbindung herstellen oder schließen
+## Verwendung
 
-### 2. Daten-Tab
-- **Echtzeit-Anzeige**: Empfangene Daten in tabellarischer Form anzeigen
-- **Daten speichern**: Aktuellen Datensatz in Textdatei exportieren
-- **Daten laden**: Zuvor gespeicherte Daten importieren
-- **Daten löschen**: Aktuellen Datensatz zurücksetzen
-- **Automatisches Speichern**: Automatische Sicherung mit Benutzerbestätigung
+### Konfigurationsreiter
+- **Modus**: Wählen Sie "Hardware" für echte Geräte, "Simuliert" zum Testen
+- **Port**: Wählen Sie Ihren seriellen Port (klicken Sie auf Aktualisieren, um die Liste zu aktualisieren)
+- **Baudrate**: Stellen Sie die Kommunikationsgeschwindigkeit ein (entsprechend Ihren Geräteeinstellungen)
+- **Verbinden**: Klicken Sie, um den Datenempfang zu starten
 
-### 3. Grafik-Tab
-- **Spaltenauswahl**: X-Spalte und bis zu 5 Y-Spalten (Y1-Y5) für Darstellung wählen
-- **Multi-Serien-Unterstützung**: Mehrere Datenserien gleichzeitig mit Legende darstellen
-- **Individuelle Konfiguration**: Diagrammtyp, Farbe und Markierung für jede Y-Serie festlegen
-- **Diagrammtypen**: Linien- oder Streudiagramm pro Serie auswählen
-- **Anpassung**: Farben, Markierungen, Achsengrenzen, Fenstergröße (Standard: 50 Punkte)
-- **Exportieren**: Grafiken als PNG-Bilder speichern
-- **Pausieren/Fortsetzen**: Echtzeit-Updates kontrollieren
+### Datenreiter
+- **Daten anzeigen**: Sehen Sie eingehende Daten in Echtzeit-Tabellenformat
+- **Daten speichern**: Exportieren Sie aktuelle Daten in eine Textdatei
+- **Daten laden**: Importieren Sie zuvor gespeicherte Datendateien
+- **Daten löschen**: Setzen Sie den aktuellen Datensatz zurück (mit Bestätigung)
+- **Automatisch speichern**: Schalten Sie die automatische Sicherung mit zeitgestempelten Dateinamen ein/aus
 
-### 4. Sprachen-Menü
-- **Sprachauswahl**: Verfügbar in der Hauptmenüleiste
-- **Echtzeit-Wechsel**: Änderungen sofort angewendet
-- **Persistent**: Spracheinstellung automatisch gespeichert
+### Diagrammreiter
+- **Spalten auswählen**: Wählen Sie X-Achse und bis zu 5 Y-Achsen-Spalten aus Ihren Daten
+- **Diagrammtypen**:
+  - **Zeitreihen**: Individuelle Linien-/Streudiagramme für jede Datenreihe
+  - **Gestapelte Fläche**: Geschichtete Diagramme mit kumulativen Daten oder Prozentsätzen
+- **Anpassen**: Erweitern Sie "Erweiterte Optionen anzeigen", um Farben, Marker, Aktualisierungsrate zu ändern
+- **Export**: Speichern Sie Ihre Diagramme als PNG-Bilder
+- **Steuerung**: Pausieren/Fortsetzen von Echtzeit-Updates jederzeit
+
+### Sprachmenü
+- **Sprache wechseln**: Wählen Sie aus 5 verfügbaren Sprachen
+- **Neustart erforderlich**: Die Anwendung fordert Sie auf, für den Sprachwechsel neu zu starten
+- **Einstellungen erhalten**: Alle Ihre Präferenzen bleiben beim Sprachwechsel erhalten
 
 ## Datenformat
 
-Serielle Daten sollten in durch Leerzeichen getrennten Spalten gesendet werden:
+Ihr serielles Gerät sollte Daten im einfachen Textformat senden:
 
 ```
-# Kopfzeile (optional)
+# Optionale Kopfzeile
 timestamp voltage current temperature
 
-# Datenzeilen
+# Datenzeilen (durch Leerzeichen oder Tab getrennt)
 1.0 3.3 0.125 25.4
 2.0 3.2 0.130 25.6
 3.0 3.4 0.122 25.2
 ```
 
-**Eigenschaften:**
-- Durch Leerzeichen oder Tab getrennte Werte
-- Automatische Spaltenerkennung
-- Numerische Datenanalyse
-- Kopfzeilensupport (beim Plotten ignoriert)
+**Unterstützte Formate:**
+- Durch Leerzeichen oder Tab getrennte Spalten
+- Zahlen in beliebiger Spalte
+- Optionale Kopfzeile (wird automatisch erkannt)
+- Echtzeit-Streaming oder Batch-Datenladen
 
-## Projektarchitektur
+## Problembehandlung
 
-### Konfigurationsverwaltung
-- **Benutzereinstellungen**: Gespeichert in `config/prefs.yml`
-- **Tab-spezifische Einstellungen**: Organisiert nach Oberflächenbereich
-- **Sprach-Persistenz**: Automatisches Sprachauswahl-Gedächtnis
-- **Sichere Standardwerte**: Fallback-Werte für alle Einstellungen
+**Verbindungsprobleme:**
+- Stellen Sie sicher, dass Ihr Gerät angeschlossen und eingeschaltet ist
+- Überprüfen Sie, dass kein anderes Programm den seriellen Port verwendet
+- Versuchen Sie verschiedene Baudraten, wenn Daten verstümmelt erscheinen
+- Verwenden Sie den Simulationsmodus, um die Oberfläche ohne Hardware zu testen
 
-### Übersetzungssystem
-- **YAML-basiert**: Menschenlesbare Übersetzungsdateien in `languages/`
-- **Hierarchische Schlüssel**: Organisiert nach UI-Komponente und Kontext
-- **Fallback-Unterstützung**: Fehlende Übersetzungen fallen zurück auf Englisch
-- **Echtzeit-Updates**: Oberfläche aktualisiert sich sofort bei Sprachwechsel
+**Datenprobleme:**
+- Stellen Sie sicher, dass Daten durch Leerzeichen oder Tab getrennt sind
+- Überprüfen Sie, dass Zahlen im Standardformat vorliegen (verwenden Sie . für Dezimalstellen)
+- Überprüfen Sie, dass Ihr Gerät kontinuierlich Daten sendet
+- Versuchen Sie, Daten zu speichern und wieder zu laden, um das Format zu überprüfen
+
+**Leistung:**
+- Senken Sie die Aktualisierungsrate, wenn Diagramme langsam sind
+- Reduzieren Sie die Datenfenstergröße für bessere Leistung
+- Schließen Sie andere Programme, wenn das System nicht mehr reagiert
 
 ## Entwicklung
 
-### Neue Sprachen hinzufügen
-1. Neue YAML-Datei im `languages/`-Verzeichnis erstellen
-2. Struktur der vorhandenen Sprachdateien befolgen
-3. Alle Oberflächenstrings testen
-4. Pull Request einreichen
+Diese Anwendung wurde mit Python entwickelt und verwendet tkinter für die Benutzeroberfläche und matplotlib für Diagramme.
 
-### Funktionalität erweitern
-- **Serielle Protokolle**: `SerialManager` für benutzerdefinierte Protokolle erweitern
-- **Diagrammtypen**: Neue Plot-Typen in `GraphManager` hinzufügen
-- **Datenformate**: Benutzerdefinierte Parser in `utils/` implementieren
-- **UI-Komponenten**: Neue Tabs nach vorhandenen Mustern erstellen
-
-## Konfigurationsdateien
-
-### Benutzereinstellungen (`config/prefs.yml`)
-```yaml
-language: de
-tabs:
-  config:
-    mode: Hardware
-    port: "/dev/ttyUSB0"
-    baudrate: "9600"
-  graph:
-    type: Line
-    color: Blue
-    marker: circle
-    window_size: "100"
-    x_column: "1"
-    y_column: "2"
-```
-
-### Sprachdateien (`languages/*.yml`)
-Strukturierte Übersetzungsdateien mit hierarchischer Organisation nach UI-Komponente.
-
-## Beitragen
-
-1. Repository forken
-2. Feature-Branch erstellen
-3. Änderungen vornehmen
-4. Gründlich testen (besonders Internationalisierung)
-5. Pull Request einreichen
-
-### Bereiche für Beiträge
-- Neue Sprachübersetzungen
-- Zusätzliche Diagrammtypen
-- Erweiterte serielle Protokolle
-- UI/UX-Verbesserungen
-- Dokumentationsverbesserungen
+**Für Entwickler:**
+- Die Codebasis verwendet eine modulare Architektur mit separaten Komponenten für GUI, Datenverwaltung und Visualisierung
+- Übersetzungen werden in YAML-Dateien im `languages/` Verzeichnis gespeichert
+- Die Konfiguration verwendet ein hierarchisches Präferenzsystem, das in `config/prefs.yml` gespeichert wird
+- Das Diagramm-Aktualisierungssystem ist für optimale Leistung von der Datenankunft entkoppelt
 
 ## Lizenz
 
-Entwickelt von CBPF-LIM (Brasilianisches Zentrum für Physikalische Forschung - Labor für Licht und Materie).
-
-## Support
-
-Für Probleme, Feature-Anfragen oder Fragen:
-- Vorhandene Dokumentation prüfen
-- Übersetzungsdateien für UI-Strings überprüfen
-- Mit verschiedenen Sprachen und Konfigurationen testen
-- Bugs mit detaillierten Reproduktionsschritten melden
+Entwickelt von CBPF-LIM (Brasilianisches Zentrum für Physikforschung - Labor für Licht und Materie).
 
 ---
 
-**LIM Serial** - Moderne serielle Kommunikation einfach gemacht mit internationaler Zugänglichkeit.
+**LIM Serial** - Professionelle serielle Kommunikation und Datenvisualisierung leicht gemacht.
