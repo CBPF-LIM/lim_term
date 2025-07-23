@@ -132,3 +132,63 @@ class GraphManager:
             ylabel=ylabel or "Value"
         )
         self.update()
+    
+    def plot_stacked_series(self, x_data, y_series_data, colors, normalize_100=False, title=None, xlabel=None, ylabel=None):
+        """Plota séries Y empilhadas (stacked)"""
+        import numpy as np
+        
+        self.clear()
+        
+        if not y_series_data or not x_data:
+            return
+        
+        # Convert data to numpy arrays for easier manipulation
+        x_array = np.array(x_data)
+        y_arrays = []
+        labels = []
+        actual_colors = []
+        
+        # Prepare data arrays
+        for i, y_data in enumerate(y_series_data):
+            if y_data:  # Only include non-empty series
+                y_arrays.append(np.array(y_data))
+                labels.append(f"Y{i+1}")
+                actual_colors.append(colors[i] if i < len(colors) else "#1f77b4")
+        
+        if not y_arrays:
+            return
+        
+        # Ensure all arrays have the same length
+        min_length = min(len(x_array), min(len(y) for y in y_arrays))
+        x_array = x_array[:min_length]
+        y_arrays = [y[:min_length] for y in y_arrays]
+        
+        # Stack the Y data
+        y_stack = np.vstack(y_arrays)
+        
+        # Apply 100% normalization if requested
+        if normalize_100:
+            # Calculate sum for each x point
+            totals = np.sum(y_stack, axis=0)
+            # Avoid division by zero
+            totals[totals == 0] = 1
+            # Normalize to percentages
+            y_stack = (y_stack / totals) * 100
+            ylabel_text = ylabel or "Percentage (%)"
+        else:
+            ylabel_text = ylabel or "Value"
+        
+        # Create stacked area plot
+        self.ax.stackplot(x_array, *y_stack, labels=labels, colors=actual_colors, alpha=0.8)
+        
+        # Add legend
+        self.ax.legend(loc='upper left')
+        
+        # Set labels
+        self.set_labels(
+            title=title or "Stacked Chart",
+            xlabel=xlabel or "X",
+            ylabel=ylabel_text
+        )
+        
+        self.update()
