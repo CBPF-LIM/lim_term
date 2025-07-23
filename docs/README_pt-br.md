@@ -1,6 +1,6 @@
 # LIM Serial - GUI de Comunicação Serial e Visualização de Dados
 
-**README em:** [English](README.md) | [Português](README_pt-br.md) | [Español](README_es.md) | [Deutsch](README_de.md) | [Français](README_fr.md)
+**README em:** [English](/README.md) | [Português](README_pt-br.md) | [Español](README_es.md) | [Deutsch](README_de.md) | [Français](README_fr.md)
 
 ---
 
