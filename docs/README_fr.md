@@ -26,7 +26,7 @@ LIM Serial est une application GUI moderne et internationalisée pour la communi
 - **État en Temps Réel** : Informations de connexion avec retour visuel
 
 ### 📊 **Visualisation de Données**
-- **Multiples Types de Graphiques** : Ligne, Barres, Dispersion
+- **Multiples Types de Graphiques** : Ligne et Dispersion
 - **Traçage Multi-Séries** : Tracer jusqu'à 5 séries Y (Y1-Y5) simultanément
 - **Configuration Individuelle des Séries** : Couleurs, marqueurs et types personnalisés par série
 - **Mises à Jour en Temps Réel** : Traçage de données en direct avec actualisation configurable
@@ -90,7 +90,7 @@ python lim_serial.py
 - **Sélection de Colonnes** : Choisissez colonne X et jusqu'à 5 colonnes Y (Y1-Y5) pour le traçage
 - **Support Multi-Séries** : Tracez plusieurs séries de données simultanément avec légende
 - **Configuration Individuelle** : Définissez type de graphique, couleur et marqueur pour chaque série Y
-- **Types de Graphiques** : Sélectionnez graphique Ligne, Barres ou Dispersion par série
+- **Types de Graphiques** : Sélectionnez graphique Ligne ou Dispersion par série
 - **Personnalisation** : Couleurs, marqueurs, limites d'axe, taille de fenêtre (défaut : 50 points)
 - **Exporter** : Sauvegardez les graphiques comme images PNG
 - **Pause/Reprendre** : Contrôlez les mises à jour en temps réel

@@ -26,7 +26,7 @@ LIM Serial ist eine moderne, internationalisierte GUI-Anwendung für serielle Ko
 - **Echtzeit-Status**: Verbindungsinformationen mit visueller Rückmeldung
 
 ### 📊 **Datenvisualisierung**
-- **Mehrere Diagrammtypen**: Linien-, Balken-, Streudiagramme
+- **Mehrere Diagrammtypen**: Linien- und Streudiagramme
 - **Multi-Serien-Plotting**: Bis zu 5 Y-Serien (Y1-Y5) gleichzeitig plotten
 - **Individuelle Serienkonfiguration**: Benutzerdefinierte Farben, Markierungen und Typen pro Serie
 - **Echtzeit-Updates**: Live-Datenplotting mit konfigurierbarer Aktualisierung
@@ -90,7 +90,7 @@ python lim_serial.py
 - **Spaltenauswahl**: X-Spalte und bis zu 5 Y-Spalten (Y1-Y5) für Darstellung wählen
 - **Multi-Serien-Unterstützung**: Mehrere Datenserien gleichzeitig mit Legende darstellen
 - **Individuelle Konfiguration**: Diagrammtyp, Farbe und Markierung für jede Y-Serie festlegen
-- **Diagrammtypen**: Linien-, Balken- oder Streudiagramm pro Serie auswählen
+- **Diagrammtypen**: Linien- oder Streudiagramm pro Serie auswählen
 - **Anpassung**: Farben, Markierungen, Achsengrenzen, Fenstergröße (Standard: 50 Punkte)
 - **Exportieren**: Grafiken als PNG-Bilder speichern
 - **Pausieren/Fortsetzen**: Echtzeit-Updates kontrollieren

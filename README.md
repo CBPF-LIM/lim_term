@@ -26,7 +26,7 @@ LIM Serial is a modern, internationalized GUI application for serial communicati
 - **Real-time Status**: Connection information with visual feedback
 
 ### 📊 **Data Visualization**
-- **Multiple Graph Types**: Line, Bar, Scatter plots
+- **Multiple Graph Types**: Line and Scatter plots
 - **Multi-Series Plotting**: Plot up to 5 Y series (Y1-Y5) simultaneously
 - **Individual Series Configuration**: Custom colors, markers, and types per series
 - **Real-time Updates**: Live data plotting with configurable refresh
@@ -90,7 +90,7 @@ python lim_serial.py
 - **Column Selection**: Choose X column and up to 5 Y columns (Y1-Y5) for plotting
 - **Multi-Series Support**: Plot multiple data series simultaneously with legend
 - **Individual Configuration**: Set graph type, color, and marker for each Y series
-- **Graph Types**: Select Line, Bar, or Scatter plot per series
+- **Graph Types**: Select Line or Scatter plot per series
 - **Customization**: Colors, markers, axis limits, window size (default: 50 points)
 - **Export**: Save graphs as PNG images
 - **Pause/Resume**: Control real-time updates

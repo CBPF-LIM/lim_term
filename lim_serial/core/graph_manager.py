@@ -26,9 +26,7 @@ class GraphManager:
         """Plota gráfico de linha"""
         self.ax.plot(x_data, y_data, color=color, marker=marker)
     
-    def plot_bar(self, x_data, y_data, color="blue"):
-        """Plota gráfico de barras"""
-        self.ax.bar(x_data, y_data, color=color)
+
     
     def plot_scatter(self, x_data, y_data, color="blue", marker="o"):
         """Plota gráfico de dispersão"""
@@ -68,8 +66,6 @@ class GraphManager:
         
         if graph_type == "Linha":
             self.plot_line(x_data, y_data, color=color, marker=marker)
-        elif graph_type == "Barras":
-            self.plot_bar(x_data, y_data, color=color)
         elif graph_type == "Dispersão":
             self.plot_scatter(x_data, y_data, color=color, marker=marker)
         
@@ -114,8 +110,6 @@ class GraphManager:
             # Plot based on type
             if graph_type in ["Linha", "Line", "line"]:
                 self.ax.plot(x_data, y_data, color=color, marker=marker, label=series_label)
-            elif graph_type in ["Barras", "Bars", "bars"]:
-                self.ax.bar(x_data, y_data, color=color, alpha=0.7, label=series_label)
             elif graph_type in ["Dispersão", "Scatter", "scatter"]:
                 self.ax.scatter(x_data, y_data, color=color, marker=marker, label=series_label)
             

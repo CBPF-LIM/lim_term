@@ -204,13 +204,6 @@ class GraphTab:
                         linestyle=line.get_linestyle(), linewidth=line.get_linewidth(),
                         markersize=line.get_markersize())
         
-        # Copia as barras se existirem
-        for patch in ax_original.patches:
-            if hasattr(patch, 'get_height'):  # É uma barra
-                ax_copy.bar(patch.get_x() + patch.get_width()/2, patch.get_height(),
-                           width=patch.get_width(), color=patch.get_facecolor(),
-                           alpha=patch.get_alpha())
-        
         # Copia as configurações dos eixos
         ax_copy.set_xlim(ax_original.get_xlim())
         ax_copy.set_ylim(ax_original.get_ylim())
@@ -359,7 +352,7 @@ class GraphTab:
     
     def _get_translated_graph_types(self):
         """Retorna lista de tipos de gráfico traduzidos"""
-        return [t("ui.graph_types.line"), t("ui.graph_types.bars"), t("ui.graph_types.scatter")]
+        return [t("ui.graph_types.line"), t("ui.graph_types.scatter")]
     
     def _get_translated_colors(self):
         """Retorna lista de cores traduzidas"""
@@ -394,7 +387,6 @@ class GraphTab:
         """Retorna o valor original do tipo de gráfico a partir da tradução"""
         type_mapping = {
             t("ui.graph_types.line"): "line",
-            t("ui.graph_types.bars"): "bars",
             t("ui.graph_types.scatter"): "scatter"
         }
         return type_mapping.get(translated_type, "line")
@@ -485,7 +477,6 @@ class GraphTab:
                 graph_type = self.config_manager.load_tab_setting('graph', f'{series_id}_type', 'Line')
                 type_translation_map = {
                     'Line': t("ui.graph_types.line"),
-                    'Bars': t("ui.graph_types.bars"),
                     'Scatter': t("ui.graph_types.scatter")
                 }
                 if graph_type in type_translation_map:
@@ -555,7 +546,6 @@ class GraphTab:
                 current_type = widgets['type'].get()
                 type_reverse_map = {
                     t("ui.graph_types.line"): 'Line',
-                    t("ui.graph_types.bars"): 'Bars',
                     t("ui.graph_types.scatter"): 'Scatter'
                 }
                 type_value = type_reverse_map.get(current_type, 'Line')

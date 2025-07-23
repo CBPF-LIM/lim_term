@@ -70,7 +70,6 @@ ui:
   
   graph_types:
     line: "Line"
-    bars: "Bars"
     scatter: "Scatter"
   
   colors:
