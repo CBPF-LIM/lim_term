@@ -5,7 +5,7 @@ Internationalization (i18n) system for LIM Serial
 from .language_manager import LanguageManager
 from .config_manager import ConfigManager
 
-# Global instances
+
 _language_manager = None
 _config_manager = None
 
@@ -40,7 +40,7 @@ def get_current_language():
     """Get the current language code"""
     return get_language_manager().get_current_language()
 
-# Initialize with saved language
+
 def initialize():
     """Initialize the i18n system"""
     config_manager = get_config_manager()

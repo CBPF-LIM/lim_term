@@ -25,13 +25,13 @@ class MockSerial:
                 self.master_fd, slave_fd = pty.openpty()
                 self.slave_port = os.ttyname(slave_fd)
 
-                # Define permissões
+
                 os.chmod(self.slave_port, 0o666)
 
                 return self.slave_port
             else:
-                # Para Windows, seria necessário implementar COM port virtual
-                # Por enquanto, retorna uma porta simulada
+
+
                 self.slave_port = "COM_VIRTUAL"
                 return self.slave_port
 
@@ -63,7 +63,7 @@ class MockSerial:
         index = 0
         while self.is_running and self.master_fd:
             try:
-                # Gera dados artificiais
+
                 col1 = int(index)
                 col2 = col1 * 0.01 + 2
                 col3 = math.sin(10 * col2) + 2
@@ -76,7 +76,7 @@ class MockSerial:
                 os.write(self.master_fd, (data + "\n").encode("utf-8"))
 
                 index += 1
-                time.sleep(0.5)  # Dados a cada 500ms
+                time.sleep(0.5)
 
             except Exception as e:
                 print(f"Erro na geração de dados: {e}")

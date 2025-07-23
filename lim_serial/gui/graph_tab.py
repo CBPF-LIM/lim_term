@@ -20,19 +20,19 @@ class GraphTab:
         self.is_paused = False
         self.config_manager = get_config_manager()
 
-        # Chart refresh system - game-loop style rendering
-        self.refresh_rate_ms = 33  # 30 FPS default
+
+        self.refresh_rate_ms = 33
         self.refresh_timer_id = None
-        self.refresh_counter = 0  # Debug counter
-        self.debug_refresh = False  # Set to True to enable refresh debug output
-        self.last_render_time = 0  # For game-loop style rendering
+        self.refresh_counter = 0
+        self.debug_refresh = False
+        self.last_render_time = 0
 
         self._create_widgets()
         self._load_preferences()
 
     def _create_widgets(self):
         """Cria os widgets da tab"""
-        # Primeira linha: Coluna X e botões
+
         top_row = ttk.Frame(self.frame)
         top_row.grid(column=0, row=0, sticky="w", padx=10, pady=10)
 
@@ -56,13 +56,13 @@ class GraphTab:
         self.save_button = ttk.Button(top_row, text=t("ui.graph_tab.save_png"), command=self._save_chart)
         self.save_button.pack(side="left", padx=(0,10))
 
-        # Segunda linha: Colunas Y (Y1-Y5 only)
+
         self.y_columns_frame = ttk.LabelFrame(self.frame, text=t("ui.graph_tab.y_columns"))
         self.y_columns_frame.grid(column=0, row=1, columnspan=4, padx=10, pady=5, sticky="ew")
 
-        # Y1-Y5 columns only
+
         self.y_entries = []
-        for i in range(1, 6):  # Y1 to Y5
+        for i in range(1, 6):
             y_frame = ttk.Frame(self.y_columns_frame)
             y_frame.grid(column=i-1, row=0, padx=5, pady=5, sticky="w")
 
@@ -74,15 +74,15 @@ class GraphTab:
             y_entry.bind("<FocusOut>", self._on_preference_changed)
             self.y_entries.append(y_entry)
 
-        # Frame para opções (inicialmente oculto)
+
         self.options_frame = ttk.LabelFrame(self.frame, text=t("ui.graph_tab.options_frame"))
         self._create_options_widgets()
 
-        # Área do gráfico
+
         self.graph_manager = GraphManager(self.frame)
         self.graph_manager.get_widget().grid(column=0, row=4, columnspan=4, padx=10, pady=10, sticky="nsew")
 
-        # Configura expansão
+
         self.frame.rowconfigure(4, weight=1)
         self.frame.columnconfigure(0, weight=1)
         self.frame.columnconfigure(1, weight=1)
@@ -91,11 +91,11 @@ class GraphTab:
 
     def _create_options_widgets(self):
         """Cria os widgets de opções com configuração por série Y"""
-        # Global settings row
+
         global_frame = ttk.LabelFrame(self.options_frame, text=t("ui.graph_tab.global_settings"))
         global_frame.grid(column=0, row=0, columnspan=6, padx=5, pady=5, sticky="ew")
 
-        # Visualization group selection
+
         self.group_label = ttk.Label(global_frame, text=t("ui.graph_tab.visualization_group_label"))
         self.group_label.grid(column=0, row=0, padx=5, pady=5, sticky="w")
         self.group_combobox = ttk.Combobox(global_frame, state="readonly", values=["Time Series", "Stacked"], width=15)
@@ -103,7 +103,7 @@ class GraphTab:
         self.group_combobox.set("Time Series")
         self.group_combobox.bind("<<ComboboxSelected>>", self._on_group_change)
 
-        # Window size
+
         self.window_label = ttk.Label(global_frame, text=t("ui.graph_tab.window_label"))
         self.window_label.grid(column=2, row=0, padx=5, pady=5, sticky="w")
         self.data_window_entry = ttk.Entry(global_frame, width=12)
@@ -112,7 +112,7 @@ class GraphTab:
         self.data_window_entry.bind("<KeyRelease>", self._on_setting_change)
         self.data_window_entry.bind("<FocusOut>", self._on_preference_changed)
 
-        # Refresh Rate (FPS) with debug info
+
         self.fps_label = ttk.Label(global_frame, text=t("ui.graph_tab.refresh_rate_label"))
         self.fps_label.grid(column=4, row=0, padx=5, pady=5, sticky="w")
 
@@ -121,14 +121,14 @@ class GraphTab:
 
         self.fps_combobox = ttk.Combobox(fps_frame, state="readonly", values=["1", "5", "10", "15", "20", "30"], width=5)
         self.fps_combobox.pack(side="left")
-        self.fps_combobox.set("30")  # Default 30 FPS
+        self.fps_combobox.set("30")
         self.fps_combobox.bind("<<ComboboxSelected>>", self._on_fps_change)
 
-        # Debug label to show actual refresh info
+
         self.fps_debug_label = ttk.Label(fps_frame, text="(33ms)", font=("TkDefaultFont", 8))
         self.fps_debug_label.pack(side="left", padx=(5,0))
 
-        # Min and Max Y (global for all series) - second row
+
         self.min_y_label = ttk.Label(global_frame, text=t("ui.graph_tab.min_y_label"))
         self.min_y_label.grid(column=0, row=1, padx=5, pady=5, sticky="w")
         self.min_y_entry = ttk.Entry(global_frame, width=12)
@@ -143,11 +143,11 @@ class GraphTab:
         self.max_y_entry.bind("<KeyRelease>", self._on_setting_change)
         self.max_y_entry.bind("<FocusOut>", self._on_preference_changed)
 
-        # Y Series Colors (Global) - third row
+
         colors_label = ttk.Label(global_frame, text=t("ui.graph_tab.color_label"))
         colors_label.grid(column=0, row=2, padx=5, pady=5, sticky="w")
 
-        # Create color selectors for Y1-Y5 in global frame
+
         self.y_color_combos = []
         default_colors = [t("ui.colors.blue"), t("ui.colors.red"), t("ui.colors.green"),
                          t("ui.colors.orange"), t("ui.colors.magenta")]
@@ -166,7 +166,7 @@ class GraphTab:
             color_combo.bind("<<ComboboxSelected>>", lambda e, idx=i: self._on_color_setting_change(idx))
             self.y_color_combos.append(color_combo)
 
-        # Series configuration frame (dynamic based on group)
+
         self.series_config_frame = ttk.LabelFrame(self.options_frame, text=t("ui.graph_tab.series_settings"))
         self.series_config_frame.grid(column=0, row=1, columnspan=6, padx=5, pady=5, sticky="ew")
 
@@ -176,22 +176,22 @@ class GraphTab:
         """Cria uma linha de configuração para uma série Y"""
         ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
 
-        # Graph type
+
         type_combo = ttk.Combobox(parent, state="readonly", values=self._get_translated_graph_types(), width=10)
         type_combo.grid(column=1, row=row, padx=5, pady=2)
         type_combo.set(t("ui.graph_types.line"))
         type_combo.bind("<<ComboboxSelected>>", lambda e, idx=index: self._on_series_setting_change(idx))
 
-        # Color
+
         color_combo = ttk.Combobox(parent, state="readonly", values=self._get_translated_colors(), width=10)
         color_combo.grid(column=2, row=row, padx=5, pady=2)
-        # Set different default colors for each series
+
         default_colors = [t("ui.colors.blue"), t("ui.colors.red"), t("ui.colors.green"),
                          t("ui.colors.orange"), t("ui.colors.magenta"), t("ui.colors.cyan")]
         color_combo.set(default_colors[index % len(default_colors)])
         color_combo.bind("<<ComboboxSelected>>", lambda e, idx=index: self._on_series_setting_change(idx))
 
-        # Marker
+
         marker_combo = ttk.Combobox(parent, state="readonly", values=self._get_translated_markers(), width=10)
         marker_combo.grid(column=3, row=row, padx=5, pady=2)
         marker_combo.set(t("ui.markers.circle"))
@@ -233,23 +233,23 @@ class GraphTab:
         import matplotlib.pyplot as plt
         import io
 
-        # Captura o estado atual do gráfico ANTES de abrir o diálogo
-        # Cria uma cópia da figura em memória
+
+
         fig_copy = plt.figure(figsize=self.graph_manager.figure.get_size_inches(),
                              dpi=self.graph_manager.figure.dpi)
 
-        # Copia o conteúdo da figura atual para a nova figura
+
         ax_original = self.graph_manager.ax
         ax_copy = fig_copy.add_subplot(111)
 
-        # Copia todos os elementos do plot
+
         for line in ax_original.get_lines():
             ax_copy.plot(line.get_xdata(), line.get_ydata(),
                         color=line.get_color(), marker=line.get_marker(),
                         linestyle=line.get_linestyle(), linewidth=line.get_linewidth(),
                         markersize=line.get_markersize())
 
-        # Copia as configurações dos eixos
+
         ax_copy.set_xlim(ax_original.get_xlim())
         ax_copy.set_ylim(ax_original.get_ylim())
         ax_copy.set_xlabel(ax_original.get_xlabel())
@@ -257,7 +257,7 @@ class GraphTab:
         ax_copy.set_title(ax_original.get_title())
         ax_copy.grid(ax_original.get_xgridlines() or ax_original.get_ygridlines())
 
-        # AGORA abre o diálogo para salvar
+
         file_path = filedialog.asksaveasfilename(
             defaultextension=".png",
             filetypes=[("PNG files", "*.png"), ("All files", "*.*")],
@@ -266,24 +266,24 @@ class GraphTab:
 
         if file_path:
             try:
-                # Salva a figura copiada (estado do momento 1)
+
                 fig_copy.savefig(file_path, dpi=300, bbox_inches='tight')
                 self.data_tab.add_message(t("ui.graph_tab.graph_saved").format(path=file_path))
             except Exception as e:
                 self.data_tab.add_message(t("ui.data_tab.error_saving").format(error=e))
             finally:
-                # Limpa a figura copiada da memória
+
                 plt.close(fig_copy)
 
     def _on_setting_change(self, event=None):
         """Callback called when any configuration changes - no longer triggers immediate plot"""
-        # Settings changed, but chart will update on next scheduled refresh cycle
+
         pass
 
     def plot_graph(self):
         """Gera o gráfico com múltiplas séries Y"""
         try:
-            # Check if widgets are still valid before accessing them
+
             if not hasattr(self, 'x_column_entry') or not self.x_column_entry.winfo_exists():
                 return
             if not hasattr(self, 'data_window_entry') or not self.data_window_entry.winfo_exists():
@@ -301,27 +301,27 @@ class GraphTab:
                 self.data_tab.add_message(t("ui.graph_tab.no_data_available"))
                 return
 
-            # Aplica janela de dados
+
             data_window = int(self.data_window_entry.get()) if self.data_window_entry.get() else 0
             if data_window > 0:
                 data_lines = data_lines[-data_window:]
 
-            # Extract X data
-            x_data, _ = DataParser.extract_columns(data_lines, x_col, 0)  # Y doesn't matter here
+
+            x_data, _ = DataParser.extract_columns(data_lines, x_col, 0)
             if not x_data:
                 self.data_tab.add_message(t("ui.graph_tab.could_not_extract_data"))
                 return
 
-            # Get visualization group
+
             group = self.group_combobox.get()
 
             if group == "Stacked":
                 self._plot_stacked_chart(x_data, data_lines, x_col)
-            else:  # Time Series (default)
+            else:
                 self._plot_time_series_chart(x_data, data_lines, x_col)
 
         except tk.TclError as e:
-            # Widget has been destroyed, silently ignore
+
             pass
         except ValueError as e:
             self.data_tab.add_message(t("ui.graph_tab.parameter_error").format(error=e))
@@ -330,12 +330,12 @@ class GraphTab:
 
     def _plot_time_series_chart(self, x_data, data_lines, x_col):
         """Plot Time Series chart (original behavior)"""
-        # Collect all Y series data and settings
+
         y_series_data = []
         settings_list = []
         has_data = False
 
-        # Process Y1-Y5 columns only
+
         for i, y_entry in enumerate(self.y_entries):
             y_col_str = y_entry.get().strip()
             if y_col_str:
@@ -356,12 +356,12 @@ class GraphTab:
             self.data_tab.add_message(t("ui.graph_tab.no_data_available"))
             return
 
-        # Generate translated labels
+
         title = t("ui.graph_tab.chart_title")
         xlabel = t("ui.graph_tab.chart_xlabel").format(column=x_col + 1)
         ylabel = t("ui.graph_tab.chart_ylabel").format(column="Multi")
 
-        # Apply global Y limits to first settings
+
         if settings_list:
             min_y = self.min_y_entry.get().strip()
             max_y = self.max_y_entry.get().strip()
@@ -372,12 +372,12 @@ class GraphTab:
 
     def _plot_stacked_chart(self, x_data, data_lines, x_col):
         """Plot Stacked chart"""
-        # Collect all Y series data
+
         y_series_data = []
         colors = []
         has_data = False
 
-        # Process Y1-Y5 columns only
+
         for i, y_entry in enumerate(self.y_entries):
             y_col_str = y_entry.get().strip()
             if y_col_str:
@@ -387,12 +387,12 @@ class GraphTab:
                         _, y_data = DataParser.extract_columns(data_lines, x_col, y_col)
                         if y_data:
                             y_series_data.append(y_data)
-                            # Get color from stacked settings
+
                             color = self._get_stacked_color(i)
                             colors.append(color)
                             has_data = True
                         else:
-                            y_series_data.append([])  # Empty data but maintain order
+                            y_series_data.append([])
                             colors.append("#cccccc")
                     else:
                         y_series_data.append([])
@@ -401,17 +401,17 @@ class GraphTab:
                     y_series_data.append([])
                     colors.append("#cccccc")
             else:
-                y_series_data.append([])  # Empty data to maintain Y order
+                y_series_data.append([])
                 colors.append("#cccccc")
 
         if not has_data:
             self.data_tab.add_message(t("ui.graph_tab.no_data_available"))
             return
 
-        # Get 100% normalization setting
+
         normalize_100 = getattr(self, 'normalize_100_var', tk.BooleanVar()).get()
 
-        # Generate labels
+
         title = t("ui.graph_tab.stacked_chart_title")
         xlabel = t("ui.graph_tab.chart_xlabel").format(column=x_col + 1)
         ylabel = t("ui.graph_tab.stacked_chart_ylabel_percent") if normalize_100 else t("ui.graph_tab.stacked_chart_ylabel")
@@ -420,29 +420,29 @@ class GraphTab:
 
     def _get_series_settings(self, series_index):
         """Get settings for a specific Y series"""
-        # Get color from global color combos
+
         color = self._get_stacked_color(series_index)
 
         if series_index < len(self.series_widgets):
             widgets = self.series_widgets[series_index]
 
-            # Check if this is Time Series (has 'type' widget) or Stacked (no specific widgets)
+
             if 'type' in widgets:
-                # Time Series configuration
+
                 return {
                     'type': self._get_original_graph_type(widgets['type'].get()),
-                    'color': color,  # Use global color
+                    'color': color,
                     'marker': self._get_original_marker(widgets['marker'].get())
                 }
             else:
-                # Stacked configuration (only color from global)
+
                 return {
-                    'type': 'line',  # Default for stacked
-                    'color': color,  # Use global color
-                    'marker': 'o'  # Default marker
+                    'type': 'line',
+                    'color': color,
+                    'marker': 'o'
                 }
 
-        # Default settings
+
         return {
             'type': 'line',
             'color': color,
@@ -452,7 +452,7 @@ class GraphTab:
     def update_graph_settings(self, settings):
         """Atualiza configurações do gráfico (compatibilidade)"""
         self.graph_settings.update(settings)
-        # Atualiza os widgets com as novas configurações
+
         if "type" in settings:
             self.graph_type_combobox.set(settings["type"])
         if "color" in settings:
@@ -471,7 +471,7 @@ class GraphTab:
                 if value == settings["dot_type"]:
                     self.dot_type_combobox.set(label)
                     break
-        # Replot automaticamente se houver dados
+
         if self.data_tab.get_data() and not self.is_paused:
             self.plot_graph()
 
@@ -546,33 +546,33 @@ class GraphTab:
 
     def _load_preferences(self):
         """Load saved preferences with new structure"""
-        # Load general settings
+
         x_col = self.config_manager.load_tab_setting('graph.general', 'x_column', DEFAULT_X_COLUMN)
         self.x_column_entry.delete(0, "end")
         self.x_column_entry.insert(0, str(x_col))
 
-        # Load visualization group
+
         vis_group = self.config_manager.load_tab_setting('graph.general', 'visualization_group', 'Time Series')
         self.group_combobox.set(vis_group)
 
-        # Load Y1-Y5 columns
+
         for i in range(1, 6):
             y_col = self.config_manager.load_tab_setting('graph.general', f'y{i}_column', '')
             entry = self.y_entries[i-1]
             entry.delete(0, "end")
             entry.insert(0, str(y_col))
 
-        # Load window size, min/max Y, refresh rate
+
         window_size = self.config_manager.load_tab_setting('graph.general', 'window_size', '50')
         self.data_window_entry.delete(0, "end")
         self.data_window_entry.insert(0, str(window_size))
 
-        # Load refresh rate
+
         refresh_rate = self.config_manager.load_tab_setting('graph.general', 'refresh_rate', '30')
         self.fps_combobox.set(str(refresh_rate))
         self._set_refresh_rate(int(refresh_rate))
 
-        # Update debug label
+
         if hasattr(self, 'fps_debug_label'):
             self.fps_debug_label.config(text=f"({self.refresh_rate_ms}ms)")
 
@@ -585,7 +585,7 @@ class GraphTab:
             self.max_y_entry.delete(0, "end")
             self.max_y_entry.insert(0, str(max_y))
 
-        # Load Y1-Y5 colors (general)
+
         default_colors = ['Blue', 'Red', 'Green', 'Orange', 'Magenta']
         for i in range(5):
             if i < len(self.y_color_combos):
@@ -605,10 +605,10 @@ class GraphTab:
                 if color in color_translation_map:
                     self.y_color_combos[i].set(color_translation_map[color])
 
-        # Create series widgets based on group
+
         self._create_series_widgets()
 
-        # Load group-specific settings
+
         self._load_group_preferences(vis_group)
 
     def _load_group_preferences(self, group):
@@ -620,13 +620,13 @@ class GraphTab:
 
     def _load_time_series_preferences(self):
         """Load Time Series group preferences"""
-        # Load series settings for Y1-Y5 (type and marker only)
+
         for i in range(5):
             if i < len(self.series_widgets) and 'type' in self.series_widgets[i]:
                 widgets = self.series_widgets[i]
                 series_id = f'y{i+1}'
 
-                # Load graph type
+
                 graph_type = self.config_manager.load_tab_setting('graph.group.ts', f'{series_id}_type', 'Line')
                 type_translation_map = {
                     'Line': t("ui.graph_types.line"),
@@ -635,7 +635,7 @@ class GraphTab:
                 if graph_type in type_translation_map:
                     widgets['type'].set(type_translation_map[graph_type])
 
-                # Load marker
+
                 marker = self.config_manager.load_tab_setting('graph.group.ts', f'{series_id}_marker', 'circle')
                 marker_translation_map = {
                     'circle': t("ui.markers.circle"), 'square': t("ui.markers.square"), 'triangle': t("ui.markers.triangle"),
@@ -648,7 +648,7 @@ class GraphTab:
 
     def _load_stacked_preferences(self):
         """Load Stacked group preferences"""
-        # Load 100% normalization setting
+
         if hasattr(self, 'normalize_100_var'):
             normalize_100 = self.config_manager.load_tab_setting('graph.group.stacked', 'normalize_100', False)
             self.normalize_100_var.set(normalize_100)
@@ -656,7 +656,7 @@ class GraphTab:
     def _save_preferences(self):
         """Save current preferences with new structure"""
         try:
-            # Save general settings - add error handling for each widget access
+
             try:
                 self.config_manager.save_tab_setting('graph.general', 'x_column', self.x_column_entry.get())
             except tk.TclError:
@@ -687,7 +687,7 @@ class GraphTab:
             except tk.TclError:
                 pass
 
-            # Save Y1-Y5 columns (general)
+
             for i in range(1, 6):
                 try:
                     entry = self.y_entries[i-1]
@@ -695,7 +695,7 @@ class GraphTab:
                 except (tk.TclError, IndexError):
                     pass
 
-            # Save Y1-Y5 colors (general)
+
             for i in range(5):
                 try:
                     if i < len(self.y_color_combos):
@@ -715,7 +715,7 @@ class GraphTab:
                 except (tk.TclError, IndexError):
                     pass
 
-            # Save group-specific settings
+
             try:
                 group = self.group_combobox.get()
                 if group == "Time Series":
@@ -725,21 +725,21 @@ class GraphTab:
             except tk.TclError:
                 pass
         except Exception as e:
-            # Silently handle any other errors during preference saving
+
             print(f"Note: Could not save preferences during UI transition: {e}")
 
     def _save_time_series_preferences(self):
         """Save Time Series group preferences"""
         try:
-            # Save series settings for Y1-Y5 (type and marker only)
+
             for i in range(5):
                 if i < len(self.series_widgets) and 'type' in self.series_widgets[i]:
                     widgets = self.series_widgets[i]
                     series_id = f'y{i+1}'
 
-                    # Check if widgets are still valid
+
                     try:
-                        # Save graph type
+
                         current_type = widgets['type'].get()
                         type_reverse_map = {
                             t("ui.graph_types.line"): 'Line',
@@ -748,7 +748,7 @@ class GraphTab:
                         type_value = type_reverse_map.get(current_type, 'Line')
                         self.config_manager.save_tab_setting('graph.group.ts', f'{series_id}_type', type_value)
 
-                        # Save marker type
+
                         current_marker = widgets['marker'].get()
                         marker_reverse_map = {
                             t("ui.markers.circle"): 'circle', t("ui.markers.square"): 'square', t("ui.markers.triangle"): 'triangle',
@@ -759,20 +759,20 @@ class GraphTab:
                         marker_value = marker_reverse_map.get(current_marker, 'circle')
                         self.config_manager.save_tab_setting('graph.group.ts', f'{series_id}_marker', marker_value)
                     except tk.TclError:
-                        # Widget has been destroyed, skip saving for this widget
+
                         continue
         except Exception as e:
-            # Silently handle any other errors during preference saving
+
             print(f"Note: Could not save preferences during UI transition: {e}")
 
     def _save_stacked_preferences(self):
         """Save Stacked group preferences"""
         try:
-            # Save 100% normalization setting
+
             if hasattr(self, 'normalize_100_var'):
                 self.config_manager.save_tab_setting('graph.group.stacked', 'normalize_100', self.normalize_100_var.get())
         except (tk.TclError, AttributeError) as e:
-            # Widget has been destroyed or attribute doesn't exist, skip saving
+
             print(f"Note: Could not save stacked preferences during UI transition: {e}")
 
     def _on_preference_changed(self, event=None):
@@ -780,14 +780,14 @@ class GraphTab:
         try:
             self._save_preferences()
         except Exception as e:
-            # Silently handle errors during UI transitions
+
             print(f"Note: Could not save preferences during UI transition: {e}")
 
     def _on_group_change(self, event=None):
         """Handle visualization group change"""
         self._create_series_widgets()
 
-        # Load preferences for the new group
+
         group = self.group_combobox.get()
         self._load_group_preferences(group)
 
@@ -796,7 +796,7 @@ class GraphTab:
 
     def _create_series_widgets(self):
         """Create series widgets based on the selected visualization group"""
-        # Clear existing widgets
+
         for widget in self.series_config_frame.winfo_children():
             widget.destroy()
 
@@ -811,12 +811,12 @@ class GraphTab:
         """Create Time Series configuration widgets (without colors - they're in Global)"""
         self.series_config_frame.config(text=t("ui.graph_tab.time_series_settings"))
 
-        # Headers
+
         ttk.Label(self.series_config_frame, text=t("ui.graph_tab.series_label")).grid(column=0, row=0, padx=5, pady=5)
         ttk.Label(self.series_config_frame, text=t("ui.graph_tab.type_label")).grid(column=1, row=0, padx=5, pady=5)
         ttk.Label(self.series_config_frame, text=t("ui.graph_tab.point_label")).grid(column=2, row=0, padx=5, pady=5)
 
-        # Y1-Y5 series configuration (without color)
+
         self.series_widgets = []
         for i in range(1, 6):
             self._create_time_series_row(self.series_config_frame, i, f"Y{i}", i-1)
@@ -825,13 +825,13 @@ class GraphTab:
         """Create a Time Series configuration row (without color)"""
         ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
 
-        # Graph type
+
         type_combo = ttk.Combobox(parent, state="readonly", values=self._get_translated_graph_types(), width=10)
         type_combo.grid(column=1, row=row, padx=5, pady=2)
         type_combo.set(t("ui.graph_types.line"))
         type_combo.bind("<<ComboboxSelected>>", lambda e, idx=index: self._on_series_setting_change(idx))
 
-        # Marker
+
         marker_combo = ttk.Combobox(parent, state="readonly", values=self._get_translated_markers(), width=10)
         marker_combo.grid(column=2, row=row, padx=5, pady=2)
         marker_combo.set(t("ui.markers.circle"))
@@ -846,7 +846,7 @@ class GraphTab:
         """Create Stacked configuration widgets (without colors - they're in Global)"""
         self.series_config_frame.config(text="Stack Settings")
 
-        # 100% normalization checkbox
+
         self.normalize_100_var = tk.BooleanVar()
         self.normalize_100_checkbox = ttk.Checkbutton(
             self.series_config_frame,
@@ -856,7 +856,7 @@ class GraphTab:
         self.normalize_100_checkbox.grid(column=0, row=0, columnspan=4, padx=5, pady=10)
         self.normalize_100_checkbox.bind("<Button-1>", lambda e: self.series_config_frame.after_idle(self._on_setting_change))
 
-        # Initialize empty series_widgets for consistency
+
         self.series_widgets = []
 
     def _get_stacked_color(self, series_index):
@@ -865,7 +865,7 @@ class GraphTab:
             translated_color = self.y_color_combos[series_index].get()
             return self._get_original_color(translated_color)
 
-        # Default colors if no widget found
+
         default_colors = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#ff00ff"]
         return default_colors[series_index % len(default_colors)]
 
@@ -885,31 +885,31 @@ class GraphTab:
     def _refresh_chart(self):
         """Refresh chart at fixed intervals - completely decoupled from data arrival"""
         try:
-            # Always attempt to plot (even if paused, to maintain timer consistency)
-            # Only skip plotting if explicitly paused, but still refresh available data
+
+
             if not self.is_paused:
                 data_lines = self.data_tab.get_data()
-                if data_lines:  # Only plot if we have any data at all
+                if data_lines:
                     if self.debug_refresh:
                         self.refresh_counter += 1
                         fps_actual = 1000 / self.refresh_rate_ms
                         print(f"Chart refresh #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Fixed Rate")
 
-                    # Plot whatever data is currently available - this is the key decoupling
+
                     self.plot_graph()
                 else:
-                    # No data available yet, but keep timer running
+
                     pass
             else:
-                # Paused - keep timer running but don't plot
+
                 pass
 
         except Exception as e:
-            # Don't crash on chart refresh errors, but log them
+
             if self.debug_refresh:
                 print(f"Chart refresh error: {e}")
         finally:
-            # ALWAYS schedule next refresh - this maintains fixed rate regardless of success/failure
+
             if hasattr(self, 'frame') and self.frame.winfo_exists():
                 self.refresh_timer_id = self.frame.after(self.refresh_rate_ms, self._refresh_chart)
 
@@ -924,7 +924,7 @@ class GraphTab:
 
     def _set_refresh_rate(self, fps):
         """Set chart refresh rate"""
-        self.refresh_rate_ms = int(1000 / fps)  # Convert FPS to milliseconds
+        self.refresh_rate_ms = int(1000 / fps)
 
     def cleanup(self):
         """Clean up resources when tab is destroyed"""
@@ -943,17 +943,17 @@ class GraphTab:
             fps = int(self.fps_combobox.get())
             self._set_refresh_rate(fps)
 
-            # Update debug label
+
             self.fps_debug_label.config(text=f"({self.refresh_rate_ms}ms)")
 
-            # Reset render timing for new rate
+
             import time
             self.last_render_time = time.time()
             self.refresh_counter = 0
 
             self._save_preferences()
         except ValueError:
-            # Invalid FPS value, keep current setting
+
             pass
 
     def should_render_now(self, current_time):
@@ -961,7 +961,7 @@ class GraphTab:
         if self.is_paused:
             return False
 
-        # Convert refresh_rate_ms to seconds for comparison
+
         refresh_interval = self.refresh_rate_ms / 1000.0
 
         return (current_time - self.last_render_time) >= refresh_interval
@@ -970,24 +970,24 @@ class GraphTab:
         """Game-loop style: Render the chart frame (completely decoupled from data events)"""
         import time
         try:
-            # Always render whatever data is currently available
+
             data_lines = self.data_tab.get_data()
-            if data_lines:  # Only render if we have any data at all
+            if data_lines:
                 self.refresh_counter += 1
 
                 if self.debug_refresh:
                     fps_actual = 1000 / self.refresh_rate_ms
                     print(f"Render frame #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Game Loop Style")
 
-                # Plot whatever data is currently available - this is true decoupling
+
                 self.plot_graph()
 
-            # Update last render time
+
             self.last_render_time = time.time()
 
         except Exception as e:
-            # Don't crash on render errors, but log them if debug is enabled
+
             if self.debug_refresh:
                 print(f"Render frame error: {e}")
-            # Still update time to prevent getting stuck
+
             self.last_render_time = time.time()

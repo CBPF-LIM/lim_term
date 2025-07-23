@@ -6,7 +6,7 @@ Ponto de entrada principal da aplicação LIM Serial
 import sys
 import os
 
-# Adiciona o diretório pai ao path para importar o módulo lim_serial
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lim_serial.gui import MainWindow

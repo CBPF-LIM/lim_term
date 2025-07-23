@@ -8,14 +8,14 @@ from ..config import SERIAL_TIMEOUT
 
 class SerialManager:
     """Gerenciador de comunicação serial"""
-    
+
     def __init__(self, data_callback=None, error_callback=None):
         self.serial_port = None
         self.data_callback = data_callback
         self.error_callback = error_callback
         self.is_connected = False
         self._stop_reading = False
-    
+
     def connect(self, port, baudrate):
         """Conecta à porta serial"""
         try:
@@ -24,23 +24,23 @@ class SerialManager:
             )
             self.is_connected = True
             self._stop_reading = False
-            
-            # Inicia thread de leitura
+
+
             threading.Thread(target=self._read_data, daemon=True).start()
             return True
-            
+
         except Exception as e:
             if self.error_callback:
                 self.error_callback(f"Erro ao conectar: {e}")
             return False
-    
+
     def disconnect(self):
         """Desconecta da porta serial"""
         self._stop_reading = True
         if self.serial_port and self.serial_port.is_open:
             self.serial_port.close()
         self.is_connected = False
-    
+
     def _read_data(self):
         """Lê dados da porta serial (executado em thread separada)"""
         while self.serial_port and self.serial_port.is_open and not self._stop_reading:
@@ -48,12 +48,12 @@ class SerialManager:
                 line = self.serial_port.readline().decode("utf-8").strip()
                 if line and self.data_callback:
                     self.data_callback(line)
-                    
+
             except Exception as e:
                 if self.error_callback:
                     self.error_callback(f"Erro ao ler dados: {e}")
                 break
-    
+
     def get_available_ports(self):
         """Retorna portas seriais disponíveis"""
         return SerialPortManager.get_available_ports()
