@@ -53,35 +53,80 @@ class ConfigManager:
         config['language'] = language_code
         self._save_config(config)
     
+    def _get_nested_value(self, data: dict, path: str, default=None):
+        """Get value from nested dictionary using dot notation path"""
+        keys = path.split('.')
+        current = data
+        for key in keys:
+            if isinstance(current, dict) and key in current:
+                current = current[key]
+            else:
+                return default
+        return current
+    
+    def _set_nested_value(self, data: dict, path: str, value: Any):
+        """Set value in nested dictionary using dot notation path"""
+        keys = path.split('.')
+        current = data
+        for key in keys[:-1]:
+            if key not in current:
+                current[key] = {}
+            elif not isinstance(current[key], dict):
+                current[key] = {}
+            current = current[key]
+        current[keys[-1]] = value
+
     def load_tab_setting(self, tab_name: str, key: str, default=None) -> Any:
-        """Load a specific tab setting"""
+        """Load a specific tab setting supporting nested keys with dot notation"""
         config = self._load_config()
         tabs = config.get('tabs', {})
-        tab_config = tabs.get(tab_name, {})
-        return tab_config.get(key, default)
+        
+        # Handle nested tab names (e.g., 'graph.general', 'graph.group.ts')
+        if '.' in tab_name:
+            return self._get_nested_value(tabs, f"{tab_name}.{key}", default)
+        else:
+            tab_config = tabs.get(tab_name, {})
+            return tab_config.get(key, default)
     
     def save_tab_setting(self, tab_name: str, key: str, value: Any):
-        """Save a specific tab setting"""
+        """Save a specific tab setting supporting nested keys with dot notation"""
         config = self._load_config()
         if 'tabs' not in config:
             config['tabs'] = {}
-        if tab_name not in config['tabs']:
-            config['tabs'][tab_name] = {}
-        config['tabs'][tab_name][key] = value
+        
+        # Handle nested tab names (e.g., 'graph.general', 'graph.group.ts')
+        if '.' in tab_name:
+            self._set_nested_value(config['tabs'], f"{tab_name}.{key}", value)
+        else:
+            if tab_name not in config['tabs']:
+                config['tabs'][tab_name] = {}
+            config['tabs'][tab_name][key] = value
+        
         self._save_config(config)
     
     def load_tab_settings(self, tab_name: str) -> Dict[str, Any]:
-        """Load all settings for a specific tab"""
+        """Load all settings for a specific tab supporting nested keys"""
         config = self._load_config()
         tabs = config.get('tabs', {})
-        return tabs.get(tab_name, {})
+        
+        # Handle nested tab names
+        if '.' in tab_name:
+            return self._get_nested_value(tabs, tab_name, {})
+        else:
+            return tabs.get(tab_name, {})
     
     def save_tab_settings(self, tab_name: str, settings: Dict[str, Any]):
-        """Save all settings for a specific tab"""
+        """Save all settings for a specific tab supporting nested keys"""
         config = self._load_config()
         if 'tabs' not in config:
             config['tabs'] = {}
-        config['tabs'][tab_name] = settings
+        
+        # Handle nested tab names
+        if '.' in tab_name:
+            self._set_nested_value(config['tabs'], tab_name, settings)
+        else:
+            config['tabs'][tab_name] = settings
+        
         self._save_config(config)
     
     def load_setting(self, key: str, default=None):
