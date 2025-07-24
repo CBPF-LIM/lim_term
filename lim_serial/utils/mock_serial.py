@@ -26,9 +26,21 @@ class MockSerial:
                 os.chmod(self.slave_port, 0o666)
 
                 return self.slave_port
+            elif platform.system() == "Darwin":  # macOS
+                # Use pty for macOS similar to Linux
+                self.master_fd, slave_fd = pty.openpty()
+                self.slave_port = os.ttyname(slave_fd)
+                
+                # Set permissions for macOS
+                os.chmod(self.slave_port, 0o666)
+                
+                return self.slave_port
+            elif platform.system() == "Windows":
+                # Windows virtual COM port (simulation only)
+                self.slave_port = "COM_VIRTUAL"
+                return self.slave_port
             else:
-
-
+                # Fallback for unknown systems
                 self.slave_port = "COM_VIRTUAL"
                 return self.slave_port
 
@@ -37,8 +49,17 @@ class MockSerial:
 
     def start_data_generation(self):
 
-        if not self.master_fd or self.is_running:
-            return
+        # For Linux and macOS, we need master_fd; for Windows, we simulate without it
+        if platform.system() in ["Linux", "Darwin"]:
+            if not self.master_fd or self.is_running:
+                return
+        elif platform.system() == "Windows":
+            if self.is_running:
+                return
+        else:
+            # Fallback for unknown systems
+            if self.is_running:
+                return
 
         self.is_running = True
         self.data_thread = threading.Thread(target=self._generate_data, daemon=True)
@@ -58,7 +79,7 @@ class MockSerial:
     def _generate_data(self):
 
         index = 0
-        while self.is_running and self.master_fd:
+        while self.is_running:
             try:
 
                 col1 = int(index)
@@ -70,7 +91,17 @@ class MockSerial:
                 col7 = math.sin(50 * col2) + 0.4 + 2
 
                 data = f"{col1:d} {col2:.2f} {col3:.2f} {col4:.2f} {col5:.2f} {col6:.2f} {col7:.2f}"
-                os.write(self.master_fd, (data + "\n").encode("utf-8"))
+                
+                # For Linux and macOS, write to the actual pty
+                if platform.system() in ["Linux", "Darwin"] and self.master_fd:
+                    os.write(self.master_fd, (data + "\n").encode("utf-8"))
+                elif platform.system() == "Windows":
+                    # For Windows, just simulate data generation (could be extended later)
+                    # This allows the thread to run without errors on Windows
+                    pass
+                else:
+                    # Fallback for unknown systems
+                    pass
 
                 index += 1
                 time.sleep(0.5)
