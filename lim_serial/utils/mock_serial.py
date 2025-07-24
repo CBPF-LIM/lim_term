@@ -1,14 +1,12 @@
 import os
-import pty
+import platform
+import math
 import threading
 import time
-import math
-import platform
+import pty
 
 
 class MockSerial:
-
-
     def __init__(self):
         self.master_fd = None
         self.slave_port = None
@@ -16,40 +14,27 @@ class MockSerial:
         self.data_thread = None
 
     def create_virtual_port(self):
-
         try:
             if platform.system() == "Linux":
                 self.master_fd, slave_fd = pty.openpty()
                 self.slave_port = os.ttyname(slave_fd)
-
-
                 os.chmod(self.slave_port, 0o666)
-
                 return self.slave_port
             elif platform.system() == "Darwin":  # macOS
-                # Use pty for macOS similar to Linux
                 self.master_fd, slave_fd = pty.openpty()
                 self.slave_port = os.ttyname(slave_fd)
-                
-                # Set permissions for macOS
                 os.chmod(self.slave_port, 0o666)
-                
                 return self.slave_port
             elif platform.system() == "Windows":
-                # Windows virtual COM port (simulation only)
                 self.slave_port = "COM_VIRTUAL"
                 return self.slave_port
             else:
-                # Fallback for unknown systems
                 self.slave_port = "COM_VIRTUAL"
                 return self.slave_port
-
-        except Exception as e:
-            raise Exception(f"Erro ao criar porta virtual: {e}")
+        except Exception as exc:
+            raise Exception(f"Erro ao criar porta virtual: {exc}")
 
     def start_data_generation(self):
-
-        # For Linux and macOS, we need master_fd; for Windows, we simulate without it
         if platform.system() in ["Linux", "Darwin"]:
             if not self.master_fd or self.is_running:
                 return
@@ -57,31 +42,28 @@ class MockSerial:
             if self.is_running:
                 return
         else:
-            # Fallback for unknown systems
             if self.is_running:
                 return
-
         self.is_running = True
-        self.data_thread = threading.Thread(target=self._generate_data, daemon=True)
+        self.data_thread = threading.Thread(
+            target=self._generate_data, daemon=True
+        )
         self.data_thread.start()
 
     def stop_data_generation(self):
-
         self.is_running = False
         if self.master_fd:
             try:
                 os.close(self.master_fd)
-            except:
+            except Exception:
                 pass
         self.master_fd = None
         self.slave_port = None
 
     def _generate_data(self):
-
         index = 0
         while self.is_running:
             try:
-
                 col1 = int(index)
                 col2 = col1 * 0.01 + 2
                 col3 = math.sin(10 * col2) + 2
@@ -89,27 +71,17 @@ class MockSerial:
                 col5 = math.sin(30 * col2) + 0.2 + 2
                 col6 = math.sin(40 * col2) + 0.3 + 2
                 col7 = math.sin(50 * col2) + 0.4 + 2
-
-                data = f"{col1:d} {col2:.2f} {col3:.2f} {col4:.2f} {col5:.2f} {col6:.2f} {col7:.2f}"
-                
-                # For Linux and macOS, write to the actual pty
+                data = (
+                    f"{col1:d} {col2:.2f} {col3:.2f} {col4:.2f} "
+                    f"{col5:.2f} {col6:.2f} {col7:.2f}"
+                )
                 if platform.system() in ["Linux", "Darwin"] and self.master_fd:
                     os.write(self.master_fd, (data + "\n").encode("utf-8"))
-                elif platform.system() == "Windows":
-                    # For Windows, just simulate data generation (could be extended later)
-                    # This allows the thread to run without errors on Windows
-                    pass
-                else:
-                    # Fallback for unknown systems
-                    pass
-
                 index += 1
                 time.sleep(0.5)
-
-            except Exception as e:
-                print(f"Erro na geração de dados: {e}")
+            except Exception as exc:
+                print(f"Erro na geração de dados: {exc}")
                 break
 
     def get_port(self):
-
         return self.slave_port
