@@ -97,7 +97,10 @@ class ConfigTab:
             borderwidth=0,
             highlightthickness=0
         )
-        self.win_simul_info.insert("1.0", "In Windows, you will need the Null-modem emulator to simulate a Virtual Serial Port.\nCheck: com0com.sourceforge.net/")
+        self.win_simul_info.insert(
+            "1.0",
+            "To simulate a virtual serial port on Windows, install the Null-modem emulator (com0com: https://com0com.sourceforge.net/).\nAfter configuration, select 'Hardware' mode and choose the created COM port."
+        )
         self.win_simul_info.config(state="disabled")
         self.win_simul_info.grid(column=0, row=10, columnspan=2, padx=10, pady=5, sticky="w")
         self.win_simul_info.grid_remove()
@@ -118,14 +121,17 @@ class ConfigTab:
                 self.win_simul_info.config(state="normal")
                 self.win_simul_info.tag_add("all", "1.0", "end")
                 self.win_simul_info.config(state="disabled")
+                self.connect_button.config(state="disabled")
             else:
                 self.win_simul_info.grid_remove()
+                self.connect_button.config(state="normal")
         else:
 
             self.port_combobox.config(state="readonly")
             self.baudrate_combobox.config(state="readonly")
             self.refresh_button.config(state="normal")
             self.win_simul_info.grid_remove()
+            self.connect_button.config(state="normal")
 
             if not self.baudrate_combobox.get():
                 if hasattr(self.baudrate_combobox, 'config'):
