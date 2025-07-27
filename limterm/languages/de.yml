@@ -68,6 +68,7 @@ ui:
     global_settings: "Globale Einstellungen"
     series_settings: "Serieneinstellungen"
     time_series_settings: "Zeitreihen-Einstellungen"
+    stacked_settings: "Stapel-Einstellungen"
     series_label: "Serie"
     graph_saved: "Grafik gespeichert in: {path}"
     could_not_extract_data: "Konnte keine Daten aus den angegebenen Spalten extrahieren"
