@@ -266,7 +266,6 @@ class GraphTab:
 
             data_lines = self.data_tab.get_data()
             if not data_lines:
-                self.data_tab.add_message(t("ui.graph_tab.no_data_available"))
                 return
 
 
@@ -321,7 +320,6 @@ class GraphTab:
                     pass
 
         if not has_data:
-            self.data_tab.add_message(t("ui.graph_tab.no_data_available"))
             return
 
 
@@ -373,7 +371,6 @@ class GraphTab:
                 colors.append("#cccccc")
 
         if not has_data:
-            self.data_tab.add_message(t("ui.graph_tab.no_data_available"))
             return
 
 
