@@ -3,6 +3,7 @@ from tkinter import ttk
 from ..config import DEFAULT_BAUDRATES, DEFAULT_BAUDRATE
 from ..utils import MockSerial
 from ..i18n import t, get_config_manager
+import platform
 
 
 class ConfigTab:
@@ -48,7 +49,7 @@ class ConfigTab:
 
         self.refresh_button = ttk.Button(port_frame, text="🔄", width=3,
                                        command=self._update_ports)
-        self.refresh_button.grid(column=1, row=0, padx=(5, 0), sticky="w")
+        self.refresh_button.grid(column=1, row=0, padx=(5, 0))
 
 
         port_frame.columnconfigure(0, weight=1)
@@ -83,6 +84,27 @@ class ConfigTab:
 
         self.frame.columnconfigure(0, weight=1)
 
+        # Add the win_simul_info as a selectable, read-only Text widget (initially hidden)
+        style = ttk.Style()
+        frame_bg = style.lookup("TLabelframe", "background")
+        self.win_simul_info = tk.Text(
+            self.config_frame,
+            height=3,
+            width=120,
+            wrap="word",
+            foreground="red",
+            background=frame_bg,
+            borderwidth=0,
+            highlightthickness=0
+        )
+        self.win_simul_info.insert(
+            "1.0",
+            "To simulate a virtual serial port on Windows, install the Null-modem emulator (com0com: https://com0com.sourceforge.net/).\nAfter configuration, select 'Hardware' mode and choose the created COM port."
+        )
+        self.win_simul_info.config(state="disabled")
+        self.win_simul_info.grid(column=0, row=10, columnspan=2, padx=10, pady=5, sticky="w")
+        self.win_simul_info.grid_remove()
+
     def _on_mode_changed(self, event=None):
 
         mode = self.mode_combobox.get()
@@ -93,11 +115,23 @@ class ConfigTab:
             self.refresh_button.config(state="disabled")
             self.port_combobox.set("")
             self.baudrate_combobox.set("")
+            # Show Windows info if on Windows
+            if platform.system() == "Windows":
+                self.win_simul_info.grid()
+                self.win_simul_info.config(state="normal")
+                self.win_simul_info.tag_add("all", "1.0", "end")
+                self.win_simul_info.config(state="disabled")
+                self.connect_button.config(state="disabled")
+            else:
+                self.win_simul_info.grid_remove()
+                self.connect_button.config(state="normal")
         else:
 
             self.port_combobox.config(state="readonly")
             self.baudrate_combobox.config(state="readonly")
             self.refresh_button.config(state="normal")
+            self.win_simul_info.grid_remove()
+            self.connect_button.config(state="normal")
 
             if not self.baudrate_combobox.get():
                 if hasattr(self.baudrate_combobox, 'config'):
