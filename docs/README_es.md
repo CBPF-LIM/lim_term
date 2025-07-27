@@ -66,7 +66,20 @@ cd lim_term
 pip install poetry
 poetry install
 poetry run limterm
+```
 
+### Ejecutable Windows
+
+Para usuarios de Windows que prefieren no instalar Python:
+
+1. **Descargar**: Obtén el `LimTerm.exe` más reciente de [GitHub Releases](https://github.com/CBPF-LIM/lim_term/releases)
+2. **Ejecutar**: Haz doble clic en el ejecutable - no requiere instalación
+3. **Configuración**: La aplicación crea una carpeta `lim_config` para tus preferencias
+
+**Requisitos del Sistema:**
+- Windows 10/11 (64-bit)
+- No se necesita instalación de Python
+- ~50-100 MB de espacio en disco
 
 ### Primeros Pasos
 1. **Idioma**: Elige tu idioma del menú Idioma

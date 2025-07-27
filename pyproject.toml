@@ -22,13 +22,16 @@ classifiers = [
 packages = [{include = "limterm"}]
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<4.0"
+python = ">=3.8.1,<3.13"
 matplotlib = "^3.5.0"
 pyserial = "^3.5"
 PyYAML = "^6.0"
 
 [tool.poetry.scripts]
 limterm = "limterm.main:main"
+
+[tool.poetry.group.dev.dependencies]
+pyinstaller = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core"]
