@@ -1,7 +1,5 @@
 include README.md
 include LICENSE
-recursive-include languages *.yml
-recursive-include config *.yml
 recursive-include docs *.md *.png
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

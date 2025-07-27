@@ -78,4 +78,4 @@ venv/
 autosave
 
 # User config
-config/
+lim_config/
