@@ -4,14 +4,14 @@ language:
 
 ui:
   main_window:
-    title: "LIM Serial - GUI"
+    title: "Lim Terminal"
     restart_required: "Um die Sprache zu aktualisieren, schließen und öffnen Sie die Anwendung erneut."
-  
+
   tabs:
     configuration: "Konfiguration"
     data: "Daten"
     graph: "Grafik"
-  
+
   config_tab:
     configuration_frame: "Konfiguration"
     connection_info_frame: "Verbindungsinformationen"
@@ -24,7 +24,7 @@ ui:
     disconnect: "Trennen"
     connection_status: "🔗 Modus: {mode}\n📡 Port: {port}\n⚡ Baudrate: {baudrate} bps"
     virtual_connection_status: "🔗 Modus: {mode}\n🖥️  Virtueller Port: {port}\n⚡ Baudrate: {baudrate} bps (automatisch)\n📊 Status: Simulierte Daten generieren"
-  
+
   data_tab:
     save: "Speichern"
     load: "Laden"
@@ -36,7 +36,7 @@ ui:
     error_saving: "Fehler beim Speichern der Grafik: {error}"
     overwrite_dialog_title: "Daten überschreiben"
     overwrite_dialog_message: "Die aktuellen Daten werden überschrieben. Möchten Sie fortfahren?"
-  
+
   graph_tab:
     column_x: "Spalte X:"
     column_y: "Spalte Y:"
@@ -82,16 +82,16 @@ ui:
     stacked_chart_ylabel: "Wert"
     stacked_chart_ylabel_percent: "Prozent (%)"
     normalize_100_percent: "Auf 100% normalisieren"
-  
+
   graph_types:
     line: "Linie"
     bars: "Balken"
     scatter: "Streuung"
-  
+
   visualization_groups:
     time_series: "Zeitreihe"
     stacked: "Gestapelt"
-  
+
   colors:
     blue: "Blau"
     cyan: "Cyan"
@@ -113,7 +113,7 @@ ui:
     coral: "Koralle"
     crimson: "Karmesinrot"
     pink: "Rosa"
-  
+
   markers:
     circle: "Kreis (o)"
     square: "Quadrat (s)"

@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "limterm"
+version = "0.1.0"
+description = "Serial Communication & Data Visualization - Connect to Arduino/ESP32 or other serial devices, collect data, and create dynamic graphs with professional visualization features"
+authors = ["David Vaz Teixeira <david.vaz.teixeira@gmail.com>"]
+readme = "README.md"
+homepage = "https://github.com/CBPF-LIM/lim_term"
+repository = "https://github.com/CBPF-LIM/lim_term"
+documentation = "https://github.com/CBPF-LIM/lim_term"
+keywords = ["serial", "arduino", "ESP32", "data-visualization", "plotting", "tkinter", "matplotlib"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: System :: Hardware :: Hardware Drivers",
+    "Topic :: Terminals :: Serial",
+]
+packages = [{include = "limterm"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8.1,<4.0"
+matplotlib = "^3.5.0"
+pyserial = "^3.5"
+PyYAML = "^6.0"
+
+[tool.poetry.scripts]
+limterm = "limterm.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

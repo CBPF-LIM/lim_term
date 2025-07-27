@@ -1,4 +1,4 @@
-# LIM Serial - Communication Série & Visualisation de Données
+# Lim Terminal - Communication Série & Visualisation de Données
 
 **README en :** [English](../README.md) | [Português](README_pt-br.md) | [Español](README_es.md) | [Deutsch](README_de.md) | [Français](README_fr.md)
 
@@ -6,11 +6,11 @@
 
 ## Aperçu
 
-LIM Serial est une application conviviale pour la communication série et la visualisation de données en temps réel. Connectez-vous à Arduino ou d'autres appareils série, collectez des données et créez des graphiques dynamiques avec des fonctionnalités de visualisation professionnelles. Disponible en 5 langues avec sauvegarde automatique des préférences.
+Lim Terminal est une application conviviale pour la communication série et la visualisation de données en temps réel. Connectez-vous à Arduino ou d'autres appareils série, collectez des données et créez des graphiques dynamiques avec des fonctionnalités de visualisation professionnelles. Disponible en 5 langues avec sauvegarde automatique des préférences.
 
-![LIM Serial Screenshot](shot.png)
+![Lim Terminal Screenshot](shot.png)
 
-![LIM Serial Screenshot](shot_stacked.png)
+![Lim Terminal Screenshot](shot_stacked.png)
 
 ## Fonctionnalités
 
@@ -50,9 +50,9 @@ LIM Serial est une application conviviale pour la communication série et la vis
 # Installer les packages requis
 pip install matplotlib pyserial PyYAML
 
-# Télécharger et exécuter LIM Serial
+# Télécharger et exécuter Lim Terminal
 cd lim_term
-python lim_serial.py
+python limterm.py
 ```
 
 ### Premiers Pas
@@ -145,4 +145,4 @@ Développé par CBPF-LIM (Centre Brésilien de Recherche en Physique - Laboratoi
 
 ---
 
-**LIM Serial** - Communication série et visualisation de données professionnelles simplifiées.
+**Lim Terminal** - Communication série et visualisation de données professionnelles simplifiées.

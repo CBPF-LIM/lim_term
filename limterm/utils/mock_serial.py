@@ -73,7 +73,7 @@ class MockSerial:
                 os.write(self.master_fd, (data + "\n").encode("utf-8"))
 
                 index += 1
-                time.sleep(0.5)
+                time.sleep(1/30)
 
             except Exception as e:
                 print(f"Erro na geração de dados: {e}")

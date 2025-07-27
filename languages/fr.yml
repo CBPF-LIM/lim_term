@@ -4,14 +4,14 @@ language:
 
 ui:
   main_window:
-    title: "LIM Serial - GUI"
+    title: "Lim Terminal"
     restart_required: "Pour mettre à jour la langue, fermez et rouvrez l'application."
-  
+
   tabs:
     configuration: "Configuration"
     data: "Données"
     graph: "Graphique"
-  
+
   config_tab:
     configuration_frame: "Configuration"
     connection_info_frame: "Informations de Connexion"
@@ -24,7 +24,7 @@ ui:
     disconnect: "Déconnecter"
     connection_status: "🔗 Mode: {mode}\n📡 Port: {port}\n⚡ Débit: {baudrate} bps"
     virtual_connection_status: "🔗 Mode: {mode}\n🖥️  Port Virtuel: {port}\n⚡ Débit: {baudrate} bps (automatique)\n📊 État: Génération de données simulées"
-  
+
   data_tab:
     save: "Sauvegarder"
     load: "Charger"
@@ -36,7 +36,7 @@ ui:
     error_saving: "Erreur lors de la sauvegarde du graphique: {error}"
     overwrite_dialog_title: "Écraser les données"
     overwrite_dialog_message: "Les données actuelles seront écrasées. Voulez-vous continuer?"
-  
+
   graph_tab:
     column_x: "Colonne X:"
     column_y: "Colonne Y:"
@@ -82,15 +82,15 @@ ui:
     stacked_chart_ylabel: "Valeur"
     stacked_chart_ylabel_percent: "Pourcentage (%)"
     normalize_100_percent: "Normaliser à 100%"
-  
+
   graph_types:
     line: "Ligne"
     scatter: "Dispersion"
-  
+
   visualization_groups:
     time_series: "Série Temporelle"
     stacked: "Empilé"
-  
+
   colors:
     blue: "Bleu"
     cyan: "Cyan"
@@ -112,7 +112,7 @@ ui:
     coral: "Corail"
     crimson: "Cramoisi"
     pink: "Rose"
-  
+
   markers:
     circle: "Cercle (o)"
     square: "Carré (s)"
