@@ -225,36 +225,10 @@ class GraphTab:
             self.pause_button.config(text=t("ui.graph_tab.pause"))
 
     def _save_chart(self):
-
+        """Save the current chart as PNG by directly saving the existing figure"""
         from tkinter import filedialog
-        import matplotlib.pyplot as plt
-        import io
 
-
-
-        fig_copy = plt.figure(figsize=self.graph_manager.figure.get_size_inches(),
-                             dpi=self.graph_manager.figure.dpi)
-
-
-        ax_original = self.graph_manager.ax
-        ax_copy = fig_copy.add_subplot(111)
-
-
-        for line in ax_original.get_lines():
-            ax_copy.plot(line.get_xdata(), line.get_ydata(),
-                        color=line.get_color(), marker=line.get_marker(),
-                        linestyle=line.get_linestyle(), linewidth=line.get_linewidth(),
-                        markersize=line.get_markersize())
-
-
-        ax_copy.set_xlim(ax_original.get_xlim())
-        ax_copy.set_ylim(ax_original.get_ylim())
-        ax_copy.set_xlabel(ax_original.get_xlabel())
-        ax_copy.set_ylabel(ax_original.get_ylabel())
-        ax_copy.set_title(ax_original.get_title())
-        ax_copy.grid(ax_original.get_xgridlines() or ax_original.get_ygridlines())
-
-
+        # Get file path first
         file_path = filedialog.asksaveasfilename(
             defaultextension=".png",
             filetypes=[("PNG files", "*.png"), ("All files", "*.*")],
@@ -263,14 +237,11 @@ class GraphTab:
 
         if file_path:
             try:
-
-                fig_copy.savefig(file_path, dpi=300, bbox_inches='tight')
+                # Simply save the current figure that's already being displayed
+                self.graph_manager.figure.savefig(file_path, dpi=300, bbox_inches='tight')
                 self.data_tab.add_message(t("ui.graph_tab.graph_saved").format(path=file_path))
             except Exception as e:
                 self.data_tab.add_message(t("ui.data_tab.error_saving").format(error=e))
-            finally:
-
-                plt.close(fig_copy)
 
     def _on_setting_change(self, event=None):
 
