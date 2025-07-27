@@ -174,8 +174,7 @@ class GraphTab:
 
 
         self.y_color_combos = []
-        default_colors = [t("ui.colors.blue"), t("ui.colors.red"), t("ui.colors.green"),
-                         t("ui.colors.orange"), t("ui.colors.magenta")]
+        default_colors = ["blue", "red", "green", "orange", "magenta"]
 
         colors_frame = ttk.Frame(global_frame)
         colors_frame.grid(column=1, row=2, columnspan=3, padx=5, pady=5, sticky="w")
@@ -192,6 +191,7 @@ class GraphTab:
                 state="readonly",
                 values=self._get_translated_colors(),
                 width=8,
+                value_mapping=self._get_color_mapping(),
                 on_change=lambda idx=i: self._on_color_setting_change(idx)
             )
             color_combo.pack()
@@ -422,11 +422,13 @@ class GraphTab:
             widgets = self.series_widgets[series_index]
 
             if 'type' in widgets:
+                type_value = widgets['type'].get_value()
+                marker_value = widgets['marker'].get_value()  # Already "circle", "square", etc.
 
                 return {
-                    'type': self._get_original_graph_type(widgets['type'].get_value()),
+                    'type': type_value,
                     'color': color,
-                    'marker': self._get_original_marker(widgets['marker'].get_value())
+                    'marker': self._get_original_marker_from_internal(marker_value)
                 }
             else:
                 return {
@@ -466,24 +468,60 @@ class GraphTab:
             self.plot_graph()
 
     def _get_translated_graph_types(self):
-
+        """Get translated graph type labels."""
         return [t("ui.graph_types.line"), t("ui.graph_types.scatter")]
 
-    def _get_translated_colors(self):
+    def _get_graph_type_mapping(self):
+        """Get mapping from translated labels to internal values."""
+        return {
+            t("ui.graph_types.line"): "line",
+            t("ui.graph_types.scatter"): "scatter"
+        }
 
+    def _get_translated_colors(self):
+        """Get translated color labels."""
         color_keys = ["blue", "cyan", "teal", "green", "lime", "yellow", "amber", "orange",
                      "red", "magenta", "indigo", "violet", "turquoise", "aquamarine",
                      "springgreen", "chartreuse", "gold", "coral", "crimson", "pink"]
         return [t(f"ui.colors.{color}") for color in color_keys]
 
-    def _get_translated_markers(self):
+    def _get_color_mapping(self):
+        """Get mapping from translated color labels to internal values."""
+        color_keys = ["blue", "cyan", "teal", "green", "lime", "yellow", "amber", "orange",
+                     "red", "magenta", "indigo", "violet", "turquoise", "aquamarine",
+                     "springgreen", "chartreuse", "gold", "coral", "crimson", "pink"]
+        return {t(f"ui.colors.{color}"): color for color in color_keys}
 
+    def _get_translated_markers(self):
+        """Get translated marker labels."""
         marker_keys = ["circle", "square", "triangle", "diamond", "star", "plus",
                       "x", "vline", "hline", "hexagon"]
         return [t(f"ui.markers.{marker}") for marker in marker_keys]
 
-    def _get_original_marker(self, translated_marker):
+    def _get_marker_mapping(self):
+        """Get mapping from translated marker labels to internal values."""
+        marker_keys = ["circle", "square", "triangle", "diamond", "star", "plus",
+                      "x", "vline", "hline", "hexagon"]
+        return {t(f"ui.markers.{marker}"): marker for marker in marker_keys}
 
+    def _get_original_marker_from_internal(self, internal_marker):
+        """Convert internal marker name to matplotlib marker symbol."""
+        marker_mapping = {
+            "circle": "o",
+            "square": "s",
+            "triangle": "^",
+            "diamond": "D",
+            "star": "*",
+            "plus": "+",
+            "x": "x",
+            "vline": "|",
+            "hline": "_",
+            "hexagon": "h"
+        }
+        return marker_mapping.get(internal_marker, "o")
+
+    def _get_original_marker(self, translated_marker):
+        """Convert translated marker to matplotlib marker symbol."""
         marker_mapping = {
             t("ui.markers.circle"): "o",
             t("ui.markers.square"): "s",
@@ -512,6 +550,32 @@ class GraphTab:
             t("ui.graph_types.scatter"): "scatter"
         }
         return type_mapping.get(translated_type, "line")
+
+    def _get_original_color_from_internal(self, internal_color):
+        """Convert internal color name to hex color."""
+        color_mapping = {
+            "blue": "#1f77b4",
+            "cyan": "#17becf",
+            "teal": "#008080",
+            "green": "#2ca02c",
+            "lime": "#32cd32",
+            "yellow": "#ffff00",
+            "amber": "#ffc000",
+            "orange": "#ff7f0e",
+            "red": "#d62728",
+            "magenta": "#ff00ff",
+            "indigo": "#4b0082",
+            "violet": "#9467bd",
+            "turquoise": "#40e0d0",
+            "aquamarine": "#7fffd4",
+            "springgreen": "#00ff7f",
+            "chartreuse": "#7fff00",
+            "gold": "#ffd700",
+            "coral": "#ff7f50",
+            "crimson": "#dc143c",
+            "pink": "#ffc0cb"
+        }
+        return color_mapping.get(internal_color, "#1f77b4")
 
     def _get_original_color(self, translated_color):
 
@@ -578,26 +642,28 @@ class GraphTab:
         """Create a time series configuration row using preference widgets."""
         ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
 
-        # Type combobox with automatic preference handling
+        # Type combobox with automatic preference handling and value mapping
         type_combo = PrefCombobox(
             parent,
             pref_key=f'graph.time_series.y{index+1}_type',
-            default_value=t("ui.graph_types.line"),
+            default_value="line",  # Store internal value, not translated
             state="readonly",
             values=self._get_translated_graph_types(),
             width=10,
+            value_mapping=self._get_graph_type_mapping(),
             on_change=lambda idx=index: self._on_series_setting_change(idx)
         )
         type_combo.grid(column=1, row=row, padx=5, pady=2)
 
-        # Marker combobox with automatic preference handling
+        # Marker combobox with automatic preference handling and value mapping
         marker_combo = PrefCombobox(
             parent,
             pref_key=f'graph.time_series.y{index+1}_marker',
-            default_value=t("ui.markers.circle"),
+            default_value="circle",  # Store internal value, not translated
             state="readonly",
             values=self._get_translated_markers(),
             width=10,
+            value_mapping=self._get_marker_mapping(),
             on_change=lambda idx=index: self._on_series_setting_change(idx)
         )
         marker_combo.grid(column=2, row=row, padx=5, pady=2)
@@ -626,8 +692,8 @@ class GraphTab:
     def _get_stacked_color(self, series_index):
         """Get color for stacked chart series using preference widget API."""
         if series_index < len(self.y_color_combos):
-            translated_color = self.y_color_combos[series_index].get_value()  # Use get_value() for preference widgets
-            return self._get_original_color(translated_color)
+            internal_color = self.y_color_combos[series_index].get_value()  # Now gets internal value
+            return self._get_original_color_from_internal(internal_color)
 
         # Default colors if no preference widget available
         default_colors = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#ff00ff"]
