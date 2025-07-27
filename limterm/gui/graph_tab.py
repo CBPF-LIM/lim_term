@@ -247,7 +247,6 @@ class GraphTab:
 
     def _on_series_setting_change(self, series_index):
 
-        self._save_preferences()
         self._on_setting_change()
 
     def _toggle_pause(self):
@@ -416,29 +415,25 @@ class GraphTab:
         self.graph_manager.plot_stacked_series(x_data, y_series_data, colors, normalize_100, title, xlabel, ylabel)
 
     def _get_series_settings(self, series_index):
-
-
+        """Get series settings using preference widget API for type-safe value access."""
         color = self._get_stacked_color(series_index)
 
         if series_index < len(self.series_widgets):
             widgets = self.series_widgets[series_index]
 
-
             if 'type' in widgets:
 
                 return {
-                    'type': self._get_original_graph_type(widgets['type'].get()),
+                    'type': self._get_original_graph_type(widgets['type'].get_value()),
                     'color': color,
-                    'marker': self._get_original_marker(widgets['marker'].get())
+                    'marker': self._get_original_marker(widgets['marker'].get_value())
                 }
             else:
-
                 return {
                     'type': 'line',
                     'color': color,
                     'marker': 'o'
                 }
-
 
         return {
             'type': 'line',
@@ -580,20 +575,32 @@ class GraphTab:
             self._create_time_series_row(self.series_config_frame, i, f"Y{i}", i-1)
 
     def _create_time_series_row(self, parent, row, label, index):
-
+        """Create a time series configuration row using preference widgets."""
         ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
 
-
-        type_combo = ttk.Combobox(parent, state="readonly", values=self._get_translated_graph_types(), width=10)
+        # Type combobox with automatic preference handling
+        type_combo = PrefCombobox(
+            parent,
+            pref_key=f'graph.time_series.y{index+1}_type',
+            default_value=t("ui.graph_types.line"),
+            state="readonly",
+            values=self._get_translated_graph_types(),
+            width=10,
+            on_change=lambda idx=index: self._on_series_setting_change(idx)
+        )
         type_combo.grid(column=1, row=row, padx=5, pady=2)
-        type_combo.set(t("ui.graph_types.line"))
-        type_combo.bind("<<ComboboxSelected>>", lambda e, idx=index: self._on_series_setting_change(idx))
 
-
-        marker_combo = ttk.Combobox(parent, state="readonly", values=self._get_translated_markers(), width=10)
+        # Marker combobox with automatic preference handling
+        marker_combo = PrefCombobox(
+            parent,
+            pref_key=f'graph.time_series.y{index+1}_marker',
+            default_value=t("ui.markers.circle"),
+            state="readonly",
+            values=self._get_translated_markers(),
+            width=10,
+            on_change=lambda idx=index: self._on_series_setting_change(idx)
+        )
         marker_combo.grid(column=2, row=row, padx=5, pady=2)
-        marker_combo.set(t("ui.markers.circle"))
-        marker_combo.bind("<<ComboboxSelected>>", lambda e, idx=index: self._on_series_setting_change(idx))
 
         self.series_widgets.append({
             'type': type_combo,
