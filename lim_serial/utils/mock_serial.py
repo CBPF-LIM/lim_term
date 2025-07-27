@@ -1,5 +1,4 @@
 import os
-import pty
 import threading
 import time
 import math
@@ -19,6 +18,7 @@ class MockSerial:
 
         try:
             if platform.system() == "Linux":
+                import pty
                 self.master_fd, slave_fd = pty.openpty()
                 self.slave_port = os.ttyname(slave_fd)
 
