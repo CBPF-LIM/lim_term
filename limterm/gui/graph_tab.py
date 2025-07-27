@@ -261,7 +261,7 @@ class GraphTab:
         """Save the current chart as PNG by directly saving the existing figure"""
         from tkinter import filedialog
 
-        # Get file path first
+
         file_path = filedialog.asksaveasfilename(
             defaultextension=".png",
             filetypes=[("PNG files", "*.png"), ("All files", "*.*")],
@@ -270,7 +270,7 @@ class GraphTab:
 
         if file_path:
             try:
-                # Simply save the current figure that's already being displayed
+
                 self.graph_manager.figure.savefig(file_path, dpi=300, bbox_inches='tight')
                 self.data_tab.add_message(t("ui.graph_tab.graph_saved").format(path=file_path))
             except Exception as e:
@@ -301,7 +301,7 @@ class GraphTab:
             if not data_lines:
                 return
 
-            # Use get_value() for type-safe value retrieval
+
             data_window_str = self.data_window_entry.get_value()
             data_window = int(data_window_str) if data_window_str else 0
             if data_window > 0:
@@ -333,9 +333,9 @@ class GraphTab:
         settings_list = []
         has_data = False
 
-        # Extract Y series data using preference widget API
+
         for i, y_entry in enumerate(self.y_entries):
-            y_col_str = y_entry.get_value().strip()  # Use get_value() for preference widgets
+            y_col_str = y_entry.get_value().strip()
             if y_col_str:
                 try:
                     y_col = int(y_col_str) - 1
@@ -357,10 +357,10 @@ class GraphTab:
         xlabel = t("ui.graph_tab.chart_xlabel").format(column=x_col + 1)
         ylabel = t("ui.graph_tab.chart_ylabel").format(column="Multi")
 
-        # Get min/max Y values using preference widget API
+
         if settings_list:
-            min_y = self.min_y_entry.get_value().strip()  # Use get_value() for preference widgets
-            max_y = self.max_y_entry.get_value().strip()  # Use get_value() for preference widgets
+            min_y = self.min_y_entry.get_value().strip()
+            max_y = self.max_y_entry.get_value().strip()
             settings_list[0]['min_y'] = min_y
             settings_list[0]['max_y'] = max_y
 
@@ -375,7 +375,7 @@ class GraphTab:
 
 
         for i, y_entry in enumerate(self.y_entries):
-            y_col_str = y_entry.get_value().strip()  # Use get_value() for preference widgets
+            y_col_str = y_entry.get_value().strip()
             if y_col_str:
                 try:
                     y_col = int(y_col_str) - 1
@@ -404,7 +404,7 @@ class GraphTab:
             return
 
 
-        # Get normalization setting using the preference widget's API
+
         normalize_100 = self.normalize_100_checkbox.get_value()
 
 
@@ -423,7 +423,7 @@ class GraphTab:
 
             if 'type' in widgets:
                 type_value = widgets['type'].get_value()
-                marker_value = widgets['marker'].get_value()  # Already "circle", "square", etc.
+                marker_value = widgets['marker'].get_value()
 
                 return {
                     'type': type_value,
@@ -617,7 +617,7 @@ class GraphTab:
         for widget in self.series_config_frame.winfo_children():
             widget.destroy()
 
-        group = self.group_combobox.get_value()  # Use get_value() for preference widgets
+        group = self.group_combobox.get_value()
 
         if group == "Time Series":
             self._create_time_series_widgets()
@@ -642,11 +642,11 @@ class GraphTab:
         """Create a time series configuration row using preference widgets."""
         ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
 
-        # Type combobox with automatic preference handling and value mapping
+
         type_combo = PrefCombobox(
             parent,
             pref_key=f'graph.time_series.y{index+1}_type',
-            default_value="line",  # Store internal value, not translated
+            default_value="line",
             state="readonly",
             values=self._get_translated_graph_types(),
             width=10,
@@ -655,11 +655,11 @@ class GraphTab:
         )
         type_combo.grid(column=1, row=row, padx=5, pady=2)
 
-        # Marker combobox with automatic preference handling and value mapping
+
         marker_combo = PrefCombobox(
             parent,
             pref_key=f'graph.time_series.y{index+1}_marker',
-            default_value="circle",  # Store internal value, not translated
+            default_value="circle",
             state="readonly",
             values=self._get_translated_markers(),
             width=10,
@@ -692,10 +692,10 @@ class GraphTab:
     def _get_stacked_color(self, series_index):
         """Get color for stacked chart series using preference widget API."""
         if series_index < len(self.y_color_combos):
-            internal_color = self.y_color_combos[series_index].get_value()  # Now gets internal value
+            internal_color = self.y_color_combos[series_index].get_value()
             return self._get_original_color_from_internal(internal_color)
 
-        # Default colors if no preference widget available
+
         default_colors = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#ff00ff"]
         return default_colors[series_index % len(default_colors)]
 
@@ -770,7 +770,7 @@ class GraphTab:
     def _on_fps_change(self, event=None):
         """Called when FPS setting changes. Preferences are automatically saved."""
         try:
-            fps = int(self.fps_combobox.get_value())  # Use get_value() for type-safe access
+            fps = int(self.fps_combobox.get_value())
             self._set_refresh_rate(fps)
 
             self.fps_debug_label.config(text=f"({self.refresh_rate_ms}ms)")
@@ -822,9 +822,9 @@ class GraphTab:
     def _on_normalize_change(self):
         """Handle immediate change when normalization checkbox is clicked"""
         try:
-            # Save the preference immediately
+
             self._save_stacked_preferences()
-            # Trigger graph update if needed
+
             self._on_setting_change()
         except Exception as e:
             print(f"Note: Could not save normalization preference: {e}")

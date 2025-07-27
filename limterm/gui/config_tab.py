@@ -84,7 +84,7 @@ class ConfigTab:
 
         self.frame.columnconfigure(0, weight=1)
 
-        # Add the win_simul_info as a selectable, read-only Text widget (initially hidden)
+
         style = ttk.Style()
         frame_bg = style.lookup("TLabelframe", "background")
         self.win_simul_info = tk.Text(
@@ -115,7 +115,7 @@ class ConfigTab:
             self.refresh_button.config(state="disabled")
             self.port_combobox.set("")
             self.baudrate_combobox.set("")
-            # Show Windows info if on Windows
+
             if platform.system() == "Windows":
                 self.win_simul_info.grid()
                 self.win_simul_info.config(state="normal")

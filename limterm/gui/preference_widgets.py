@@ -44,20 +44,20 @@ class PreferenceWidget:
         self.value_type = value_type
         self.on_change = on_change
         self.config_manager = get_config_manager()
-        self._tkinter_var = None  # Store reference to tkinter variable for widgets that need it
-        self.value_mapping = value_mapping or {}  # Map display labels to stored values
+        self._tkinter_var = None
+        self.value_mapping = value_mapping or {}
         self.reverse_mapping = {v: k for k, v in self.value_mapping.items()} if value_mapping else {}
 
-        # Parse the preference key into section and key
+
         self._parse_pref_key()
 
-        # Create the underlying widget
+
         self.widget = widget_class(parent, **widget_kwargs)
 
-        # Set up automatic preference handling
+
         self._setup_preference_handling()
 
-        # Load initial value from preferences
+
         self._load_from_preferences()
 
     def _parse_pref_key(self):
@@ -66,7 +66,7 @@ class PreferenceWidget:
         if len(parts) < 2:
             raise ValueError(f"Preference key must have at least 2 parts separated by dots: {self.pref_key}")
 
-        # Last part is the key, everything else is the section
+
         self.pref_section = '.'.join(parts[:-1])
         self.pref_name = parts[-1]
 
@@ -75,47 +75,47 @@ class PreferenceWidget:
         widget_type = type(self.widget).__name__
 
         if widget_type in ['Entry']:
-            # For Entry widgets, save on key release and focus out
+
             self.widget.bind('<KeyRelease>', self._on_change_event)
             self.widget.bind('<FocusOut>', self._on_change_event)
 
         elif widget_type in ['Combobox']:
-            # For Combobox, save on selection change
+
             self.widget.bind('<<ComboboxSelected>>', self._on_change_event)
 
         elif widget_type in ['Checkbutton']:
-            # For Checkbutton, we need to wrap the command
-            # First, ensure the widget has a variable and store a reference to it
+
+
             var = self.widget.cget('variable')
             if not var or isinstance(var, str):
-                # Create a new BooleanVar if none exists or if it's just a string name
+
                 self._tkinter_var = tk.BooleanVar()
                 self.widget.config(variable=self._tkinter_var)
             else:
-                # Store reference to existing variable
+
                 self._tkinter_var = var
 
             original_command = self.widget.cget('command') if self.widget.cget('command') else None
             self.widget.config(command=lambda: self._on_checkbutton_change(original_command))
 
         elif widget_type in ['Scale']:
-            # For Scale, save on value change
+
             original_command = self.widget.cget('command') if self.widget.cget('command') else None
             self.widget.config(command=lambda val: self._on_scale_change(val, original_command))
 
         elif widget_type in ['Spinbox']:
-            # For Spinbox, save on key release, focus out, and button clicks
+
             self.widget.bind('<KeyRelease>', self._on_change_event)
             self.widget.bind('<FocusOut>', self._on_change_event)
             self.widget.bind('<ButtonRelease-1>', self._on_change_event)
 
         else:
-            # For other widgets, try to bind to common events
+
             try:
                 self.widget.bind('<KeyRelease>', self._on_change_event)
                 self.widget.bind('<FocusOut>', self._on_change_event)
             except tk.TclError:
-                # Widget doesn't support these events, that's ok
+
                 pass
 
     def _on_change_event(self, event=None):
@@ -158,17 +158,17 @@ class PreferenceWidget:
 
         elif widget_type in ['Combobox']:
             display_value = self.widget.get()
-            # If we have value mapping, convert display value to stored value
+
             if self.value_mapping and display_value in self.value_mapping:
                 return self.value_mapping[display_value]
             return display_value
 
         elif widget_type in ['Checkbutton']:
-            # For Checkbutton, use our stored variable reference
+
             if self._tkinter_var and hasattr(self._tkinter_var, 'get'):
                 return self._tkinter_var.get()
             else:
-                # Fallback: try to get variable from widget
+
                 var = self.widget.cget('variable')
                 if var and hasattr(var, 'get') and callable(var.get):
                     return var.get()
@@ -179,7 +179,7 @@ class PreferenceWidget:
             return self.widget.get()
 
         else:
-            # Try common methods
+
             if hasattr(self.widget, 'get'):
                 return self.widget.get()
             else:
@@ -194,7 +194,7 @@ class PreferenceWidget:
             self.widget.insert(0, str(value))
 
         elif widget_type in ['Combobox']:
-            # If we have value mapping, convert stored value to display value
+
             if self.reverse_mapping and value in self.reverse_mapping:
                 display_value = self.reverse_mapping[value]
                 self.widget.set(display_value)
@@ -202,16 +202,16 @@ class PreferenceWidget:
                 self.widget.set(str(value))
 
         elif widget_type in ['Checkbutton']:
-            # For Checkbutton, use our stored variable reference
+
             if self._tkinter_var and hasattr(self._tkinter_var, 'set'):
                 try:
                     self._tkinter_var.set(bool(value))
                 except Exception as e:
-                    # Recreate the variable if there's an issue
+
                     self._tkinter_var = tk.BooleanVar(value=bool(value))
                     self.widget.config(variable=self._tkinter_var)
             else:
-                # Create a new variable if something went wrong
+
                 self._tkinter_var = tk.BooleanVar(value=bool(value))
                 self.widget.config(variable=self._tkinter_var)
 
@@ -219,7 +219,7 @@ class PreferenceWidget:
             self.widget.set(value)
 
         else:
-            # Try common methods
+
             if hasattr(self.widget, 'set'):
                 self.widget.set(value)
             elif hasattr(self.widget, 'delete') and hasattr(self.widget, 'insert'):
@@ -307,7 +307,7 @@ def PrefCombobox(parent, pref_key: str, default_value: str = "",
 def PrefCheckbutton(parent, pref_key: str, default_value: bool = False,
                     on_change: Optional[Callable] = None, **kwargs) -> PreferenceWidget:
     """Create a preference-aware Checkbutton widget."""
-    # Ensure we have a BooleanVar for the checkbutton
+
     if 'variable' not in kwargs:
         kwargs['variable'] = tk.BooleanVar()
     return PreferenceWidget(ttk.Checkbutton, parent, pref_key, default_value, bool, on_change, **kwargs)
