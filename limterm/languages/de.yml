@@ -70,7 +70,6 @@ ui:
     time_series_settings: "Zeitreihen-Einstellungen"
     series_label: "Serie"
     graph_saved: "Grafik gespeichert in: {path}"
-    no_data_available: "Keine Daten zum Zeichnen verfügbar"
     could_not_extract_data: "Konnte keine Daten aus den angegebenen Spalten extrahieren"
     parameter_error: "Parameterfehler: {error}"
     graph_error: "Fehler beim Generieren der Grafik: {error}"

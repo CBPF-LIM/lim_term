@@ -70,7 +70,6 @@ ui:
     time_series_settings: "Time Series Settings"
     series_label: "Series"
     graph_saved: "Graph saved to: {path}"
-    no_data_available: "No data available to plot"
     could_not_extract_data: "Could not extract data from specified columns"
     parameter_error: "Parameter error: {error}"
     graph_error: "Error generating graph: {error}"

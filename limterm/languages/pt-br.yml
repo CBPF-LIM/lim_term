@@ -70,7 +70,6 @@ ui:
     time_series_settings: "Configurações de Série Temporal"
     series_label: "Série"
     graph_saved: "Gráfico salvo em: {path}"
-    no_data_available: "Nenhum dado disponível para plotagem"
     could_not_extract_data: "Não foi possível extrair dados das colunas especificadas"
     parameter_error: "Erro de parâmetro: {error}"
     graph_error: "Erro ao gerar gráfico: {error}"
