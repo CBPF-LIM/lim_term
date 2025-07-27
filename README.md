@@ -1,4 +1,4 @@
-# LIM Serial - Serial Communication & Data Visualization
+# Lim Terminal - Serial Communication & Data Visualization
 
 **README in:** [English](README.md) | [Português](docs/README_pt-br.md) | [Español](docs/README_es.md) | [Deutsch](docs/README_de.md) | [Français](docs/README_fr.md)
 
@@ -6,11 +6,11 @@
 
 ## Overview
 
-LIM Serial is a user-friendly application for serial communication and real-time data visualization. Connect to Arduino or other serial devices, collect data, and create dynamic graphs with professional visualization features. Available in 5 languages with automatic preferences saving.
+Lim Terminal is a user-friendly application for serial communication and real-time data visualization. Connect to Arduino or other serial devices, collect data, and create dynamic graphs with professional visualization features. Available in 5 languages with automatic preferences saving.
 
-![LIM Serial Screenshot](docs/shot.png)
+![Lim Terminal Screenshot](docs/shot.png)
 
-![LIM Serial Screenshot](docs/shot_stacked.png)
+![Lim Terminal Screenshot](docs/shot_stacked.png)
 
 ## Features
 
@@ -42,18 +42,31 @@ LIM Serial is a user-friendly application for serial communication and real-time
 ## Getting Started
 
 ### Requirements
-- Python 3.7 or newer
+- Python 3.8 or newer
 - Internet connection for dependency installation
 
 ### Installation
-```bash
-# Install required packages
-pip install matplotlib pyserial PyYAML
 
-# Download and run LIM Serial
-cd lim_term
-python lim_serial.py
+#### Method 1: Direct Installation (Recommended)
+```bash
+# Install directly from GitHub
+pip install git+https://github.com/CBPF-LIM/lim_term.git
+
+# Run the application
+limterm
 ```
+
+#### Method 2: Development Installation
+```bash
+# Clone the repository
+git clone https://github.com/CBPF-LIM/lim_term.git
+cd lim_term
+
+# Install using Poetry (recommended for development)
+pip install poetry
+poetry install
+poetry run limterm
+
 
 ### First Steps
 1. **Language**: Choose your language from the Language menu
@@ -151,4 +164,4 @@ Developed by CBPF-LIM (Brazilian Center for Research in Physics - Light and Matt
 
 ---
 
-**LIM Serial** - Professional serial communication and data visualization made simple.
+**Lim Terminal** - Professional serial communication and data visualization made simple.

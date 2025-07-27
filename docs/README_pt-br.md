@@ -1,4 +1,4 @@
-# LIM Serial - Comunicação Serial & Visualização de Dados
+# Lim Terminal - Comunicação Serial & Visualização de Dados
 
 **README em:** [English](../README.md) | [Português](README_pt-br.md) | [Español](README_es.md) | [Deutsch](README_de.md) | [Français](README_fr.md)
 
@@ -6,11 +6,11 @@
 
 ## Visão Geral
 
-LIM Serial é uma aplicação amigável para comunicação serial e visualização de dados em tempo real. Conecte-se a Arduino ou outros dispositivos seriais, colete dados e crie gráficos dinâmicos com recursos de visualização profissionais. Disponível em 5 idiomas com salvamento automático de preferências.
+Lim Terminal é uma aplicação amigável para comunicação serial e visualização de dados em tempo real. Conecte-se a Arduino ou outros dispositivos seriais, colete dados e crie gráficos dinâmicos com recursos de visualização profissionais. Disponível em 5 idiomas com salvamento automático de preferências.
 
-![LIM Serial Screenshot](shot.png)
+![Lim Terminal Screenshot](shot.png)
 
-![LIM Serial Screenshot](shot_stacked.png)
+![Lim Terminal Screenshot](shot_stacked.png)
 
 ## Recursos
 
@@ -42,18 +42,31 @@ LIM Serial é uma aplicação amigável para comunicação serial e visualizaç�
 ## Primeiros Passos
 
 ### Requisitos
-- Python 3.7 ou mais recente
+- Python 3.8 ou mais recente
 - Conexão com a internet para instalação de dependências
 
 ### Instalação
-```bash
-# Instalar pacotes necessários
-pip install matplotlib pyserial PyYAML
 
-# Baixar e executar LIM Serial
-cd lim_term
-python lim_serial.py
+#### Método 1: Instalação Direta (Recomendado)
+```bash
+# Instalar diretamente do GitHub
+pip install git+https://github.com/CBPF-LIM/lim_term.git
+
+# Executar a aplicação
+limterm
 ```
+
+#### Método 2: Instalação para Desenvolvimento
+```bash
+# Clonar o repositório
+git clone https://github.com/CBPF-LIM/lim_term.git
+cd lim_term
+
+# Instalar usando Poetry (recomendado para desenvolvimento)
+pip install poetry
+poetry install
+poetry run limterm
+
 
 ### Primeiros Passos
 1. **Idioma**: Escolha seu idioma no menu Idioma
@@ -145,4 +158,4 @@ Desenvolvido por CBPF-LIM (Centro Brasileiro de Pesquisas Físicas - Laboratóri
 
 ---
 
-**LIM Serial** - Comunicação serial e visualização de dados profissionais simplificadas.
+**Lim Terminal** - Comunicação serial e visualização de dados profissionais simplificadas.

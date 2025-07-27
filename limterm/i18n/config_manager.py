@@ -7,7 +7,7 @@ class ConfigManager:
 
 
     def __init__(self):
-        self.config_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config")
+        self.config_dir = os.path.join(os.getcwd(), "lim_config")
         self.config_file = os.path.join(self.config_dir, "prefs.yml")
         self._ensure_config_dir()
 

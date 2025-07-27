@@ -10,7 +10,7 @@ class LanguageManager:
         self.languages = {}
         self.current_language = "en"
         self.fallback_language = "en"
-        self.languages_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "languages")
+        self.languages_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "languages")
         self._load_all_languages()
 
     def _load_all_languages(self):
