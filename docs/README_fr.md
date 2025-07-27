@@ -42,18 +42,31 @@ Lim Terminal est une application conviviale pour la communication série et la v
 ## Premiers Pas
 
 ### Prérequis
-- Python 3.7 ou plus récent
+- Python 3.8 ou plus récent
 - Connexion Internet pour l'installation des dépendances
 
 ### Installation
-```bash
-# Installer les packages requis
-pip install matplotlib pyserial PyYAML
 
-# Télécharger et exécuter Lim Terminal
-cd lim_term
-python limterm.py
+#### Méthode 1 : Installation Directe (Recommandée)
+```bash
+# Installer directement depuis GitHub
+pip install git+https://github.com/CBPF-LIM/lim_term.git
+
+# Exécuter l'application
+limterm
 ```
+
+#### Méthode 2 : Installation pour Développement
+```bash
+# Cloner le dépôt
+git clone https://github.com/CBPF-LIM/lim_term.git
+cd lim_term
+
+# Installer avec Poetry (recommandé pour le développement)
+pip install poetry
+poetry install
+poetry run limterm
+
 
 ### Premiers Pas
 1. **Langue** : Choisissez votre langue dans le menu Langue
