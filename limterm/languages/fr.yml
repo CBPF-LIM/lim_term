@@ -68,6 +68,7 @@ ui:
     global_settings: "Paramètres Globaux"
     series_settings: "Paramètres des Séries"
     time_series_settings: "Paramètres de Série Temporelle"
+    stacked_settings: "Paramètres Empilés"
     series_label: "Série"
     graph_saved: "Graphique sauvegardé dans: {path}"
     could_not_extract_data: "Impossible d'extraire les données des colonnes spécifiées"

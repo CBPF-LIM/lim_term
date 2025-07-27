@@ -68,6 +68,7 @@ ui:
     global_settings: "Global Settings"
     series_settings: "Series Settings"
     time_series_settings: "Time Series Settings"
+    stacked_settings: "Stack Settings"
     series_label: "Series"
     graph_saved: "Graph saved to: {path}"
     could_not_extract_data: "Could not extract data from specified columns"

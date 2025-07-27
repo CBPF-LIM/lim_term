@@ -814,18 +814,21 @@ class GraphTab:
 
     def _create_stacked_widgets(self):
 
-        self.series_config_frame.config(text="Stack Settings")
+        self.series_config_frame.config(text=t("ui.graph_tab.stacked_settings"))
 
 
         self.normalize_100_var = tk.BooleanVar()
         self.normalize_100_checkbox = ttk.Checkbutton(
             self.series_config_frame,
-            text="Normalizar para 100%",
-            variable=self.normalize_100_var
+            text=t("ui.graph_tab.normalize_100_percent"),
+            variable=self.normalize_100_var,
+            command=self._on_normalize_change
         )
         self.normalize_100_checkbox.grid(column=0, row=0, columnspan=4, padx=5, pady=10)
-        self.normalize_100_checkbox.bind("<Button-1>", lambda e: self.series_config_frame.after_idle(self._on_setting_change))
 
+        # Load the saved normalization preference immediately after creating the widget
+        normalize_100 = self.config_manager.load_tab_setting('graph.group.stacked', 'normalize_100', False)
+        self.normalize_100_var.set(normalize_100)
 
         self.series_widgets = []
 
@@ -961,3 +964,13 @@ class GraphTab:
                 print(f"Render frame error: {e}")
 
             self.last_render_time = time.time()
+
+    def _on_normalize_change(self):
+        """Handle immediate change when normalization checkbox is clicked"""
+        try:
+            # Save the preference immediately
+            self._save_stacked_preferences()
+            # Trigger graph update if needed
+            self._on_setting_change()
+        except Exception as e:
+            print(f"Note: Could not save normalization preference: {e}")
