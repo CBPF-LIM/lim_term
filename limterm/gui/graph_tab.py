@@ -4,6 +4,7 @@ from ..core import GraphManager
 from ..utils import DataParser
 from ..config import DEFAULT_X_COLUMN, DEFAULT_Y_COLUMN, MARKER_MAPPING
 from ..i18n import t, get_config_manager
+from .preference_widgets import PrefEntry, PrefCombobox, PrefCheckbutton
 
 
 class GraphTab:
@@ -15,8 +16,6 @@ class GraphTab:
         self.graph_settings = {}
         self.options_visible = False
         self.is_paused = False
-        self.config_manager = get_config_manager()
-
 
         self.refresh_rate_ms = 33
         self.refresh_timer_id = None
@@ -25,7 +24,6 @@ class GraphTab:
         self.last_render_time = 0
 
         self._create_widgets()
-        self._load_preferences()
 
     def _create_widgets(self):
 
@@ -35,11 +33,14 @@ class GraphTab:
 
         self.x_label = ttk.Label(top_row, text=t("ui.graph_tab.column_x"))
         self.x_label.pack(side="left", padx=(0,5))
-        self.x_column_entry = ttk.Entry(top_row, width=10)
+        self.x_column_entry = PrefEntry(
+            top_row,
+            pref_key='graph.general.x_column',
+            default_value=str(DEFAULT_X_COLUMN),
+            width=10,
+            on_change=self._on_setting_change
+        )
         self.x_column_entry.pack(side="left", padx=(0,15))
-        self.x_column_entry.insert(0, DEFAULT_X_COLUMN)
-        self.x_column_entry.bind("<KeyRelease>", self._on_setting_change)
-        self.x_column_entry.bind("<FocusOut>", self._on_preference_changed)
 
         self.plot_button = ttk.Button(top_row, text=t("ui.graph_tab.update_graph"), command=self.plot_graph)
         self.plot_button.pack(side="left", padx=(0,10))
@@ -65,10 +66,14 @@ class GraphTab:
 
             y_label = ttk.Label(y_frame, text=t(f"ui.graph_tab.column_y{i}"))
             y_label.pack(side="top")
-            y_entry = ttk.Entry(y_frame, width=8)
+            y_entry = PrefEntry(
+                y_frame,
+                pref_key=f'graph.general.y{i}_column',
+                default_value='',
+                width=8,
+                on_change=self._on_setting_change
+            )
             y_entry.pack(side="top")
-            y_entry.bind("<KeyRelease>", self._on_setting_change)
-            y_entry.bind("<FocusOut>", self._on_preference_changed)
             self.y_entries.append(y_entry)
 
 
@@ -95,19 +100,28 @@ class GraphTab:
 
         self.group_label = ttk.Label(global_frame, text=t("ui.graph_tab.visualization_group_label"))
         self.group_label.grid(column=0, row=0, padx=5, pady=5, sticky="w")
-        self.group_combobox = ttk.Combobox(global_frame, state="readonly", values=["Time Series", "Stacked"], width=15)
+        self.group_combobox = PrefCombobox(
+            global_frame,
+            pref_key='graph.general.visualization_group',
+            default_value='Time Series',
+            state="readonly",
+            values=["Time Series", "Stacked"],
+            width=15,
+            on_change=self._on_group_change
+        )
         self.group_combobox.grid(column=1, row=0, padx=5, pady=5, sticky="w")
-        self.group_combobox.set("Time Series")
-        self.group_combobox.bind("<<ComboboxSelected>>", self._on_group_change)
 
 
         self.window_label = ttk.Label(global_frame, text=t("ui.graph_tab.window_label"))
         self.window_label.grid(column=2, row=0, padx=5, pady=5, sticky="w")
-        self.data_window_entry = ttk.Entry(global_frame, width=12)
+        self.data_window_entry = PrefEntry(
+            global_frame,
+            pref_key='graph.general.window_size',
+            default_value='50',
+            width=12,
+            on_change=self._on_setting_change
+        )
         self.data_window_entry.grid(column=3, row=0, padx=5, pady=5, sticky="w")
-        self.data_window_entry.insert(0, "50")
-        self.data_window_entry.bind("<KeyRelease>", self._on_setting_change)
-        self.data_window_entry.bind("<FocusOut>", self._on_preference_changed)
 
 
         self.fps_label = ttk.Label(global_frame, text=t("ui.graph_tab.refresh_rate_label"))
@@ -116,10 +130,16 @@ class GraphTab:
         fps_frame = ttk.Frame(global_frame)
         fps_frame.grid(column=5, row=0, padx=5, pady=5, sticky="w")
 
-        self.fps_combobox = ttk.Combobox(fps_frame, state="readonly", values=["1", "5", "10", "15", "20", "30"], width=5)
+        self.fps_combobox = PrefCombobox(
+            fps_frame,
+            pref_key='graph.general.refresh_rate',
+            default_value='30',
+            state="readonly",
+            values=["1", "5", "10", "15", "20", "30"],
+            width=5,
+            on_change=self._on_fps_change
+        )
         self.fps_combobox.pack(side="left")
-        self.fps_combobox.set("30")
-        self.fps_combobox.bind("<<ComboboxSelected>>", self._on_fps_change)
 
 
         self.fps_debug_label = ttk.Label(fps_frame, text="(33ms)", font=("TkDefaultFont", 8))
@@ -128,17 +148,25 @@ class GraphTab:
 
         self.min_y_label = ttk.Label(global_frame, text=t("ui.graph_tab.min_y_label"))
         self.min_y_label.grid(column=0, row=1, padx=5, pady=5, sticky="w")
-        self.min_y_entry = ttk.Entry(global_frame, width=12)
+        self.min_y_entry = PrefEntry(
+            global_frame,
+            pref_key='graph.general.min_y',
+            default_value='',
+            width=12,
+            on_change=self._on_setting_change
+        )
         self.min_y_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
-        self.min_y_entry.bind("<KeyRelease>", self._on_setting_change)
-        self.min_y_entry.bind("<FocusOut>", self._on_preference_changed)
 
         self.max_y_label = ttk.Label(global_frame, text=t("ui.graph_tab.max_y_label"))
         self.max_y_label.grid(column=2, row=1, padx=5, pady=5, sticky="w")
-        self.max_y_entry = ttk.Entry(global_frame, width=12)
+        self.max_y_entry = PrefEntry(
+            global_frame,
+            pref_key='graph.general.max_y',
+            default_value='',
+            width=12,
+            on_change=self._on_setting_change
+        )
         self.max_y_entry.grid(column=3, row=1, padx=5, pady=5, sticky="w")
-        self.max_y_entry.bind("<KeyRelease>", self._on_setting_change)
-        self.max_y_entry.bind("<FocusOut>", self._on_preference_changed)
 
 
         colors_label = ttk.Label(global_frame, text=t("ui.graph_tab.color_label"))
@@ -157,10 +185,16 @@ class GraphTab:
             y_frame.grid(column=i, row=0, padx=2, pady=2)
 
             ttk.Label(y_frame, text=f"Y{i+1}").pack()
-            color_combo = ttk.Combobox(y_frame, state="readonly", values=self._get_translated_colors(), width=8)
+            color_combo = PrefCombobox(
+                y_frame,
+                pref_key=f'graph.general.y{i+1}_color',
+                default_value=default_colors[i],
+                state="readonly",
+                values=self._get_translated_colors(),
+                width=8,
+                on_change=lambda idx=i: self._on_color_setting_change(idx)
+            )
             color_combo.pack()
-            color_combo.set(default_colors[i])
-            color_combo.bind("<<ComboboxSelected>>", lambda e, idx=i: self._on_color_setting_change(idx))
             self.y_color_combos.append(color_combo)
 
 
@@ -259,7 +293,7 @@ class GraphTab:
             if not hasattr(self, 'group_combobox') or not self.group_combobox.winfo_exists():
                 return
 
-            x_col = int(self.x_column_entry.get()) - 1
+            x_col = int(self.x_column_entry.get_value()) - 1
 
             if x_col < 0:
                 raise ValueError(t("ui.graph_tab.positive_numbers"))
@@ -268,19 +302,18 @@ class GraphTab:
             if not data_lines:
                 return
 
-
-            data_window = int(self.data_window_entry.get()) if self.data_window_entry.get() else 0
+            # Use get_value() for type-safe value retrieval
+            data_window_str = self.data_window_entry.get_value()
+            data_window = int(data_window_str) if data_window_str else 0
             if data_window > 0:
                 data_lines = data_lines[-data_window:]
-
 
             x_data, _ = DataParser.extract_columns(data_lines, x_col, 0)
             if not x_data:
                 self.data_tab.add_message(t("ui.graph_tab.could_not_extract_data"))
                 return
 
-
-            group = self.group_combobox.get()
+            group = self.group_combobox.get_value()
 
             if group == "Stacked":
                 self._plot_stacked_chart(x_data, data_lines, x_col)
@@ -296,15 +329,14 @@ class GraphTab:
             self.data_tab.add_message(t("ui.graph_tab.graph_error").format(error=e))
 
     def _plot_time_series_chart(self, x_data, data_lines, x_col):
-
-
+        """Plot time series chart using preference widgets for value access."""
         y_series_data = []
         settings_list = []
         has_data = False
 
-
+        # Extract Y series data using preference widget API
         for i, y_entry in enumerate(self.y_entries):
-            y_col_str = y_entry.get().strip()
+            y_col_str = y_entry.get_value().strip()  # Use get_value() for preference widgets
             if y_col_str:
                 try:
                     y_col = int(y_col_str) - 1
@@ -322,15 +354,14 @@ class GraphTab:
         if not has_data:
             return
 
-
         title = t("ui.graph_tab.chart_title")
         xlabel = t("ui.graph_tab.chart_xlabel").format(column=x_col + 1)
         ylabel = t("ui.graph_tab.chart_ylabel").format(column="Multi")
 
-
+        # Get min/max Y values using preference widget API
         if settings_list:
-            min_y = self.min_y_entry.get().strip()
-            max_y = self.max_y_entry.get().strip()
+            min_y = self.min_y_entry.get_value().strip()  # Use get_value() for preference widgets
+            max_y = self.max_y_entry.get_value().strip()  # Use get_value() for preference widgets
             settings_list[0]['min_y'] = min_y
             settings_list[0]['max_y'] = max_y
 
@@ -345,7 +376,7 @@ class GraphTab:
 
 
         for i, y_entry in enumerate(self.y_entries):
-            y_col_str = y_entry.get().strip()
+            y_col_str = y_entry.get_value().strip()  # Use get_value() for preference widgets
             if y_col_str:
                 try:
                     y_col = int(y_col_str) - 1
@@ -374,7 +405,8 @@ class GraphTab:
             return
 
 
-        normalize_100 = getattr(self, 'normalize_100_var', tk.BooleanVar()).get()
+        # Get normalization setting using the preference widget's API
+        normalize_100 = self.normalize_100_checkbox.get_value()
 
 
         title = t("ui.graph_tab.stacked_chart_title")
@@ -514,254 +546,10 @@ class GraphTab:
 
 
 
-    def _load_preferences(self):
-
-
-        x_col = self.config_manager.load_tab_setting('graph.general', 'x_column', DEFAULT_X_COLUMN)
-        self.x_column_entry.delete(0, "end")
-        self.x_column_entry.insert(0, str(x_col))
-
-
-        vis_group = self.config_manager.load_tab_setting('graph.general', 'visualization_group', 'Time Series')
-        self.group_combobox.set(vis_group)
-
-
-        for i in range(1, 6):
-            y_col = self.config_manager.load_tab_setting('graph.general', f'y{i}_column', '')
-            entry = self.y_entries[i-1]
-            entry.delete(0, "end")
-            entry.insert(0, str(y_col))
-
-
-        window_size = self.config_manager.load_tab_setting('graph.general', 'window_size', '50')
-        self.data_window_entry.delete(0, "end")
-        self.data_window_entry.insert(0, str(window_size))
-
-
-        refresh_rate = self.config_manager.load_tab_setting('graph.general', 'refresh_rate', '30')
-        self.fps_combobox.set(str(refresh_rate))
-        self._set_refresh_rate(int(refresh_rate))
-
-
-        if hasattr(self, 'fps_debug_label'):
-            self.fps_debug_label.config(text=f"({self.refresh_rate_ms}ms)")
-
-        min_y = self.config_manager.load_tab_setting('graph.general', 'min_y', '')
-        max_y = self.config_manager.load_tab_setting('graph.general', 'max_y', '')
-        if min_y:
-            self.min_y_entry.delete(0, "end")
-            self.min_y_entry.insert(0, str(min_y))
-        if max_y:
-            self.max_y_entry.delete(0, "end")
-            self.max_y_entry.insert(0, str(max_y))
-
-
-        default_colors = ['Blue', 'Red', 'Green', 'Orange', 'Magenta']
-        for i in range(5):
-            if i < len(self.y_color_combos):
-                default_color = default_colors[i] if i < len(default_colors) else 'Blue'
-                color = self.config_manager.load_tab_setting('graph.general', f'y{i+1}_color', default_color)
-
-                color_translation_map = {
-                    'Blue': t("ui.colors.blue"), 'Cyan': t("ui.colors.cyan"), 'Teal': t("ui.colors.teal"),
-                    'Green': t("ui.colors.green"), 'Lime': t("ui.colors.lime"), 'Yellow': t("ui.colors.yellow"),
-                    'Amber': t("ui.colors.amber"), 'Orange': t("ui.colors.orange"), 'Red': t("ui.colors.red"),
-                    'Magenta': t("ui.colors.magenta"), 'Indigo': t("ui.colors.indigo"), 'Violet': t("ui.colors.violet"),
-                    'Turquoise': t("ui.colors.turquoise"), 'Aquamarine': t("ui.colors.aquamarine"),
-                    'Springgreen': t("ui.colors.springgreen"), 'Chartreuse': t("ui.colors.chartreuse"),
-                    'Gold': t("ui.colors.gold"), 'Coral': t("ui.colors.coral"), 'Crimson': t("ui.colors.crimson"),
-                    'Pink': t("ui.colors.pink")
-                }
-                if color in color_translation_map:
-                    self.y_color_combos[i].set(color_translation_map[color])
-
-
-        self._create_series_widgets()
-
-
-        self._load_group_preferences(vis_group)
-
-    def _load_group_preferences(self, group):
-
-        if group == "Time Series":
-            self._load_time_series_preferences()
-        elif group == "Stacked":
-            self._load_stacked_preferences()
-
-    def _load_time_series_preferences(self):
-
-
-        for i in range(5):
-            if i < len(self.series_widgets) and 'type' in self.series_widgets[i]:
-                widgets = self.series_widgets[i]
-                series_id = f'y{i+1}'
-
-
-                graph_type = self.config_manager.load_tab_setting('graph.group.ts', f'{series_id}_type', 'Line')
-                type_translation_map = {
-                    'Line': t("ui.graph_types.line"),
-                    'Scatter': t("ui.graph_types.scatter")
-                }
-                if graph_type in type_translation_map:
-                    widgets['type'].set(type_translation_map[graph_type])
-
-
-                marker = self.config_manager.load_tab_setting('graph.group.ts', f'{series_id}_marker', 'circle')
-                marker_translation_map = {
-                    'circle': t("ui.markers.circle"), 'square': t("ui.markers.square"), 'triangle': t("ui.markers.triangle"),
-                    'diamond': t("ui.markers.diamond"), 'star': t("ui.markers.star"), 'plus': t("ui.markers.plus"),
-                    'x': t("ui.markers.x"), 'vline': t("ui.markers.vline"), 'hline': t("ui.markers.hline"),
-                    'hexagon': t("ui.markers.hexagon")
-                }
-                if marker in marker_translation_map:
-                    widgets['marker'].set(marker_translation_map[marker])
-
-    def _load_stacked_preferences(self):
-
-
-        if hasattr(self, 'normalize_100_var'):
-            normalize_100 = self.config_manager.load_tab_setting('graph.group.stacked', 'normalize_100', False)
-            self.normalize_100_var.set(normalize_100)
-
-    def _save_preferences(self):
-
-        try:
-
-            try:
-                self.config_manager.save_tab_setting('graph.general', 'x_column', self.x_column_entry.get())
-            except tk.TclError:
-                pass
-
-            try:
-                self.config_manager.save_tab_setting('graph.general', 'visualization_group', self.group_combobox.get())
-            except tk.TclError:
-                pass
-
-            try:
-                self.config_manager.save_tab_setting('graph.general', 'window_size', self.data_window_entry.get())
-            except tk.TclError:
-                pass
-
-            try:
-                self.config_manager.save_tab_setting('graph.general', 'refresh_rate', self.fps_combobox.get())
-            except tk.TclError:
-                pass
-
-            try:
-                self.config_manager.save_tab_setting('graph.general', 'min_y', self.min_y_entry.get())
-            except tk.TclError:
-                pass
-
-            try:
-                self.config_manager.save_tab_setting('graph.general', 'max_y', self.max_y_entry.get())
-            except tk.TclError:
-                pass
-
-
-            for i in range(1, 6):
-                try:
-                    entry = self.y_entries[i-1]
-                    self.config_manager.save_tab_setting('graph.general', f'y{i}_column', entry.get())
-                except (tk.TclError, IndexError):
-                    pass
-
-
-            for i in range(5):
-                try:
-                    if i < len(self.y_color_combos):
-                        current_color = self.y_color_combos[i].get()
-                        color_reverse_map = {
-                            t("ui.colors.blue"): 'Blue', t("ui.colors.cyan"): 'Cyan', t("ui.colors.teal"): 'Teal',
-                            t("ui.colors.green"): 'Green', t("ui.colors.lime"): 'Lime', t("ui.colors.yellow"): 'Yellow',
-                            t("ui.colors.amber"): 'Amber', t("ui.colors.orange"): 'Orange', t("ui.colors.red"): 'Red',
-                            t("ui.colors.magenta"): 'Magenta', t("ui.colors.indigo"): 'Indigo', t("ui.colors.violet"): 'Violet',
-                            t("ui.colors.turquoise"): 'Turquoise', t("ui.colors.aquamarine"): 'Aquamarine',
-                            t("ui.colors.springgreen"): 'Springgreen', t("ui.colors.chartreuse"): 'Chartreuse',
-                            t("ui.colors.gold"): 'Gold', t("ui.colors.coral"): 'Coral', t("ui.colors.crimson"): 'Crimson',
-                            t("ui.colors.pink"): 'Pink'
-                        }
-                        color_value = color_reverse_map.get(current_color, 'Blue')
-                        self.config_manager.save_tab_setting('graph.general', f'y{i+1}_color', color_value)
-                except (tk.TclError, IndexError):
-                    pass
-
-
-            try:
-                group = self.group_combobox.get()
-                if group == "Time Series":
-                    self._save_time_series_preferences()
-                elif group == "Stacked":
-                    self._save_stacked_preferences()
-            except tk.TclError:
-                pass
-        except Exception as e:
-
-            print(f"Note: Could not save preferences during UI transition: {e}")
-
-    def _save_time_series_preferences(self):
-
-        try:
-
-            for i in range(5):
-                if i < len(self.series_widgets) and 'type' in self.series_widgets[i]:
-                    widgets = self.series_widgets[i]
-                    series_id = f'y{i+1}'
-
-
-                    try:
-
-                        current_type = widgets['type'].get()
-                        type_reverse_map = {
-                            t("ui.graph_types.line"): 'Line',
-                            t("ui.graph_types.scatter"): 'Scatter'
-                        }
-                        type_value = type_reverse_map.get(current_type, 'Line')
-                        self.config_manager.save_tab_setting('graph.group.ts', f'{series_id}_type', type_value)
-
-
-                        current_marker = widgets['marker'].get()
-                        marker_reverse_map = {
-                            t("ui.markers.circle"): 'circle', t("ui.markers.square"): 'square', t("ui.markers.triangle"): 'triangle',
-                            t("ui.markers.diamond"): 'diamond', t("ui.markers.star"): 'star', t("ui.markers.plus"): 'plus',
-                            t("ui.markers.x"): 'x', t("ui.markers.vline"): 'vline', t("ui.markers.hline"): 'hline',
-                            t("ui.markers.hexagon"): 'hexagon'
-                        }
-                        marker_value = marker_reverse_map.get(current_marker, 'circle')
-                        self.config_manager.save_tab_setting('graph.group.ts', f'{series_id}_marker', marker_value)
-                    except tk.TclError:
-
-                        continue
-        except Exception as e:
-
-            print(f"Note: Could not save preferences during UI transition: {e}")
-
-    def _save_stacked_preferences(self):
-
-        try:
-
-            if hasattr(self, 'normalize_100_var'):
-                self.config_manager.save_tab_setting('graph.group.stacked', 'normalize_100', self.normalize_100_var.get())
-        except (tk.TclError, AttributeError) as e:
-
-            print(f"Note: Could not save stacked preferences during UI transition: {e}")
-
-    def _on_preference_changed(self, event=None):
-
-        try:
-            self._save_preferences()
-        except Exception as e:
-
-            print(f"Note: Could not save preferences during UI transition: {e}")
 
     def _on_group_change(self, event=None):
-
+        """Called when the visualization group changes. Preferences are automatically saved."""
         self._create_series_widgets()
-
-
-        group = self.group_combobox.get()
-        self._load_group_preferences(group)
-
-        self._save_preferences()
         self._on_setting_change()
 
     def _create_series_widgets(self):
@@ -770,7 +558,7 @@ class GraphTab:
         for widget in self.series_config_frame.winfo_children():
             widget.destroy()
 
-        group = self.group_combobox.get()
+        group = self.group_combobox.get_value()  # Use get_value() for preference widgets
 
         if group == "Time Series":
             self._create_time_series_widgets()
@@ -817,28 +605,24 @@ class GraphTab:
         self.series_config_frame.config(text=t("ui.graph_tab.stacked_settings"))
 
 
-        self.normalize_100_var = tk.BooleanVar()
-        self.normalize_100_checkbox = ttk.Checkbutton(
+        self.normalize_100_checkbox = PrefCheckbutton(
             self.series_config_frame,
+            pref_key='graph.group.stacked.normalize_100',
+            default_value=False,
             text=t("ui.graph_tab.normalize_100_percent"),
-            variable=self.normalize_100_var,
-            command=self._on_normalize_change
+            on_change=self._on_setting_change
         )
         self.normalize_100_checkbox.grid(column=0, row=0, columnspan=4, padx=5, pady=10)
-
-        # Load the saved normalization preference immediately after creating the widget
-        normalize_100 = self.config_manager.load_tab_setting('graph.group.stacked', 'normalize_100', False)
-        self.normalize_100_var.set(normalize_100)
 
         self.series_widgets = []
 
     def _get_stacked_color(self, series_index):
-
+        """Get color for stacked chart series using preference widget API."""
         if series_index < len(self.y_color_combos):
-            translated_color = self.y_color_combos[series_index].get()
+            translated_color = self.y_color_combos[series_index].get_value()  # Use get_value() for preference widgets
             return self._get_original_color(translated_color)
 
-
+        # Default colors if no preference widget available
         default_colors = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#ff00ff"]
         return default_colors[series_index % len(default_colors)]
 
@@ -847,8 +631,8 @@ class GraphTab:
         return self.frame
 
     def _on_color_setting_change(self, color_index):
+        """Called when a color setting changes. Preferences are automatically saved."""
 
-        self._save_preferences()
         self._on_setting_change()
 
     def _start_refresh_timer(self):
@@ -911,22 +695,19 @@ class GraphTab:
             pass
 
     def _on_fps_change(self, event=None):
-
+        """Called when FPS setting changes. Preferences are automatically saved."""
         try:
-            fps = int(self.fps_combobox.get())
+            fps = int(self.fps_combobox.get_value())  # Use get_value() for type-safe access
             self._set_refresh_rate(fps)
 
-
             self.fps_debug_label.config(text=f"({self.refresh_rate_ms}ms)")
-
 
             import time
             self.last_render_time = time.time()
             self.refresh_counter = 0
 
-            self._save_preferences()
-        except ValueError:
 
+        except ValueError:
             pass
 
     def should_render_now(self, current_time):
