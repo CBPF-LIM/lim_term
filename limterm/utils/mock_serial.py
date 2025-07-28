@@ -44,7 +44,7 @@ class SyntheticDataGenerator:
                         equation = self.equations[column_name]
                         try:
                             value = eval(equation, {"__builtins__": {}}, evaluated_vars)
-                            evaluated_vars[column_name] = (value)
+                            evaluated_vars[column_name] = value
                             data_values.append(f"{value:.2f}")
                         except Exception as e:
                             print(f"Error evaluating equation '{equation}': {e}")
@@ -61,6 +61,7 @@ class SyntheticDataGenerator:
             except Exception as e:
                 print(t("mode_synthetic_generation_error").format(error=e))
                 break
+
 
 class MockSerial(SyntheticDataGenerator):
     def __init__(self):

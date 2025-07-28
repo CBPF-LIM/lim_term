@@ -93,17 +93,21 @@ class ConfigTab:
 
         # FPS selection for synthetic mode
         self.fps_label = ttk.Label(self.equation_frame, text="FPS:")
-        self.fps_label.grid(column=0, row=len(self.equation_labels), padx=5, pady=5, sticky="w")
-        
+        self.fps_label.grid(
+            column=0, row=len(self.equation_labels), padx=5, pady=5, sticky="w"
+        )
+
         self.fps_pref_combobox = PrefCombobox(
             self.equation_frame,
             pref_key="graph.general.refresh_rate",
             default_value="10",
             state="readonly",
             values=[str(i) for i in range(1, 31)],
-            width=8
+            width=8,
         )
-        self.fps_pref_combobox.grid(column=1, row=len(self.equation_labels), padx=5, pady=5, sticky="w")
+        self.fps_pref_combobox.grid(
+            column=1, row=len(self.equation_labels), padx=5, pady=5, sticky="w"
+        )
 
         self.info_frame = ttk.LabelFrame(
             self.frame, text=t("ui.config_tab.connection_info_frame")
@@ -224,7 +228,7 @@ class ConfigTab:
                 self.synthetic_generator = SyntheticDataGenerator(
                     data_callback=self.serial_manager.data_callback,
                     equations=equations,
-                    refresh_rate=fps
+                    refresh_rate=fps,
                 )
 
                 self.synthetic_generator.start_data_generation()
@@ -286,7 +290,7 @@ class ConfigTab:
 
     def _save_preferences(self):
         current_mode = self.mode_combobox.get()
-        
+
         self.config_manager.save_tab_setting("config", "mode", current_mode)
         self.config_manager.save_tab_setting("config", "port", self.port_combobox.get())
         self.config_manager.save_tab_setting(
