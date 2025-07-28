@@ -8,8 +8,6 @@ from .preference_widgets import PrefEntry, PrefCombobox, PrefCheckbutton
 
 
 class GraphTab:
-
-
     def __init__(self, parent, data_tab, open_options_callback):
         self.frame = ttk.Frame(parent)
         self.data_tab = data_tab
@@ -26,64 +24,73 @@ class GraphTab:
         self._create_widgets()
 
     def _create_widgets(self):
-
-
         top_row = ttk.Frame(self.frame)
         top_row.grid(column=0, row=0, sticky="w", padx=10, pady=10)
 
         self.x_label = ttk.Label(top_row, text=t("ui.graph_tab.column_x"))
-        self.x_label.pack(side="left", padx=(0,5))
+        self.x_label.pack(side="left", padx=(0, 5))
         self.x_column_entry = PrefEntry(
             top_row,
-            pref_key='graph.general.x_column',
+            pref_key="graph.general.x_column",
             default_value=str(DEFAULT_X_COLUMN),
             width=10,
-            on_change=self._on_setting_change
+            on_change=self._on_setting_change,
         )
-        self.x_column_entry.pack(side="left", padx=(0,15))
+        self.x_column_entry.pack(side="left", padx=(0, 15))
 
-        self.plot_button = ttk.Button(top_row, text=t("ui.graph_tab.update_graph"), command=self.plot_graph)
-        self.plot_button.pack(side="left", padx=(0,10))
+        self.plot_button = ttk.Button(
+            top_row, text=t("ui.graph_tab.update_graph"), command=self.plot_graph
+        )
+        self.plot_button.pack(side="left", padx=(0, 10))
 
-        self.pause_button = ttk.Button(top_row, text=t("ui.graph_tab.pause"), command=self._toggle_pause)
-        self.pause_button.pack(side="left", padx=(0,10))
+        self.pause_button = ttk.Button(
+            top_row, text=t("ui.graph_tab.pause"), command=self._toggle_pause
+        )
+        self.pause_button.pack(side="left", padx=(0, 10))
 
-        self.options_button = ttk.Button(top_row, text=t("ui.graph_tab.show_options"), command=self._toggle_options)
-        self.options_button.pack(side="left", padx=(0,10))
+        self.options_button = ttk.Button(
+            top_row, text=t("ui.graph_tab.show_options"), command=self._toggle_options
+        )
+        self.options_button.pack(side="left", padx=(0, 10))
 
-        self.save_button = ttk.Button(top_row, text=t("ui.graph_tab.save_png"), command=self._save_chart)
-        self.save_button.pack(side="left", padx=(0,10))
+        self.save_button = ttk.Button(
+            top_row, text=t("ui.graph_tab.save_png"), command=self._save_chart
+        )
+        self.save_button.pack(side="left", padx=(0, 10))
 
-
-        self.y_columns_frame = ttk.LabelFrame(self.frame, text=t("ui.graph_tab.y_columns"))
-        self.y_columns_frame.grid(column=0, row=1, columnspan=4, padx=10, pady=5, sticky="ew")
-
+        self.y_columns_frame = ttk.LabelFrame(
+            self.frame, text=t("ui.graph_tab.y_columns")
+        )
+        self.y_columns_frame.grid(
+            column=0, row=1, columnspan=4, padx=10, pady=5, sticky="ew"
+        )
 
         self.y_entries = []
         for i in range(1, 6):
             y_frame = ttk.Frame(self.y_columns_frame)
-            y_frame.grid(column=i-1, row=0, padx=5, pady=5, sticky="w")
+            y_frame.grid(column=i - 1, row=0, padx=5, pady=5, sticky="w")
 
             y_label = ttk.Label(y_frame, text=t(f"ui.graph_tab.column_y{i}"))
             y_label.pack(side="top")
             y_entry = PrefEntry(
                 y_frame,
-                pref_key=f'graph.general.y{i}_column',
-                default_value='',
+                pref_key=f"graph.general.y{i}_column",
+                default_value="",
                 width=8,
-                on_change=self._on_setting_change
+                on_change=self._on_setting_change,
             )
             y_entry.pack(side="top")
             self.y_entries.append(y_entry)
 
-
-        self.options_frame = ttk.LabelFrame(self.frame, text=t("ui.graph_tab.options_frame"))
+        self.options_frame = ttk.LabelFrame(
+            self.frame, text=t("ui.graph_tab.options_frame")
+        )
         self._create_options_widgets()
 
-
         self.graph_manager = GraphManager(self.frame)
-        self.graph_manager.get_widget().grid(column=0, row=4, columnspan=4, padx=10, pady=10, sticky="nsew")
-
+        self.graph_manager.get_widget().grid(
+            column=0, row=4, columnspan=4, padx=10, pady=10, sticky="nsew"
+        )
 
         self.frame.rowconfigure(4, weight=1)
         self.frame.columnconfigure(0, weight=1)
@@ -92,39 +99,40 @@ class GraphTab:
         self.frame.columnconfigure(3, weight=1)
 
     def _create_options_widgets(self):
-
-
-        global_frame = ttk.LabelFrame(self.options_frame, text=t("ui.graph_tab.global_settings"))
+        global_frame = ttk.LabelFrame(
+            self.options_frame, text=t("ui.graph_tab.global_settings")
+        )
         global_frame.grid(column=0, row=0, columnspan=6, padx=5, pady=5, sticky="ew")
 
-
-        self.group_label = ttk.Label(global_frame, text=t("ui.graph_tab.visualization_group_label"))
+        self.group_label = ttk.Label(
+            global_frame, text=t("ui.graph_tab.visualization_group_label")
+        )
         self.group_label.grid(column=0, row=0, padx=5, pady=5, sticky="w")
         self.group_combobox = PrefCombobox(
             global_frame,
-            pref_key='graph.general.visualization_group',
-            default_value='Time Series',
+            pref_key="graph.general.visualization_group",
+            default_value="Time Series",
             state="readonly",
             values=["Time Series", "Stacked"],
             width=15,
-            on_change=self._on_group_change
+            on_change=self._on_group_change,
         )
         self.group_combobox.grid(column=1, row=0, padx=5, pady=5, sticky="w")
-
 
         self.window_label = ttk.Label(global_frame, text=t("ui.graph_tab.window_label"))
         self.window_label.grid(column=2, row=0, padx=5, pady=5, sticky="w")
         self.data_window_entry = PrefEntry(
             global_frame,
-            pref_key='graph.general.window_size',
-            default_value='50',
+            pref_key="graph.general.window_size",
+            default_value="50",
             width=12,
-            on_change=self._on_setting_change
+            on_change=self._on_setting_change,
         )
         self.data_window_entry.grid(column=3, row=0, padx=5, pady=5, sticky="w")
 
-
-        self.fps_label = ttk.Label(global_frame, text=t("ui.graph_tab.refresh_rate_label"))
+        self.fps_label = ttk.Label(
+            global_frame, text=t("ui.graph_tab.refresh_rate_label")
+        )
         self.fps_label.grid(column=4, row=0, padx=5, pady=5, sticky="w")
 
         fps_frame = ttk.Frame(global_frame)
@@ -132,28 +140,28 @@ class GraphTab:
 
         self.fps_combobox = PrefCombobox(
             fps_frame,
-            pref_key='graph.general.refresh_rate',
-            default_value='30',
+            pref_key="graph.general.refresh_rate",
+            default_value="30",
             state="readonly",
             values=["1", "5", "10", "15", "20", "30"],
             width=5,
-            on_change=self._on_fps_change
+            on_change=self._on_fps_change,
         )
         self.fps_combobox.pack(side="left")
 
-
-        self.fps_debug_label = ttk.Label(fps_frame, text="(33ms)", font=("TkDefaultFont", 8))
-        self.fps_debug_label.pack(side="left", padx=(5,0))
-
+        self.fps_debug_label = ttk.Label(
+            fps_frame, text="(33ms)", font=("TkDefaultFont", 8)
+        )
+        self.fps_debug_label.pack(side="left", padx=(5, 0))
 
         self.min_y_label = ttk.Label(global_frame, text=t("ui.graph_tab.min_y_label"))
         self.min_y_label.grid(column=0, row=1, padx=5, pady=5, sticky="w")
         self.min_y_entry = PrefEntry(
             global_frame,
-            pref_key='graph.general.min_y',
-            default_value='',
+            pref_key="graph.general.min_y",
+            default_value="",
             width=12,
-            on_change=self._on_setting_change
+            on_change=self._on_setting_change,
         )
         self.min_y_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
 
@@ -161,17 +169,15 @@ class GraphTab:
         self.max_y_label.grid(column=2, row=1, padx=5, pady=5, sticky="w")
         self.max_y_entry = PrefEntry(
             global_frame,
-            pref_key='graph.general.max_y',
-            default_value='',
+            pref_key="graph.general.max_y",
+            default_value="",
             width=12,
-            on_change=self._on_setting_change
+            on_change=self._on_setting_change,
         )
         self.max_y_entry.grid(column=3, row=1, padx=5, pady=5, sticky="w")
 
-
         colors_label = ttk.Label(global_frame, text=t("ui.graph_tab.color_label"))
         colors_label.grid(column=0, row=2, padx=5, pady=5, sticky="w")
-
 
         self.y_color_combos = []
         default_colors = ["blue", "red", "green", "orange", "magenta"]
@@ -186,71 +192,91 @@ class GraphTab:
             ttk.Label(y_frame, text=f"Y{i+1}").pack()
             color_combo = PrefCombobox(
                 y_frame,
-                pref_key=f'graph.general.y{i+1}_color',
+                pref_key=f"graph.general.y{i+1}_color",
                 default_value=default_colors[i],
                 state="readonly",
                 values=self._get_translated_colors(),
                 width=8,
                 value_mapping=self._get_color_mapping(),
-                on_change=lambda idx=i: self._on_color_setting_change(idx)
+                on_change=lambda idx=i: self._on_color_setting_change(idx),
             )
             color_combo.pack()
             self.y_color_combos.append(color_combo)
 
-
-        self.series_config_frame = ttk.LabelFrame(self.options_frame, text=t("ui.graph_tab.series_settings"))
-        self.series_config_frame.grid(column=0, row=1, columnspan=6, padx=5, pady=5, sticky="ew")
+        self.series_config_frame = ttk.LabelFrame(
+            self.options_frame, text=t("ui.graph_tab.series_settings")
+        )
+        self.series_config_frame.grid(
+            column=0, row=1, columnspan=6, padx=5, pady=5, sticky="ew"
+        )
 
         self._create_series_widgets()
 
     def _create_series_row(self, parent, row, label, index):
-
         ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
 
-
-        type_combo = ttk.Combobox(parent, state="readonly", values=self._get_translated_graph_types(), width=10)
+        type_combo = ttk.Combobox(
+            parent,
+            state="readonly",
+            values=self._get_translated_graph_types(),
+            width=10,
+        )
         type_combo.grid(column=1, row=row, padx=5, pady=2)
         type_combo.set(t("ui.graph_types.line"))
-        type_combo.bind("<<ComboboxSelected>>", lambda e, idx=index: self._on_series_setting_change(idx))
+        type_combo.bind(
+            "<<ComboboxSelected>>",
+            lambda e, idx=index: self._on_series_setting_change(idx),
+        )
 
-
-        color_combo = ttk.Combobox(parent, state="readonly", values=self._get_translated_colors(), width=10)
+        color_combo = ttk.Combobox(
+            parent, state="readonly", values=self._get_translated_colors(), width=10
+        )
         color_combo.grid(column=2, row=row, padx=5, pady=2)
 
-        default_colors = [t("ui.colors.blue"), t("ui.colors.red"), t("ui.colors.green"),
-                         t("ui.colors.orange"), t("ui.colors.magenta"), t("ui.colors.cyan")]
+        default_colors = [
+            t("ui.colors.blue"),
+            t("ui.colors.red"),
+            t("ui.colors.green"),
+            t("ui.colors.orange"),
+            t("ui.colors.magenta"),
+            t("ui.colors.cyan"),
+        ]
         color_combo.set(default_colors[index % len(default_colors)])
-        color_combo.bind("<<ComboboxSelected>>", lambda e, idx=index: self._on_series_setting_change(idx))
+        color_combo.bind(
+            "<<ComboboxSelected>>",
+            lambda e, idx=index: self._on_series_setting_change(idx),
+        )
 
-
-        marker_combo = ttk.Combobox(parent, state="readonly", values=self._get_translated_markers(), width=10)
+        marker_combo = ttk.Combobox(
+            parent, state="readonly", values=self._get_translated_markers(), width=10
+        )
         marker_combo.grid(column=3, row=row, padx=5, pady=2)
         marker_combo.set(t("ui.markers.circle"))
-        marker_combo.bind("<<ComboboxSelected>>", lambda e, idx=index: self._on_series_setting_change(idx))
+        marker_combo.bind(
+            "<<ComboboxSelected>>",
+            lambda e, idx=index: self._on_series_setting_change(idx),
+        )
 
-        self.series_widgets.append({
-            'type': type_combo,
-            'color': color_combo,
-            'marker': marker_combo
-        })
+        self.series_widgets.append(
+            {"type": type_combo, "color": color_combo, "marker": marker_combo}
+        )
 
     def _toggle_options(self):
-
         if self.options_visible:
             self.options_frame.grid_remove()
             self.options_button.config(text=t("ui.graph_tab.show_options"))
             self.options_visible = False
         else:
-            self.options_frame.grid(column=0, row=2, columnspan=4, padx=10, pady=10, sticky="ew")
+            self.options_frame.grid(
+                column=0, row=2, columnspan=4, padx=10, pady=10, sticky="ew"
+            )
             self.options_button.config(text=t("ui.graph_tab.hide_options"))
             self.options_visible = True
 
     def _on_series_setting_change(self, series_index):
-
         self._on_setting_change()
 
     def _toggle_pause(self):
-
         self.is_paused = not self.is_paused
         if self.is_paused:
             self.pause_button.config(text=t("ui.graph_tab.resume"))
@@ -261,35 +287,42 @@ class GraphTab:
         """Save the current chart as PNG by directly saving the existing figure"""
         from tkinter import filedialog
 
-
         file_path = filedialog.asksaveasfilename(
             defaultextension=".png",
             filetypes=[("PNG files", "*.png"), ("All files", "*.*")],
-            title=t("ui.graph_tab.save_dialog_title")
+            title=t("ui.graph_tab.save_dialog_title"),
         )
 
         if file_path:
             try:
-
-                self.graph_manager.figure.savefig(file_path, dpi=300, bbox_inches='tight')
-                self.data_tab.add_message(t("ui.graph_tab.graph_saved").format(path=file_path))
+                self.graph_manager.figure.savefig(
+                    file_path, dpi=300, bbox_inches="tight"
+                )
+                self.data_tab.add_message(
+                    t("ui.graph_tab.graph_saved").format(path=file_path)
+                )
             except Exception as e:
                 self.data_tab.add_message(t("ui.data_tab.error_saving").format(error=e))
 
     def _on_setting_change(self, event=None):
-
-
         pass
 
     def plot_graph(self):
-
         try:
-
-            if not hasattr(self, 'x_column_entry') or not self.x_column_entry.winfo_exists():
+            if (
+                not hasattr(self, "x_column_entry")
+                or not self.x_column_entry.winfo_exists()
+            ):
                 return
-            if not hasattr(self, 'data_window_entry') or not self.data_window_entry.winfo_exists():
+            if (
+                not hasattr(self, "data_window_entry")
+                or not self.data_window_entry.winfo_exists()
+            ):
                 return
-            if not hasattr(self, 'group_combobox') or not self.group_combobox.winfo_exists():
+            if (
+                not hasattr(self, "group_combobox")
+                or not self.group_combobox.winfo_exists()
+            ):
                 return
 
             x_col = int(self.x_column_entry.get_value()) - 1
@@ -300,7 +333,6 @@ class GraphTab:
             data_lines = self.data_tab.get_data()
             if not data_lines:
                 return
-
 
             data_window_str = self.data_window_entry.get_value()
             data_window = int(data_window_str) if data_window_str else 0
@@ -320,7 +352,6 @@ class GraphTab:
                 self._plot_time_series_chart(x_data, data_lines, x_col)
 
         except tk.TclError as e:
-
             pass
         except ValueError as e:
             self.data_tab.add_message(t("ui.graph_tab.parameter_error").format(error=e))
@@ -333,7 +364,6 @@ class GraphTab:
         settings_list = []
         has_data = False
 
-
         for i, y_entry in enumerate(self.y_entries):
             y_col_str = y_entry.get_value().strip()
             if y_col_str:
@@ -344,7 +374,7 @@ class GraphTab:
                         if y_data:
                             y_series_data.append(y_data)
                             settings = self._get_series_settings(i)
-                            settings['has_data'] = True
+                            settings["has_data"] = True
                             settings_list.append(settings)
                             has_data = True
                 except ValueError:
@@ -357,22 +387,20 @@ class GraphTab:
         xlabel = t("ui.graph_tab.chart_xlabel").format(column=x_col + 1)
         ylabel = t("ui.graph_tab.chart_ylabel").format(column="Multi")
 
-
         if settings_list:
             min_y = self.min_y_entry.get_value().strip()
             max_y = self.max_y_entry.get_value().strip()
-            settings_list[0]['min_y'] = min_y
-            settings_list[0]['max_y'] = max_y
+            settings_list[0]["min_y"] = min_y
+            settings_list[0]["max_y"] = max_y
 
-        self.graph_manager.plot_multi_series(x_data, y_series_data, settings_list, x_col, title, xlabel, ylabel)
+        self.graph_manager.plot_multi_series(
+            x_data, y_series_data, settings_list, x_col, title, xlabel, ylabel
+        )
 
     def _plot_stacked_chart(self, x_data, data_lines, x_col):
-
-
         y_series_data = []
         colors = []
         has_data = False
-
 
         for i, y_entry in enumerate(self.y_entries):
             y_col_str = y_entry.get_value().strip()
@@ -403,16 +431,19 @@ class GraphTab:
         if not has_data:
             return
 
-
-
         normalize_100 = self.normalize_100_checkbox.get_value()
-
 
         title = t("ui.graph_tab.stacked_chart_title")
         xlabel = t("ui.graph_tab.chart_xlabel").format(column=x_col + 1)
-        ylabel = t("ui.graph_tab.stacked_chart_ylabel_percent") if normalize_100 else t("ui.graph_tab.stacked_chart_ylabel")
+        ylabel = (
+            t("ui.graph_tab.stacked_chart_ylabel_percent")
+            if normalize_100
+            else t("ui.graph_tab.stacked_chart_ylabel")
+        )
 
-        self.graph_manager.plot_stacked_series(x_data, y_series_data, colors, normalize_100, title, xlabel, ylabel)
+        self.graph_manager.plot_stacked_series(
+            x_data, y_series_data, colors, normalize_100, title, xlabel, ylabel
+        )
 
     def _get_series_settings(self, series_index):
         """Get series settings using preference widget API for type-safe value access."""
@@ -421,30 +452,21 @@ class GraphTab:
         if series_index < len(self.series_widgets):
             widgets = self.series_widgets[series_index]
 
-            if 'type' in widgets:
-                type_value = widgets['type'].get_value()
-                marker_value = widgets['marker'].get_value()
+            if "type" in widgets:
+                type_value = widgets["type"].get_value()
+                marker_value = widgets["marker"].get_value()
 
                 return {
-                    'type': type_value,
-                    'color': color,
-                    'marker': self._get_original_marker_from_internal(marker_value)
+                    "type": type_value,
+                    "color": color,
+                    "marker": self._get_original_marker_from_internal(marker_value),
                 }
             else:
-                return {
-                    'type': 'line',
-                    'color': color,
-                    'marker': 'o'
-                }
+                return {"type": "line", "color": color, "marker": "o"}
 
-        return {
-            'type': 'line',
-            'color': color,
-            'marker': 'o'
-        }
+        return {"type": "line", "color": color, "marker": "o"}
 
     def update_graph_settings(self, settings):
-
         self.graph_settings.update(settings)
 
         if "type" in settings:
@@ -461,7 +483,9 @@ class GraphTab:
             self.max_y_entry.delete(0, "end")
             self.max_y_entry.insert(0, settings["max_y"])
         if "dot_type" in settings:
-            translated_marker = self._get_translated_marker_from_original(settings["dot_type"])
+            translated_marker = self._get_translated_marker_from_original(
+                settings["dot_type"]
+            )
             self.dot_type_combobox.set(translated_marker)
 
         if self.data_tab.get_data() and not self.is_paused:
@@ -475,33 +499,91 @@ class GraphTab:
         """Get mapping from translated labels to internal values."""
         return {
             t("ui.graph_types.line"): "line",
-            t("ui.graph_types.scatter"): "scatter"
+            t("ui.graph_types.scatter"): "scatter",
         }
 
     def _get_translated_colors(self):
         """Get translated color labels."""
-        color_keys = ["blue", "cyan", "teal", "green", "lime", "yellow", "amber", "orange",
-                     "red", "magenta", "indigo", "violet", "turquoise", "aquamarine",
-                     "springgreen", "chartreuse", "gold", "coral", "crimson", "pink"]
+        color_keys = [
+            "blue",
+            "cyan",
+            "teal",
+            "green",
+            "lime",
+            "yellow",
+            "amber",
+            "orange",
+            "red",
+            "magenta",
+            "indigo",
+            "violet",
+            "turquoise",
+            "aquamarine",
+            "springgreen",
+            "chartreuse",
+            "gold",
+            "coral",
+            "crimson",
+            "pink",
+        ]
         return [t(f"ui.colors.{color}") for color in color_keys]
 
     def _get_color_mapping(self):
         """Get mapping from translated color labels to internal values."""
-        color_keys = ["blue", "cyan", "teal", "green", "lime", "yellow", "amber", "orange",
-                     "red", "magenta", "indigo", "violet", "turquoise", "aquamarine",
-                     "springgreen", "chartreuse", "gold", "coral", "crimson", "pink"]
+        color_keys = [
+            "blue",
+            "cyan",
+            "teal",
+            "green",
+            "lime",
+            "yellow",
+            "amber",
+            "orange",
+            "red",
+            "magenta",
+            "indigo",
+            "violet",
+            "turquoise",
+            "aquamarine",
+            "springgreen",
+            "chartreuse",
+            "gold",
+            "coral",
+            "crimson",
+            "pink",
+        ]
         return {t(f"ui.colors.{color}"): color for color in color_keys}
 
     def _get_translated_markers(self):
         """Get translated marker labels."""
-        marker_keys = ["circle", "square", "triangle", "diamond", "star", "plus",
-                      "x", "vline", "hline", "hexagon"]
+        marker_keys = [
+            "circle",
+            "square",
+            "triangle",
+            "diamond",
+            "star",
+            "plus",
+            "x",
+            "vline",
+            "hline",
+            "hexagon",
+        ]
         return [t(f"ui.markers.{marker}") for marker in marker_keys]
 
     def _get_marker_mapping(self):
         """Get mapping from translated marker labels to internal values."""
-        marker_keys = ["circle", "square", "triangle", "diamond", "star", "plus",
-                      "x", "vline", "hline", "hexagon"]
+        marker_keys = [
+            "circle",
+            "square",
+            "triangle",
+            "diamond",
+            "star",
+            "plus",
+            "x",
+            "vline",
+            "hline",
+            "hexagon",
+        ]
         return {t(f"ui.markers.{marker}"): marker for marker in marker_keys}
 
     def _get_original_marker_from_internal(self, internal_marker):
@@ -516,7 +598,7 @@ class GraphTab:
             "x": "x",
             "vline": "|",
             "hline": "_",
-            "hexagon": "h"
+            "hexagon": "h",
         }
         return marker_mapping.get(internal_marker, "o")
 
@@ -532,7 +614,7 @@ class GraphTab:
             t("ui.markers.x"): "x",
             t("ui.markers.vline"): "|",
             t("ui.markers.hline"): "_",
-            t("ui.markers.hexagon"): "h"
+            t("ui.markers.hexagon"): "h",
         }
         return marker_mapping.get(translated_marker, "o")
 
@@ -544,10 +626,9 @@ class GraphTab:
         return t("ui.markers.circle")
 
     def _get_original_graph_type(self, translated_type):
-
         type_mapping = {
             t("ui.graph_types.line"): "line",
-            t("ui.graph_types.scatter"): "scatter"
+            t("ui.graph_types.scatter"): "scatter",
         }
         return type_mapping.get(translated_type, "line")
 
@@ -573,12 +654,11 @@ class GraphTab:
             "gold": "#ffd700",
             "coral": "#ff7f50",
             "crimson": "#dc143c",
-            "pink": "#ffc0cb"
+            "pink": "#ffc0cb",
         }
         return color_mapping.get(internal_color, "#1f77b4")
 
     def _get_original_color(self, translated_color):
-
         color_mapping = {
             t("ui.colors.blue"): "#1f77b4",
             t("ui.colors.cyan"): "#17becf",
@@ -599,12 +679,9 @@ class GraphTab:
             t("ui.colors.gold"): "#ffd700",
             t("ui.colors.coral"): "#ff7f50",
             t("ui.colors.crimson"): "#dc143c",
-            t("ui.colors.pink"): "#ffc0cb"
+            t("ui.colors.pink"): "#ffc0cb",
         }
         return color_mapping.get(translated_color, "#1f77b4")
-
-
-
 
     def _on_group_change(self, event=None):
         """Called when the visualization group changes. Preferences are automatically saved."""
@@ -612,8 +689,6 @@ class GraphTab:
         self._on_setting_change()
 
     def _create_series_widgets(self):
-
-
         for widget in self.series_config_frame.winfo_children():
             widget.destroy()
 
@@ -625,65 +700,61 @@ class GraphTab:
             self._create_stacked_widgets()
 
     def _create_time_series_widgets(self):
-
         self.series_config_frame.config(text=t("ui.graph_tab.time_series_settings"))
 
-
-        ttk.Label(self.series_config_frame, text=t("ui.graph_tab.series_label")).grid(column=0, row=0, padx=5, pady=5)
-        ttk.Label(self.series_config_frame, text=t("ui.graph_tab.type_label")).grid(column=1, row=0, padx=5, pady=5)
-        ttk.Label(self.series_config_frame, text=t("ui.graph_tab.point_label")).grid(column=2, row=0, padx=5, pady=5)
-
+        ttk.Label(self.series_config_frame, text=t("ui.graph_tab.series_label")).grid(
+            column=0, row=0, padx=5, pady=5
+        )
+        ttk.Label(self.series_config_frame, text=t("ui.graph_tab.type_label")).grid(
+            column=1, row=0, padx=5, pady=5
+        )
+        ttk.Label(self.series_config_frame, text=t("ui.graph_tab.point_label")).grid(
+            column=2, row=0, padx=5, pady=5
+        )
 
         self.series_widgets = []
         for i in range(1, 6):
-            self._create_time_series_row(self.series_config_frame, i, f"Y{i}", i-1)
+            self._create_time_series_row(self.series_config_frame, i, f"Y{i}", i - 1)
 
     def _create_time_series_row(self, parent, row, label, index):
         """Create a time series configuration row using preference widgets."""
         ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
 
-
         type_combo = PrefCombobox(
             parent,
-            pref_key=f'graph.time_series.y{index+1}_type',
+            pref_key=f"graph.time_series.y{index+1}_type",
             default_value="line",
             state="readonly",
             values=self._get_translated_graph_types(),
             width=10,
             value_mapping=self._get_graph_type_mapping(),
-            on_change=lambda idx=index: self._on_series_setting_change(idx)
+            on_change=lambda idx=index: self._on_series_setting_change(idx),
         )
         type_combo.grid(column=1, row=row, padx=5, pady=2)
 
-
         marker_combo = PrefCombobox(
             parent,
-            pref_key=f'graph.time_series.y{index+1}_marker',
+            pref_key=f"graph.time_series.y{index+1}_marker",
             default_value="circle",
             state="readonly",
             values=self._get_translated_markers(),
             width=10,
             value_mapping=self._get_marker_mapping(),
-            on_change=lambda idx=index: self._on_series_setting_change(idx)
+            on_change=lambda idx=index: self._on_series_setting_change(idx),
         )
         marker_combo.grid(column=2, row=row, padx=5, pady=2)
 
-        self.series_widgets.append({
-            'type': type_combo,
-            'marker': marker_combo
-        })
+        self.series_widgets.append({"type": type_combo, "marker": marker_combo})
 
     def _create_stacked_widgets(self):
-
         self.series_config_frame.config(text=t("ui.graph_tab.stacked_settings"))
-
 
         self.normalize_100_checkbox = PrefCheckbutton(
             self.series_config_frame,
-            pref_key='graph.group.stacked.normalize_100',
+            pref_key="graph.group.stacked.normalize_100",
             default_value=False,
             text=t("ui.graph_tab.normalize_100_percent"),
-            on_change=self._on_setting_change
+            on_change=self._on_setting_change,
         )
         self.normalize_100_checkbox.grid(column=0, row=0, columnspan=4, padx=5, pady=10)
 
@@ -695,12 +766,10 @@ class GraphTab:
             internal_color = self.y_color_combos[series_index].get_value()
             return self._get_original_color_from_internal(internal_color)
 
-
         default_colors = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#ff00ff"]
         return default_colors[series_index % len(default_colors)]
 
     def get_frame(self):
-
         return self.frame
 
     def _on_color_setting_change(self, color_index):
@@ -709,42 +778,36 @@ class GraphTab:
         self._on_setting_change()
 
     def _start_refresh_timer(self):
-
         self._refresh_chart()
 
     def _refresh_chart(self):
-
         try:
-
-
             if not self.is_paused:
                 data_lines = self.data_tab.get_data()
                 if data_lines:
                     if self.debug_refresh:
                         self.refresh_counter += 1
                         fps_actual = 1000 / self.refresh_rate_ms
-                        print(f"Chart refresh #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Fixed Rate")
-
+                        print(
+                            f"Chart refresh #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Fixed Rate"
+                        )
 
                     self.plot_graph()
                 else:
-
                     pass
             else:
-
                 pass
 
         except Exception as e:
-
             if self.debug_refresh:
                 print(f"Chart refresh error: {e}")
         finally:
-
-            if hasattr(self, 'frame') and self.frame.winfo_exists():
-                self.refresh_timer_id = self.frame.after(self.refresh_rate_ms, self._refresh_chart)
+            if hasattr(self, "frame") and self.frame.winfo_exists():
+                self.refresh_timer_id = self.frame.after(
+                    self.refresh_rate_ms, self._refresh_chart
+                )
 
     def _stop_refresh_timer(self):
-
         if self.refresh_timer_id:
             try:
                 self.frame.after_cancel(self.refresh_timer_id)
@@ -753,15 +816,12 @@ class GraphTab:
             self.refresh_timer_id = None
 
     def _set_refresh_rate(self, fps):
-
         self.refresh_rate_ms = int(1000 / fps)
 
     def cleanup(self):
-
         self._stop_refresh_timer()
 
     def __del__(self):
-
         try:
             self.cleanup()
         except:
@@ -776,44 +836,40 @@ class GraphTab:
             self.fps_debug_label.config(text=f"({self.refresh_rate_ms}ms)")
 
             import time
+
             self.last_render_time = time.time()
             self.refresh_counter = 0
-
 
         except ValueError:
             pass
 
     def should_render_now(self, current_time):
-
         if self.is_paused:
             return False
-
 
         refresh_interval = self.refresh_rate_ms / 1000.0
 
         return (current_time - self.last_render_time) >= refresh_interval
 
     def render_frame(self):
-
         import time
-        try:
 
+        try:
             data_lines = self.data_tab.get_data()
             if data_lines:
                 self.refresh_counter += 1
 
                 if self.debug_refresh:
                     fps_actual = 1000 / self.refresh_rate_ms
-                    print(f"Render frame #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Game Loop Style")
-
+                    print(
+                        f"Render frame #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Game Loop Style"
+                    )
 
                 self.plot_graph()
-
 
             self.last_render_time = time.time()
 
         except Exception as e:
-
             if self.debug_refresh:
                 print(f"Render frame error: {e}")
 
@@ -822,7 +878,6 @@ class GraphTab:
     def _on_normalize_change(self):
         """Handle immediate change when normalization checkbox is clicked"""
         try:
-
             self._save_stacked_preferences()
 
             self._on_setting_change()

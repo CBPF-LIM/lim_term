@@ -6,8 +6,6 @@ import platform
 
 
 class MockSerial:
-
-
     def __init__(self):
         self.master_fd = None
         self.slave_port = None
@@ -15,20 +13,17 @@ class MockSerial:
         self.data_thread = None
 
     def create_virtual_port(self):
-
         try:
             if platform.system() == "Linux":
                 import pty
+
                 self.master_fd, slave_fd = pty.openpty()
                 self.slave_port = os.ttyname(slave_fd)
-
 
                 os.chmod(self.slave_port, 0o666)
 
                 return self.slave_port
             else:
-
-
                 self.slave_port = "COM_VIRTUAL"
                 return self.slave_port
 
@@ -36,7 +31,6 @@ class MockSerial:
             raise Exception(f"Erro ao criar porta virtual: {e}")
 
     def start_data_generation(self):
-
         if not self.master_fd or self.is_running:
             return
 
@@ -45,7 +39,6 @@ class MockSerial:
         self.data_thread.start()
 
     def stop_data_generation(self):
-
         self.is_running = False
         if self.master_fd:
             try:
@@ -56,11 +49,9 @@ class MockSerial:
         self.slave_port = None
 
     def _generate_data(self):
-
         index = 0
         while self.is_running and self.master_fd:
             try:
-
                 col1 = int(index)
                 col2 = col1 * 0.01 + 2
                 col3 = math.sin(10 * col2) + 2
@@ -73,12 +64,11 @@ class MockSerial:
                 os.write(self.master_fd, (data + "\n").encode("utf-8"))
 
                 index += 1
-                time.sleep(1/30)
+                time.sleep(1 / 30)
 
             except Exception as e:
                 print(f"Erro na geração de dados: {e}")
                 break
 
     def get_port(self):
-
         return self.slave_port

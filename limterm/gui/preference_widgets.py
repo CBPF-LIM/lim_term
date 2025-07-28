@@ -23,9 +23,17 @@ class PreferenceWidget:
     5. Exposes all methods/properties of the underlying widget
     """
 
-    def __init__(self, widget_class, parent, pref_key: str, default_value: Any = None,
-                 value_type: type = str, on_change: Optional[Callable] = None,
-                 value_mapping: Optional[Dict[str, str]] = None, **widget_kwargs):
+    def __init__(
+        self,
+        widget_class,
+        parent,
+        pref_key: str,
+        default_value: Any = None,
+        value_type: type = str,
+        on_change: Optional[Callable] = None,
+        value_mapping: Optional[Dict[str, str]] = None,
+        **widget_kwargs,
+    ):
         """
         Initialize a preference-aware widget wrapper.
 
@@ -46,76 +54,73 @@ class PreferenceWidget:
         self.config_manager = get_config_manager()
         self._tkinter_var = None
         self.value_mapping = value_mapping or {}
-        self.reverse_mapping = {v: k for k, v in self.value_mapping.items()} if value_mapping else {}
-
+        self.reverse_mapping = (
+            {v: k for k, v in self.value_mapping.items()} if value_mapping else {}
+        )
 
         self._parse_pref_key()
 
-
         self.widget = widget_class(parent, **widget_kwargs)
 
-
         self._setup_preference_handling()
-
 
         self._load_from_preferences()
 
     def _parse_pref_key(self):
         """Parse the dot-notation preference key into section and key parts."""
-        parts = self.pref_key.split('.')
+        parts = self.pref_key.split(".")
         if len(parts) < 2:
-            raise ValueError(f"Preference key must have at least 2 parts separated by dots: {self.pref_key}")
+            raise ValueError(
+                f"Preference key must have at least 2 parts separated by dots: {self.pref_key}"
+            )
 
-
-        self.pref_section = '.'.join(parts[:-1])
+        self.pref_section = ".".join(parts[:-1])
         self.pref_name = parts[-1]
 
     def _setup_preference_handling(self):
         """Set up automatic change detection based on widget type."""
         widget_type = type(self.widget).__name__
 
-        if widget_type in ['Entry']:
+        if widget_type in ["Entry"]:
+            self.widget.bind("<KeyRelease>", self._on_change_event)
+            self.widget.bind("<FocusOut>", self._on_change_event)
 
-            self.widget.bind('<KeyRelease>', self._on_change_event)
-            self.widget.bind('<FocusOut>', self._on_change_event)
+        elif widget_type in ["Combobox"]:
+            self.widget.bind("<<ComboboxSelected>>", self._on_change_event)
 
-        elif widget_type in ['Combobox']:
-
-            self.widget.bind('<<ComboboxSelected>>', self._on_change_event)
-
-        elif widget_type in ['Checkbutton']:
-
-
-            var = self.widget.cget('variable')
+        elif widget_type in ["Checkbutton"]:
+            var = self.widget.cget("variable")
             if not var or isinstance(var, str):
-
                 self._tkinter_var = tk.BooleanVar()
                 self.widget.config(variable=self._tkinter_var)
             else:
-
                 self._tkinter_var = var
 
-            original_command = self.widget.cget('command') if self.widget.cget('command') else None
-            self.widget.config(command=lambda: self._on_checkbutton_change(original_command))
+            original_command = (
+                self.widget.cget("command") if self.widget.cget("command") else None
+            )
+            self.widget.config(
+                command=lambda: self._on_checkbutton_change(original_command)
+            )
 
-        elif widget_type in ['Scale']:
+        elif widget_type in ["Scale"]:
+            original_command = (
+                self.widget.cget("command") if self.widget.cget("command") else None
+            )
+            self.widget.config(
+                command=lambda val: self._on_scale_change(val, original_command)
+            )
 
-            original_command = self.widget.cget('command') if self.widget.cget('command') else None
-            self.widget.config(command=lambda val: self._on_scale_change(val, original_command))
-
-        elif widget_type in ['Spinbox']:
-
-            self.widget.bind('<KeyRelease>', self._on_change_event)
-            self.widget.bind('<FocusOut>', self._on_change_event)
-            self.widget.bind('<ButtonRelease-1>', self._on_change_event)
+        elif widget_type in ["Spinbox"]:
+            self.widget.bind("<KeyRelease>", self._on_change_event)
+            self.widget.bind("<FocusOut>", self._on_change_event)
+            self.widget.bind("<ButtonRelease-1>", self._on_change_event)
 
         else:
-
             try:
-                self.widget.bind('<KeyRelease>', self._on_change_event)
-                self.widget.bind('<FocusOut>', self._on_change_event)
+                self.widget.bind("<KeyRelease>", self._on_change_event)
+                self.widget.bind("<FocusOut>", self._on_change_event)
             except tk.TclError:
-
                 pass
 
     def _on_change_event(self, event=None):
@@ -153,80 +158,76 @@ class PreferenceWidget:
         """Get the current value from the widget."""
         widget_type = type(self.widget).__name__
 
-        if widget_type in ['Entry', 'Spinbox']:
+        if widget_type in ["Entry", "Spinbox"]:
             return self.widget.get()
 
-        elif widget_type in ['Combobox']:
+        elif widget_type in ["Combobox"]:
             display_value = self.widget.get()
 
             if self.value_mapping and display_value in self.value_mapping:
                 return self.value_mapping[display_value]
             return display_value
 
-        elif widget_type in ['Checkbutton']:
-
-            if self._tkinter_var and hasattr(self._tkinter_var, 'get'):
+        elif widget_type in ["Checkbutton"]:
+            if self._tkinter_var and hasattr(self._tkinter_var, "get"):
                 return self._tkinter_var.get()
             else:
-
-                var = self.widget.cget('variable')
-                if var and hasattr(var, 'get') and callable(var.get):
+                var = self.widget.cget("variable")
+                if var and hasattr(var, "get") and callable(var.get):
                     return var.get()
                 else:
                     return False
 
-        elif widget_type in ['Scale']:
+        elif widget_type in ["Scale"]:
             return self.widget.get()
 
         else:
-
-            if hasattr(self.widget, 'get'):
+            if hasattr(self.widget, "get"):
                 return self.widget.get()
             else:
-                raise NotImplementedError(f"Don't know how to get value from {widget_type}")
+                raise NotImplementedError(
+                    f"Don't know how to get value from {widget_type}"
+                )
 
     def _set_widget_value(self, value: Any):
         """Set the widget value."""
         widget_type = type(self.widget).__name__
 
-        if widget_type in ['Entry', 'Spinbox']:
+        if widget_type in ["Entry", "Spinbox"]:
             self.widget.delete(0, tk.END)
             self.widget.insert(0, str(value))
 
-        elif widget_type in ['Combobox']:
-
+        elif widget_type in ["Combobox"]:
             if self.reverse_mapping and value in self.reverse_mapping:
                 display_value = self.reverse_mapping[value]
                 self.widget.set(display_value)
             else:
                 self.widget.set(str(value))
 
-        elif widget_type in ['Checkbutton']:
-
-            if self._tkinter_var and hasattr(self._tkinter_var, 'set'):
+        elif widget_type in ["Checkbutton"]:
+            if self._tkinter_var and hasattr(self._tkinter_var, "set"):
                 try:
                     self._tkinter_var.set(bool(value))
                 except Exception as e:
-
                     self._tkinter_var = tk.BooleanVar(value=bool(value))
                     self.widget.config(variable=self._tkinter_var)
             else:
-
                 self._tkinter_var = tk.BooleanVar(value=bool(value))
                 self.widget.config(variable=self._tkinter_var)
 
-        elif widget_type in ['Scale']:
+        elif widget_type in ["Scale"]:
             self.widget.set(value)
 
         else:
-
-            if hasattr(self.widget, 'set'):
+            if hasattr(self.widget, "set"):
                 self.widget.set(value)
-            elif hasattr(self.widget, 'delete') and hasattr(self.widget, 'insert'):
+            elif hasattr(self.widget, "delete") and hasattr(self.widget, "insert"):
                 self.widget.delete(0, tk.END)
                 self.widget.insert(0, str(value))
             else:
-                raise NotImplementedError(f"Don't know how to set value for {widget_type}")
+                raise NotImplementedError(
+                    f"Don't know how to set value for {widget_type}"
+                )
 
     def _convert_value(self, value: Any) -> Any:
         """Convert value to the specified type."""
@@ -238,7 +239,7 @@ class PreferenceWidget:
                 if isinstance(value, bool):
                     return value
                 elif isinstance(value, str):
-                    return value.lower() in ('true', '1', 'yes', 'on')
+                    return value.lower() in ("true", "1", "yes", "on")
                 else:
                     return bool(value)
             elif self.value_type == int:
@@ -291,35 +292,78 @@ class PreferenceWidget:
 
 
 # Convenience functions for common widget types
-def PrefEntry(parent, pref_key: str, default_value: str = "",
-              on_change: Optional[Callable] = None, **kwargs) -> PreferenceWidget:
+def PrefEntry(
+    parent,
+    pref_key: str,
+    default_value: str = "",
+    on_change: Optional[Callable] = None,
+    **kwargs,
+) -> PreferenceWidget:
     """Create a preference-aware Entry widget."""
-    return PreferenceWidget(tk.Entry, parent, pref_key, default_value, str, on_change, **kwargs)
+    return PreferenceWidget(
+        tk.Entry, parent, pref_key, default_value, str, on_change, **kwargs
+    )
 
 
-def PrefCombobox(parent, pref_key: str, default_value: str = "",
-                 on_change: Optional[Callable] = None, value_mapping: Optional[Dict[str, str]] = None,
-                 **kwargs) -> PreferenceWidget:
+def PrefCombobox(
+    parent,
+    pref_key: str,
+    default_value: str = "",
+    on_change: Optional[Callable] = None,
+    value_mapping: Optional[Dict[str, str]] = None,
+    **kwargs,
+) -> PreferenceWidget:
     """Create a preference-aware Combobox widget."""
-    return PreferenceWidget(ttk.Combobox, parent, pref_key, default_value, str, on_change, value_mapping, **kwargs)
+    return PreferenceWidget(
+        ttk.Combobox,
+        parent,
+        pref_key,
+        default_value,
+        str,
+        on_change,
+        value_mapping,
+        **kwargs,
+    )
 
 
-def PrefCheckbutton(parent, pref_key: str, default_value: bool = False,
-                    on_change: Optional[Callable] = None, **kwargs) -> PreferenceWidget:
+def PrefCheckbutton(
+    parent,
+    pref_key: str,
+    default_value: bool = False,
+    on_change: Optional[Callable] = None,
+    **kwargs,
+) -> PreferenceWidget:
     """Create a preference-aware Checkbutton widget."""
 
-    if 'variable' not in kwargs:
-        kwargs['variable'] = tk.BooleanVar()
-    return PreferenceWidget(ttk.Checkbutton, parent, pref_key, default_value, bool, on_change, **kwargs)
+    if "variable" not in kwargs:
+        kwargs["variable"] = tk.BooleanVar()
+    return PreferenceWidget(
+        ttk.Checkbutton, parent, pref_key, default_value, bool, on_change, **kwargs
+    )
 
 
-def PrefScale(parent, pref_key: str, default_value: float = 0.0,
-              on_change: Optional[Callable] = None, **kwargs) -> PreferenceWidget:
+def PrefScale(
+    parent,
+    pref_key: str,
+    default_value: float = 0.0,
+    on_change: Optional[Callable] = None,
+    **kwargs,
+) -> PreferenceWidget:
     """Create a preference-aware Scale widget."""
-    return PreferenceWidget(tk.Scale, parent, pref_key, default_value, float, on_change, **kwargs)
+    return PreferenceWidget(
+        tk.Scale, parent, pref_key, default_value, float, on_change, **kwargs
+    )
 
 
-def PrefSpinbox(parent, pref_key: str, default_value: Union[int, float] = 0,
-                value_type: type = int, on_change: Optional[Callable] = None, **kwargs) -> PreferenceWidget:
+def PrefSpinbox(
+    parent,
+    pref_key: str,
+    default_value: Union[int, float] = 0,
+    value_type: type = int,
+    on_change: Optional[Callable] = None,
+    **kwargs,
+) -> PreferenceWidget:
     """Create a preference-aware Spinbox widget."""
-    return PreferenceWidget(tk.Spinbox, parent, pref_key, default_value, value_type, on_change, **kwargs)
+    return PreferenceWidget(
+        tk.Spinbox, parent, pref_key, default_value, value_type, on_change, **kwargs
+    )

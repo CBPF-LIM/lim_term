@@ -5,22 +5,19 @@ import platform
 
 
 class SerialPortManager:
-
-
     @staticmethod
     def get_available_ports():
-
         if platform.system() == "Linux":
-
             pts_ports = glob.glob("/dev/pts/*")
-            ports = [port.device for port in serial.tools.list_ports.comports()] + pts_ports
+            ports = [
+                port.device for port in serial.tools.list_ports.comports()
+            ] + pts_ports
         else:
             ports = [port.device for port in serial.tools.list_ports.comports()]
         return ports
 
     @staticmethod
     def create_connection(port, baudrate, timeout=1):
-
         try:
             return serial.Serial(port, baudrate, timeout=timeout)
         except Exception as e:
@@ -28,16 +25,12 @@ class SerialPortManager:
 
 
 class DataParser:
-
-
     @staticmethod
     def parse_line(line):
-
         return line.strip().split()
 
     @staticmethod
     def extract_columns(data_lines, x_col, y_col):
-
         x_data = []
         y_data = []
 
