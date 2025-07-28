@@ -90,7 +90,7 @@ For Windows users who prefer not to install Python:
 ## How to Use
 
 ### Configuration Tab
-- **Mode**: Choose "Hardware" for real devices, "Simulated" for testing
+- **Mode**: Choose "Hardware" for real devices, "Synthetic" for testing with equations
 - **Port**: Select your serial port (click Refresh to update the list)
 - **Baudrate**: Set the communication speed (match your device settings)
 - **Connect**: Click to start receiving data
@@ -142,7 +142,7 @@ timestamp voltage current temperature
 - Make sure your device is connected and powered on
 - Check that no other program is using the serial port
 - Try different baudrates if data appears garbled
-- Use Simulated mode to test the interface without hardware
+- Use Synthetic mode to test the interface without hardware using custom equations
 
 **Data Problems:**
 - Ensure data is space or tab-separated
