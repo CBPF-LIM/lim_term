@@ -4,11 +4,12 @@ import math
 
 
 class SyntheticDataGenerator:
-    def __init__(self, data_callback=None, equations=None):
+    def __init__(self, data_callback=None, equations=None, refresh_rate=15):
         self.data_callback = data_callback
         self.equations = equations or {}
         self.is_running = False
         self.data_thread = None
+        self.refresh_rate = refresh_rate
         self.index = 0
 
     def set_equations(self, equations):
@@ -55,7 +56,7 @@ class SyntheticDataGenerator:
                     self.data_callback(data_line)
 
                 self.index += 1
-                time.sleep(1 / 30)
+                time.sleep(1 / self.refresh_rate)
 
             except Exception as e:
                 print(t("mode_synthetic_generation_error").format(error=e))

@@ -3,6 +3,7 @@ from tkinter import ttk
 from ..config import DEFAULT_BAUDRATES, DEFAULT_BAUDRATE
 from ..utils import SyntheticDataGenerator
 from ..i18n import t, get_config_manager
+from .preference_widgets import PrefCombobox
 import platform
 
 
@@ -31,13 +32,10 @@ class ConfigTab:
         self.mode_combobox = ttk.Combobox(
             self.config_frame,
             state="readonly",
-            values=[
-                t("ui.config_tab.mode_hardware"),
-                t("ui.config_tab.mode_synthetic"),
-            ],
+            values=["Hardware", "Synthetic"],
         )
         self.mode_combobox.grid(column=1, row=0, padx=10, pady=10, sticky="w")
-        self.mode_combobox.set(t("ui.config_tab.mode_hardware"))
+        self.mode_combobox.set("Hardware")
         self.mode_combobox.bind("<<ComboboxSelected>>", self._on_mode_changed)
         self.mode_combobox.bind(
             "<<ComboboxSelected>>", self._on_preference_changed, add="+"
@@ -92,6 +90,20 @@ class ConfigTab:
             self.equation_entries[label] = equation_entry
 
         self.equation_frame.columnconfigure(1, weight=1)
+
+        # FPS selection for synthetic mode
+        self.fps_label = ttk.Label(self.equation_frame, text="FPS:")
+        self.fps_label.grid(column=0, row=len(self.equation_labels), padx=5, pady=5, sticky="w")
+        
+        self.fps_pref_combobox = PrefCombobox(
+            self.equation_frame,
+            pref_key="graph.general.refresh_rate",
+            default_value="10",
+            state="readonly",
+            values=[str(i) for i in range(1, 31)],
+            width=8
+        )
+        self.fps_pref_combobox.grid(column=1, row=len(self.equation_labels), padx=5, pady=5, sticky="w")
 
         self.info_frame = ttk.LabelFrame(
             self.frame, text=t("ui.config_tab.connection_info_frame")
@@ -168,7 +180,7 @@ class ConfigTab:
             self._update_ports()
 
     def _update_ports(self):
-        if self.mode_combobox.get() == t("ui.config_tab.mode_hardware"):
+        if self.mode_combobox.get() == "Hardware":
             ports = self.serial_manager.get_available_ports()
             self.port_combobox["values"] = ports
             if ports:
@@ -193,7 +205,7 @@ class ConfigTab:
             self._show_config_interface()
             return
 
-        if mode == t("ui.config_tab.mode_hardware"):
+        if mode == "Hardware":
             port = self.port_combobox.get()
             baudrate = self.baudrate_combobox.get()
 
@@ -207,15 +219,16 @@ class ConfigTab:
         elif mode == "Synthetic":
             try:
                 equations = self._get_equations_from_ui()
-
+                fps = int(self.fps_pref_combobox.get())
                 self.synthetic_generator = SyntheticDataGenerator(
-                    data_callback=self.serial_manager.data_callback, equations=equations
+                    data_callback=self.serial_manager.data_callback,
+                    equations=equations,
+                    refresh_rate=fps
                 )
 
                 self.synthetic_generator.start_data_generation()
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
                 self._show_connection_info(mode, "SYNTHETIC_MODE", "N/A")
-
             except Exception as e:
                 print(t("ui.config_tab.mode_synthetic_start_error").format(error=e))
 
@@ -232,9 +245,9 @@ class ConfigTab:
         self.config_frame.grid_remove()
         self.info_frame.grid()
 
-        if mode == t("ui.config_tab.mode_hardware"):
+        if mode == "Hardware":
             info_text = t("ui.config_tab.connection_status").format(
-                mode=mode, port=port, baudrate=baudrate
+                mode=t("ui.config_tab.mode_hardware"), port=port, baudrate=baudrate
             )
         elif mode == "Synthetic":
             info_text = t("ui.config_tab.synthetic_connection_status")
@@ -248,10 +261,7 @@ class ConfigTab:
     def _load_preferences(self):
         saved_mode = self.config_manager.load_tab_setting("config", "mode")
         if saved_mode:
-            if saved_mode == "Hardware":
-                self.mode_combobox.set(t("ui.config_tab.mode_hardware"))
-            elif saved_mode == "Synthetic":
-                self.mode_combobox.set("Synthetic")
+            self.mode_combobox.set(saved_mode)
 
         saved_baudrate = self.config_manager.load_tab_setting(
             "config", "baudrate", DEFAULT_BAUDRATE
@@ -274,14 +284,8 @@ class ConfigTab:
 
     def _save_preferences(self):
         current_mode = self.mode_combobox.get()
-        if current_mode == t("ui.config_tab.mode_hardware"):
-            mode_value = "Hardware"
-        elif current_mode == "Synthetic":
-            mode_value = "Synthetic"
-        else:
-            mode_value = "Hardware"
-
-        self.config_manager.save_tab_setting("config", "mode", mode_value)
+        
+        self.config_manager.save_tab_setting("config", "mode", current_mode)
         self.config_manager.save_tab_setting("config", "port", self.port_combobox.get())
         self.config_manager.save_tab_setting(
             "config", "baudrate", self.baudrate_combobox.get()
