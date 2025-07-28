@@ -20,6 +20,7 @@ class GraphTab:
         self.refresh_counter = 0
         self.debug_refresh = False
         self.last_render_time = 0
+        self.series_widgets = []
 
         self._create_widgets()
 

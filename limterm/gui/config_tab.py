@@ -1,8 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 from ..config import DEFAULT_BAUDRATES, DEFAULT_BAUDRATE
-from ..utils import MockSerial
+from ..utils import SyntheticDataGenerator
 from ..i18n import t, get_config_manager
+from .preference_widgets import PrefCombobox
 import platform
 
 
@@ -10,8 +11,9 @@ class ConfigTab:
     def __init__(self, parent, serial_manager):
         self.frame = ttk.Frame(parent)
         self.serial_manager = serial_manager
-        self.mock_serial = None
+        self.synthetic_generator = None
         self.config_manager = get_config_manager()
+        self.equation_entries = {}
 
         self._create_widgets()
         self._update_ports()
@@ -30,13 +32,10 @@ class ConfigTab:
         self.mode_combobox = ttk.Combobox(
             self.config_frame,
             state="readonly",
-            values=[
-                t("ui.config_tab.mode_hardware"),
-                t("ui.config_tab.mode_simulated"),
-            ],
+            values=["Hardware", "Synthetic"],
         )
         self.mode_combobox.grid(column=1, row=0, padx=10, pady=10, sticky="w")
-        self.mode_combobox.set(t("ui.config_tab.mode_hardware"))
+        self.mode_combobox.set("Hardware")
         self.mode_combobox.bind("<<ComboboxSelected>>", self._on_mode_changed)
         self.mode_combobox.bind(
             "<<ComboboxSelected>>", self._on_preference_changed, add="+"
@@ -73,6 +72,42 @@ class ConfigTab:
         self.baudrate_combobox.bind("<<ComboboxSelected>>", self._on_preference_changed)
 
         self.config_frame.columnconfigure(1, weight=1)
+
+        self.equation_frame = ttk.LabelFrame(
+            self.frame, text=t("ui.config_tab.mode_synthetic_data_equations")
+        )
+        self.equation_frame.grid(column=0, row=2, padx=10, pady=10, sticky="ew")
+        self.equation_frame.grid_remove()  # Hidden by default
+
+        self.equation_labels = ["a", "b", "c", "d", "e"]
+        for i, label in enumerate(self.equation_labels):
+            col_label = ttk.Label(self.equation_frame, text=f"{label.upper()}:")
+            col_label.grid(column=0, row=i, padx=5, pady=5, sticky="w")
+
+            equation_entry = ttk.Entry(self.equation_frame, width=40)
+            equation_entry.grid(column=1, row=i, padx=5, pady=5, sticky="ew")
+            equation_entry.bind("<KeyRelease>", self._on_equation_changed)
+            self.equation_entries[label] = equation_entry
+
+        self.equation_frame.columnconfigure(1, weight=1)
+
+        # FPS selection for synthetic mode
+        self.fps_label = ttk.Label(self.equation_frame, text="FPS:")
+        self.fps_label.grid(
+            column=0, row=len(self.equation_labels), padx=5, pady=5, sticky="w"
+        )
+
+        self.fps_pref_combobox = PrefCombobox(
+            self.equation_frame,
+            pref_key="graph.general.refresh_rate",
+            default_value="10",
+            state="readonly",
+            values=[str(i) for i in range(1, 31)],
+            width=8,
+        )
+        self.fps_pref_combobox.grid(
+            column=1, row=len(self.equation_labels), padx=5, pady=5, sticky="w"
+        )
 
         self.info_frame = ttk.LabelFrame(
             self.frame, text=t("ui.config_tab.connection_info_frame")
@@ -121,27 +156,26 @@ class ConfigTab:
 
     def _on_mode_changed(self, event=None):
         mode = self.mode_combobox.get()
-        if mode == t("ui.config_tab.mode_simulated"):
+        if mode == "Synthetic":
             self.port_combobox.config(state="disabled")
             self.baudrate_combobox.config(state="disabled")
             self.refresh_button.config(state="disabled")
             self.port_combobox.set("")
             self.baudrate_combobox.set("")
-
-            if platform.system() == "Windows":
-                self.win_simul_info.grid()
-                self.win_simul_info.config(state="normal")
-                self.win_simul_info.tag_add("all", "1.0", "end")
-                self.win_simul_info.config(state="disabled")
-                self.connect_button.config(state="disabled")
-            else:
-                self.win_simul_info.grid_remove()
-                self.connect_button.config(state="normal")
+            self.equation_frame.grid(
+                column=0, row=6, columnspan=2, padx=10, pady=10, sticky="ew"
+            )
+            self.win_simul_info.grid_remove()
+            self.connect_button.config(
+                text=t("ui.config_tab.start_synthetic"), state="normal"
+            )
         else:
             self.port_combobox.config(state="readonly")
             self.baudrate_combobox.config(state="readonly")
             self.refresh_button.config(state="normal")
             self.win_simul_info.grid_remove()
+            self.equation_frame.grid_remove()
+            self.connect_button.config(text=t("ui.config_tab.connect"), state="normal")
             self.connect_button.config(state="normal")
 
             if not self.baudrate_combobox.get():
@@ -150,7 +184,7 @@ class ConfigTab:
             self._update_ports()
 
     def _update_ports(self):
-        if self.mode_combobox.get() == t("ui.config_tab.mode_hardware"):
+        if self.mode_combobox.get() == "Hardware":
             ports = self.serial_manager.get_available_ports()
             self.port_combobox["values"] = ports
             if ports:
@@ -166,16 +200,17 @@ class ConfigTab:
     def _connect(self):
         mode = self.mode_combobox.get()
 
-        if self.serial_manager.is_connected:
+        if self.serial_manager.is_connected or self.synthetic_generator:
             self.serial_manager.disconnect()
-            if self.mock_serial:
-                self.mock_serial.stop_data_generation()
-                self.mock_serial = None
+            if self.synthetic_generator:
+                self.synthetic_generator.stop_data_generation()
+                self.synthetic_generator = None
             self.connect_button.config(text=t("ui.config_tab.connect"))
+            self._set_equation_widgets_state("normal")
             self._show_config_interface()
             return
 
-        if mode == t("ui.config_tab.mode_hardware"):
+        if mode == "Hardware":
             port = self.port_combobox.get()
             baudrate = self.baudrate_combobox.get()
 
@@ -186,41 +221,42 @@ class ConfigTab:
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
                 self._show_connection_info(mode, port, baudrate)
 
-        elif mode == t("ui.config_tab.mode_simulated"):
+        elif mode == "Synthetic":
             try:
-                self.mock_serial = MockSerial()
-                virtual_port = self.mock_serial.create_virtual_port()
+                equations = self._get_equations_from_ui()
+                fps = int(self.fps_pref_combobox.get())
+                self.synthetic_generator = SyntheticDataGenerator(
+                    data_callback=self.serial_manager.data_callback,
+                    equations=equations,
+                    refresh_rate=fps,
+                )
 
-                if self.serial_manager.connect(virtual_port, DEFAULT_BAUDRATE):
-                    self.mock_serial.start_data_generation()
-                    self.connect_button.config(text=t("ui.config_tab.disconnect"))
-                    self._show_connection_info(mode, virtual_port, DEFAULT_BAUDRATE)
-
-                    current_ports = list(self.port_combobox["values"])
-                    if virtual_port not in current_ports:
-                        current_ports.append(f"{virtual_port} (Virtual)")
-                        self.port_combobox["values"] = current_ports
-                        self.port_combobox.set(f"{virtual_port} (Virtual)")
-                else:
-                    self.mock_serial.stop_data_generation()
-                    self.mock_serial = None
-
+                self.synthetic_generator.start_data_generation()
+                self.connect_button.config(text=t("ui.config_tab.disconnect"))
+                self._set_equation_widgets_state("disabled")
+                self._show_connection_info(mode, "SYNTHETIC_MODE", "N/A")
             except Exception as e:
-                print(t("errors.virtual_port_error").format(error=e))
+                print(t("ui.config_tab.mode_synthetic_start_error").format(error=e))
+
+        else:
+            print(t("ui.config_tab.mode_unknown_error").format(mode=mode))
 
     def _show_config_interface(self):
         self.config_frame.grid()
         self.info_frame.grid_remove()
+        self.equation_frame.grid_remove
         self._on_mode_changed()
 
     def _show_connection_info(self, mode, port, baudrate):
         self.config_frame.grid_remove()
         self.info_frame.grid()
 
-        if mode == t("ui.config_tab.mode_hardware"):
+        if mode == "Hardware":
             info_text = t("ui.config_tab.connection_status").format(
-                mode=mode, port=port, baudrate=baudrate
+                mode=t("ui.config_tab.mode_hardware"), port=port, baudrate=baudrate
             )
+        elif mode == "Synthetic":
+            info_text = t("ui.config_tab.synthetic_connection_status")
         else:
             info_text = t("ui.config_tab.virtual_connection_status").format(
                 mode=mode, port=port, baudrate=baudrate
@@ -231,10 +267,7 @@ class ConfigTab:
     def _load_preferences(self):
         saved_mode = self.config_manager.load_tab_setting("config", "mode")
         if saved_mode:
-            if saved_mode == "Hardware":
-                self.mode_combobox.set(t("ui.config_tab.mode_hardware"))
-            elif saved_mode == "Simulated":
-                self.mode_combobox.set(t("ui.config_tab.mode_simulated"))
+            self.mode_combobox.set(saved_mode)
 
         saved_baudrate = self.config_manager.load_tab_setting(
             "config", "baudrate", DEFAULT_BAUDRATE
@@ -248,25 +281,54 @@ class ConfigTab:
         else:
             self._preferred_port = None
 
+        # Load equations
+        equations = self.config_manager.load_setting("equations", {})
+        if equations:
+            self._load_equations_to_ui(equations)
+
         self._on_mode_changed()
 
     def _save_preferences(self):
         current_mode = self.mode_combobox.get()
-        if current_mode == t("ui.config_tab.mode_hardware"):
-            mode_value = "Hardware"
-        elif current_mode == t("ui.config_tab.mode_simulated"):
-            mode_value = "Simulated"
-        else:
-            mode_value = "Hardware"
 
-        self.config_manager.save_tab_setting("config", "mode", mode_value)
+        self.config_manager.save_tab_setting("config", "mode", current_mode)
         self.config_manager.save_tab_setting("config", "port", self.port_combobox.get())
         self.config_manager.save_tab_setting(
             "config", "baudrate", self.baudrate_combobox.get()
         )
+
+        # Save equations
+        equations = self._get_equations_from_ui()
+        self.config_manager.save_setting("equations", equations)
 
     def _on_preference_changed(self, event=None):
         self._save_preferences()
 
     def get_frame(self):
         return self.frame
+
+    def _get_equations_from_ui(self):
+        equations = {}
+        for label, entry in self.equation_entries.items():
+            equation = entry.get().strip()
+            if equation:
+                equations[label] = equation
+        return equations
+
+    def _load_equations_to_ui(self, equations):
+        for label, entry in self.equation_entries.items():
+            equation = equations.get(label, "")
+            entry.delete(0, tk.END)
+            entry.insert(0, equation)
+
+    def _on_equation_changed(self, event=None):
+        equations = self._get_equations_from_ui()
+        self.config_manager.save_setting("equations", equations)
+
+        if self.synthetic_generator and self.synthetic_generator.is_running:
+            self.synthetic_generator.set_equations(equations)
+
+    def _set_equation_widgets_state(self, state):
+        for entry in self.equation_entries.values():
+            entry.config(state=state)
+        self.fps_pref_combobox.config(state=state)
