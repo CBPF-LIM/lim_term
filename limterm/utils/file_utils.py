@@ -2,14 +2,10 @@ from tkinter import filedialog
 
 
 class FileManager:
-
-
     @staticmethod
     def save_data_to_file(data, default_extension=".txt"):
-
         file_path = filedialog.asksaveasfilename(
-            defaultextension=default_extension,
-            filetypes=[("Text files", "*.txt")]
+            defaultextension=default_extension, filetypes=[("Text files", "*.txt")]
         )
 
         if file_path:

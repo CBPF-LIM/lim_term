@@ -4,8 +4,6 @@ from ..config import SERIAL_TIMEOUT
 
 
 class SerialManager:
-
-
     def __init__(self, data_callback=None, error_callback=None):
         self.serial_port = None
         self.data_callback = data_callback
@@ -14,14 +12,12 @@ class SerialManager:
         self._stop_reading = False
 
     def connect(self, port, baudrate):
-
         try:
             self.serial_port = SerialPortManager.create_connection(
                 port, baudrate, SERIAL_TIMEOUT
             )
             self.is_connected = True
             self._stop_reading = False
-
 
             threading.Thread(target=self._read_data, daemon=True).start()
             return True
@@ -32,14 +28,12 @@ class SerialManager:
             return False
 
     def disconnect(self):
-
         self._stop_reading = True
         if self.serial_port and self.serial_port.is_open:
             self.serial_port.close()
         self.is_connected = False
 
     def _read_data(self):
-
         while self.serial_port and self.serial_port.is_open and not self._stop_reading:
             try:
                 line = self.serial_port.readline().decode("utf-8").strip()
@@ -52,5 +46,4 @@ class SerialManager:
                 break
 
     def get_available_ports(self):
-
         return SerialPortManager.get_available_ports()

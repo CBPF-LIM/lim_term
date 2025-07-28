@@ -4,4 +4,4 @@ from .data_tab import DataTab
 from .graph_tab import GraphTab
 from .graph_options import GraphOptionsWindow
 
-__all__ = ['MainWindow', 'ConfigTab', 'DataTab', 'GraphTab', 'GraphOptionsWindow']
+__all__ = ["MainWindow", "ConfigTab", "DataTab", "GraphTab", "GraphOptionsWindow"]
