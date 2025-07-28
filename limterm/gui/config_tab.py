@@ -202,6 +202,7 @@ class ConfigTab:
                 self.synthetic_generator.stop_data_generation()
                 self.synthetic_generator = None
             self.connect_button.config(text=t("ui.config_tab.connect"))
+            self._set_equation_widgets_state("normal")
             self._show_config_interface()
             return
 
@@ -228,6 +229,7 @@ class ConfigTab:
 
                 self.synthetic_generator.start_data_generation()
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
+                self._set_equation_widgets_state("disabled")
                 self._show_connection_info(mode, "SYNTHETIC_MODE", "N/A")
             except Exception as e:
                 print(t("ui.config_tab.mode_synthetic_start_error").format(error=e))
@@ -321,3 +323,8 @@ class ConfigTab:
 
         if self.synthetic_generator and self.synthetic_generator.is_running:
             self.synthetic_generator.set_equations(equations)
+
+    def _set_equation_widgets_state(self, state):
+        for entry in self.equation_entries.values():
+            entry.config(state=state)
+        self.fps_pref_combobox.config(state=state)
