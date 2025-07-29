@@ -14,6 +14,9 @@ requirements:
 install:
 	pipx install .
 
+shell:
+	poetry run python
+
 pipx:
 	sudo apt install pipx
 	python3 -m pipx ensurepath
