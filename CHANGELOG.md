@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-07-29
+
+### Added
+- Added "Available Math Functions" display in synthetic mode showing all available math functions
+- Synthetic equations can reference other (in cascade) using a letter: n (index), a,b, c, d and e
+
+### Improved
+- **Enhanced Safety**: Replaced unsafe `eval()` with secure `asteval` library for equation evaluation
+- **Graph Legends**: Changed legend position from random to "upper right"
+- **Data Generation**: Now always includes index (n) as the first column in synthetic data
+- **Math Functions**: All Python math functions are now directly available in equations without `math.` prefix
+
+### Technical
+- Migrated from `eval()` to `asteval.Interpreter()` for secure expression evaluation
+- Enhanced equation parsing with proper variable scoping and error recovery
+- Improved synthetic data output format and reliability
+
 ## [0.3.0] - 2025-07-28
 
 ### Added
