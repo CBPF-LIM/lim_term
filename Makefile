@@ -1,5 +1,7 @@
 .PHONY: lint run
 
+default: run
+
 lint:
 	poetry run black .
 
