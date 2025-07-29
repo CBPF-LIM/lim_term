@@ -1,7 +1,7 @@
 import threading
 import time
 import math
-
+from asteval import Interpreter
 
 class SyntheticDataGenerator:
     def __init__(self, data_callback=None, equations=None, refresh_rate=15):
@@ -38,17 +38,17 @@ class SyntheticDataGenerator:
                 n = self.index
 
                 if self.equations:
-                    evaluated_vars = {"n": n, "math": math}
-
+                    aeval = Interpreter()
+                    aeval.symtable['n'] = n
                     for column_name in sorted(self.equations.keys()):
-                        equation = self.equations[column_name]
+                        expr = self.equations[column_name]
                         try:
-                            value = eval(equation, {"__builtins__": {}}, evaluated_vars)
-                            evaluated_vars[column_name] = value
-                            data_values.append(f"{value}")
+                            value = aeval(expr)
                         except Exception as e:
-                            print(f"Error evaluating equation '{equation}': {e}")
-                            data_values.append("0.00")
+                            print(f"Error evaluating equation '{expr}': {e}")
+                            value = 0
+                        aeval.symtable[column_name] = value
+                        data_values.append(str(value))
 
                 data_line = " ".join(data_values)
 
