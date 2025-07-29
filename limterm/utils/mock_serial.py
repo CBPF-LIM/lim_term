@@ -45,7 +45,7 @@ class SyntheticDataGenerator:
                         try:
                             value = eval(equation, {"__builtins__": {}}, evaluated_vars)
                             evaluated_vars[column_name] = value
-                            data_values.append(f"{value:.2f}")
+                            data_values.append(f"{value}")
                         except Exception as e:
                             print(f"Error evaluating equation '{equation}': {e}")
                             data_values.append("0.00")
