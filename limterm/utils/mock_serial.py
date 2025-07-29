@@ -44,8 +44,14 @@ class SyntheticDataGenerator:
                     aeval.symtable['n'] = n
                     for column_name in sorted(self.equations.keys()):
                         expr = self.equations[column_name]
+                        if not expr.strip():
+                            value = 0
+                            aeval.symtable[column_name] = value
+                            continue
                         try:
                             value = aeval(expr)
+                            if value is None:
+                                value = 0
                         except Exception as e:
                             print(f"Error evaluating equation '{expr}': {e}")
                             value = 0
