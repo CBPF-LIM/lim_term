@@ -10,7 +10,7 @@ class SyntheticDataGenerator:
         self.is_running = False
         self.data_thread = None
         self.refresh_rate = refresh_rate
-        self.index = 0
+        self.index = 1
 
     def set_equations(self, equations):
         self.equations = equations
@@ -35,7 +35,9 @@ class SyntheticDataGenerator:
         while self.is_running:
             try:
                 data_values = []
-                n = self.index
+                n = int(self.index)
+
+                data_values.append(str(n))
 
                 if self.equations:
                     aeval = Interpreter()
