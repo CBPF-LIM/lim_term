@@ -1,7 +1,7 @@
 import threading
 import time
 import math
-
+from asteval import Interpreter
 
 class SyntheticDataGenerator:
     def __init__(self, data_callback=None, equations=None, refresh_rate=15):
@@ -10,7 +10,7 @@ class SyntheticDataGenerator:
         self.is_running = False
         self.data_thread = None
         self.refresh_rate = refresh_rate
-        self.index = 0
+        self.index = 1
 
     def set_equations(self, equations):
         self.equations = equations
@@ -35,20 +35,28 @@ class SyntheticDataGenerator:
         while self.is_running:
             try:
                 data_values = []
-                n = self.index
+                n = int(self.index)
+
+                data_values.append(str(n))
 
                 if self.equations:
-                    evaluated_vars = {"n": n, "math": math}
-
+                    aeval = Interpreter()
+                    aeval.symtable['n'] = n
                     for column_name in sorted(self.equations.keys()):
-                        equation = self.equations[column_name]
+                        expr = self.equations[column_name]
+                        if not expr.strip():
+                            value = 0
+                            aeval.symtable[column_name] = value
+                            continue
                         try:
-                            value = eval(equation, {"__builtins__": {}}, evaluated_vars)
-                            evaluated_vars[column_name] = value
-                            data_values.append(f"{value}")
+                            value = aeval(expr)
+                            if value is None:
+                                value = 0
                         except Exception as e:
-                            print(f"Error evaluating equation '{equation}': {e}")
-                            data_values.append("0.00")
+                            print(f"Error evaluating equation '{expr}': {e}")
+                            value = 0
+                        aeval.symtable[column_name] = value
+                        data_values.append(str(value))
 
                 data_line = " ".join(data_values)
 
