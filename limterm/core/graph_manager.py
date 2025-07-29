@@ -154,7 +154,7 @@ class GraphManager:
             plotted_series += 1
 
         if plotted_series > 1:
-            self.ax.legend()
+            self.ax.legend(loc="upper right")
 
         if settings_list:
             first_settings = settings_list[0]
@@ -233,7 +233,7 @@ class GraphManager:
             x_list, *y_lists, labels=labels, colors=actual_colors, alpha=0.8
         )
 
-        self.ax.legend(loc="upper left")
+        self.ax.legend(loc="upper right")
 
         self.set_labels(
             title=title or "Stacked Chart", xlabel=xlabel or "X", ylabel=ylabel_text
