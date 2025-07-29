@@ -79,24 +79,11 @@ class ConfigTab:
         self.equation_frame.grid(column=0, row=2, padx=10, pady=10, sticky="ew")
         self.equation_frame.grid_remove()  # Hidden by default
 
-        self.equation_labels = ["a", "b", "c", "d", "e"]
-        for i, label in enumerate(self.equation_labels):
-            col_label = ttk.Label(self.equation_frame, text=f"{label}:")
-            col_label.grid(column=0, row=i, padx=5, pady=5, sticky="w")
-
-            equation_entry = ttk.Entry(self.equation_frame, width=40)
-            equation_entry.grid(column=1, row=i, padx=5, pady=5, sticky="ew")
-            equation_entry.bind("<KeyRelease>", self._on_equation_changed)
-            self.equation_entries[label] = equation_entry
-
-        self.equation_frame.columnconfigure(1, weight=1)
-
-        # FPS selection for synthetic mode
+        # FPS selection for synthetic mode (move up)
         self.fps_label = ttk.Label(self.equation_frame, text="FPS:")
         self.fps_label.grid(
-            column=0, row=len(self.equation_labels), padx=5, pady=5, sticky="w"
+            column=0, row=0, padx=5, pady=5, sticky="w"
         )
-
         self.fps_pref_combobox = PrefCombobox(
             self.equation_frame,
             pref_key="graph.general.refresh_rate",
@@ -106,8 +93,20 @@ class ConfigTab:
             width=8,
         )
         self.fps_pref_combobox.grid(
-            column=1, row=len(self.equation_labels), padx=5, pady=5, sticky="w"
+            column=1, row=0, padx=5, pady=5, sticky="w"
         )
+
+        self.equation_labels = ["a", "b", "c", "d", "e"]
+        for i, label in enumerate(self.equation_labels):
+            col_label = ttk.Label(self.equation_frame, text=f"{label}:")
+            col_label.grid(column=0, row=i+1, padx=5, pady=5, sticky="w")
+
+            equation_entry = ttk.Entry(self.equation_frame, width=40)
+            equation_entry.grid(column=1, row=i+1, padx=5, pady=5, sticky="ew")
+            equation_entry.bind("<KeyRelease>", self._on_equation_changed)
+            self.equation_entries[label] = equation_entry
+
+        self.equation_frame.columnconfigure(1, weight=1)
 
         self.info_frame = ttk.LabelFrame(
             self.frame, text=t("ui.config_tab.connection_info_frame")
