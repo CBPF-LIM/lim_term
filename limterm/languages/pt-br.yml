@@ -28,8 +28,9 @@ ui:
     disconnect: "Desconectar"
     start_synthetic: "Iniciar Geração"
     connection_status: "🔗 Modo: {mode}\n📡 Porta: {port}\n⚡ Taxa: {baudrate} bps"
-    synthetic_connection_status: "🔗 Modo: Sintético\n🧮 Gerando dados usando equações\n⚡ Taxa: 30 Hz"
-
+    synthetic_connection_status: "🔗 Modo: Sintético\n🧮 Gerando dados usando equações"
+    available_math_functions: "Funções Matemáticas Disponíveis"
+  
   data_tab:
     save: "Salvar"
     load: "Carregar"

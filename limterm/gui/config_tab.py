@@ -5,6 +5,7 @@ from ..utils import SyntheticDataGenerator
 from ..i18n import t, get_config_manager
 from .preference_widgets import PrefCombobox
 import platform
+import math
 
 
 class ConfigTab:
@@ -107,6 +108,16 @@ class ConfigTab:
             self.equation_entries[label] = equation_entry
 
         self.equation_frame.columnconfigure(1, weight=1)
+
+        self.math_funcs_label = ttk.Label(self.equation_frame, text=t("ui.config_tab.available_math_functions"))
+        self.math_funcs_label.grid(column=0, row=len(self.equation_labels)+1, columnspan=2, padx=5, pady=(15,2), sticky="w")
+
+        math_funcs = [name for name in dir(math) if not name.startswith("_") and callable(getattr(math, name))]
+        math_funcs_text = ", ".join(math_funcs)
+        self.math_funcs_text = tk.Text(self.equation_frame, height=6, width=120, wrap="word")
+        self.math_funcs_text.insert("1.0", math_funcs_text)
+        self.math_funcs_text.config(state="disabled")
+        self.math_funcs_text.grid(column=0, row=len(self.equation_labels)+2, columnspan=2, padx=5, pady=(2,5), sticky="ew")
 
         self.info_frame = ttk.LabelFrame(
             self.frame, text=t("ui.config_tab.connection_info_frame")
