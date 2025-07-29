@@ -26,6 +26,7 @@ python = ">=3.9,<3.13"
 matplotlib = "^3.5.0"
 pyserial = "^3.5"
 PyYAML = "^6.0"
+asteval = "^1.0.6"
 
 [tool.poetry.scripts]
 limterm = "limterm.main:main"
