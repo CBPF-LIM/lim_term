@@ -4,4 +4,14 @@ lint:
 	poetry run black .
 
 run:
-	poetry run python -m limterm.main
+	poetry run limterm
+
+requirements:
+	poetry install
+
+install:
+	pipx install .
+
+pipx:
+	sudo apt install pipx
+	python3 -m pipx ensurepath
