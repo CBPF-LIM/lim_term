@@ -81,7 +81,7 @@ class ConfigTab:
 
         self.equation_labels = ["a", "b", "c", "d", "e"]
         for i, label in enumerate(self.equation_labels):
-            col_label = ttk.Label(self.equation_frame, text=f"{label.upper()}:")
+            col_label = ttk.Label(self.equation_frame, text=f"{label}:")
             col_label.grid(column=0, row=i, padx=5, pady=5, sticky="w")
 
             equation_entry = ttk.Entry(self.equation_frame, width=40)
