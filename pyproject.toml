@@ -22,7 +22,7 @@ classifiers = [
 packages = [{include = "limterm"}]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
+python = ">=3.9,<3.14"
 matplotlib = "^3.5.0"
 pyserial = "^3.5"
 PyYAML = "^6.0"

@@ -1,4 +1,7 @@
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from ..config import FIGURE_SIZE, FIGURE_DPI
 
