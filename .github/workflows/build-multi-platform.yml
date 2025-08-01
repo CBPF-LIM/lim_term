@@ -46,11 +46,18 @@ jobs:
         curl -sSL https://install.python-poetry.org | python3 -
         echo "$HOME/.local/bin" >> $GITHUB_PATH
         
-    - name: Configure Poetry
+    - name: Configure Poetry (Windows)
+      if: matrix.os == 'windows-latest'
       run: |
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
-      shell: ${{ matrix.os == 'windows-latest' && 'powershell' || 'bash' }}
+      shell: powershell
+      
+    - name: Configure Poetry (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
         
     - name: Load cached venv
       id: cached-poetry-dependencies
