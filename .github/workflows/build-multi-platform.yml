@@ -124,7 +124,7 @@ jobs:
           
           ### Requirements:
           - **Windows**: Windows 10/11 (64-bit)
-          - **macOS**: macOS 11+ (Apple Silicon or Intel), tk@8 (version 9.0 or later not working now)
+          - **macOS**: macOS 11+ (Apple Silicon or Intel)
           - No Python installation needed
           
           For help, see the [README](https://github.com/${{ github.repository }}/blob/main/README.md).
