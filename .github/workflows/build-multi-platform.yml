@@ -1,4 +1,4 @@
-name: Build Windows Executable
+name: Build Multi-Platform Executables
 
 on:
   push:
@@ -8,8 +8,19 @@ on:
   workflow_dispatch:  # Allow manual triggering
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        include:
+          - os: windows-latest
+            executable: LimTerm.exe
+            artifact_name: LimTerm-Windows
+          - os: macos-latest
+            executable: LimTerm
+            artifact_name: LimTerm-macOS
+    
+    runs-on: ${{ matrix.os }}
     
     steps:
     - name: Checkout code
@@ -20,18 +31,25 @@ jobs:
       with:
         python-version: '3.11'
         
-    - name: Install Poetry
+    - name: Install Poetry (Windows)
+      if: matrix.os == 'windows-latest'
       run: |
         (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
         $env:PATH += ";$env:APPDATA\Python\Scripts"
         echo "$env:APPDATA\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       shell: powershell
       
+    - name: Install Poetry (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        
     - name: Configure Poetry
       run: |
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
-      shell: powershell
+      shell: ${{ matrix.os == 'windows-latest' && 'powershell' || 'bash' }}
         
     - name: Load cached venv
       id: cached-poetry-dependencies
@@ -50,42 +68,68 @@ jobs:
     - name: Build with PyInstaller
       run: poetry run pyinstaller limterm.spec
         
-    - name: Create ZIP package
-      run: |
-        $version = "${{ github.ref_name }}"
-        if ($version -eq "") { $version = "latest" }
-        $zipName = "LimTerm-Windows-$version.zip"
-        Compress-Archive -Path "dist/LimTerm.exe" -DestinationPath $zipName
-        Write-Output "ZIP_NAME=$zipName" >> $env:GITHUB_ENV
-      shell: powershell
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: dist/${{ matrix.executable }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download Windows artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: LimTerm-Windows
+        path: ./artifacts/windows/
         
-    - name: Create Release (if tag)
-      if: startsWith(github.ref, 'refs/tags/')
+    - name: Download macOS artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: LimTerm-macOS
+        path: ./artifacts/macos/
+        
+    - name: Rename executables
+      run: |
+        mv ./artifacts/windows/LimTerm.exe ./LimTerm-Windows.exe
+        mv ./artifacts/macos/LimTerm ./LimTerm-macOS
+        chmod +x ./LimTerm-macOS
+        
+    - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          dist/LimTerm.exe
-          *.zip
+          LimTerm-Windows.exe
+          LimTerm-macOS
         body: |
           ## LimTerm ${{ github.ref_name }}
           
-          🎉 **Windows Executable Ready!**
+          🚀 **Cross-Platform Release**
           
           ### Download:
-          - **`LimTerm.exe`** - Direct executable (recommended)
-          - **`LimTerm-Windows-${{ github.ref_name }}.zip`** - ZIP package
+          - **`LimTerm-Windows.exe`** - Windows executable
+          - **`LimTerm-macOS`** - macOS executable
+          - **Source code** - Available as zip/tar.gz below
           
           ### Installation:
-          1. Download `LimTerm.exe`
+          1. Download the appropriate executable for your OS
           2. Run directly - no installation required
           3. First run creates `lim_config/` folder for settings
           
           ### Requirements:
-          - Windows 10/11 (64-bit)
+          - **Windows**: Windows 10/11 (64-bit)
+          - **macOS**: macOS 11+ (Apple Silicon or Intel)
           - No Python installation needed
           
           For help, see the [README](https://github.com/${{ github.repository }}/blob/main/README.md).
         draft: false
         prerelease: false
+        generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
