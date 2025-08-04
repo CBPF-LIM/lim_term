@@ -7,6 +7,7 @@ from ..i18n import t, initialize as init_i18n, get_available_languages, set_lang
 from .config_tab import ConfigTab
 from .data_tab import DataTab
 from .graph_tab import GraphTab
+from .osc_tab import OscTab
 
 
 class MainWindow:
@@ -71,12 +72,14 @@ class MainWindow:
         self.config_tab = ConfigTab(self.tab_control, self.serial_manager)
         self.data_tab = DataTab(self.tab_control)
         self.graph_tab = GraphTab(self.tab_control, self.data_tab, None)
+        self.osc_tab = OscTab(self.tab_control, self.data_tab)
 
         self.tab_control.add(
             self.config_tab.get_frame(), text=t("ui.tabs.configuration")
         )
         self.tab_control.add(self.data_tab.get_frame(), text=t("ui.tabs.data"))
         self.tab_control.add(self.graph_tab.get_frame(), text=t("ui.tabs.graph"))
+        self.tab_control.add(self.osc_tab.get_frame(), text="Oscilloscope")
 
         self.tab_control.pack(expand=1, fill="both")
 
@@ -102,6 +105,9 @@ class MainWindow:
 
             if hasattr(self, "data_tab"):
                 self.data_tab.cleanup()
+            
+            if hasattr(self, "osc_tab"):
+                self.osc_tab.cleanup()
 
             self.serial_manager.disconnect()
 
