@@ -28,18 +28,15 @@ class OscTab:
         self.data_tab = data_tab
         self.config_manager = get_config_manager()
         
-        # Oscilloscope state
         self.is_armed = False
         self.trigger_data = []
         self.capture_start_time = None
         self.capture_count = 0  # Track number of captures
         
-        # Performance optimizations
         self.osc_refresh_rate_ms = 33  # 30 FPS for OSC mode
         self.refresh_timer_id = None
         self.is_tab_active = False  # Track if this tab is currently visible
         
-        # Create helper modules
         self.trigger_manager = None  # Will be initialized after widgets
         self.plotter = None  # Will be initialized after widgets
         
@@ -48,11 +45,9 @@ class OscTab:
     
     def _create_widgets(self):
         """Create the oscilloscope interface."""
-        # Main layout: ARM control + collapsible settings
         main_controls_frame = ttk.Frame(self.frame)
         main_controls_frame.grid(column=0, row=0, padx=10, pady=5, sticky="ew")
         
-        # ARM Control (always visible)
         arm_frame = ttk.LabelFrame(main_controls_frame, text=t("ui.osc_tab.oscilloscope_controls"))
         arm_frame.grid(column=0, row=0, padx=5, pady=5, sticky="ew")
         
@@ -63,7 +58,6 @@ class OscTab:
         )
         self.arm_button.pack(pady=5, fill="x")
         
-        # Settings toggle button
         self.settings_button = ttk.Button(
             arm_frame,
             text=t("ui.osc_tab.show_settings"),
@@ -71,7 +65,6 @@ class OscTab:
         )
         self.settings_button.pack(pady=2, fill="x")
         
-        # Status display
         status_frame = ttk.LabelFrame(main_controls_frame, text=t("ui.osc_tab.status"))
         status_frame.grid(column=1, row=0, padx=5, pady=5, sticky="nsew")
         
@@ -81,36 +74,29 @@ class OscTab:
         self.freq_label = ttk.Label(status_frame, text=t("ui.osc_tab.frequency_unknown"), font=("TkDefaultFont", 8))
         self.freq_label.pack()
         
-        # Collapsible settings frame
         self.settings_frame = ttk.LabelFrame(main_controls_frame, text=t("ui.osc_tab.oscilloscope_settings"))
         self.settings_frame.grid(column=2, row=0, padx=5, pady=5, sticky="ew")
         
-        # Load settings visibility preference
         self.settings_visible = self.config_manager.load_setting("osc.ui.settings_visible", True)
         
         self._create_settings_widgets()
         
-        # Apply initial settings visibility
         if not self.settings_visible:
             self.settings_frame.grid_remove()
             self.settings_button.config(text=t("ui.osc_tab.show_settings"))
         
-        # Make columns expandable
         main_controls_frame.columnconfigure(0, weight=0)  # ARM control fixed
         main_controls_frame.columnconfigure(1, weight=0)  # Status fixed
         main_controls_frame.columnconfigure(2, weight=1)  # Settings expandable
         
-        # Graph display
         self.graph_manager = GraphManager(self.frame)
         self.graph_manager.get_widget().grid(
             column=0, row=1, columnspan=4, padx=10, pady=10, sticky="nsew"
         )
         
-        # Make the graph area expandable
         self.frame.rowconfigure(1, weight=1)
         self.frame.columnconfigure(0, weight=1)
         
-        # Initialize helper modules now that widgets exist
         self.trigger_manager = OscTrigger(
             self.data_tab, self.trigger_source, self.trigger_level, 
             self.trigger_edge, self.trigger_mode
@@ -122,15 +108,12 @@ class OscTab:
     
     def _create_settings_widgets(self):
         """Create the settings widgets inside the collapsible frame."""
-        # Create a container for all settings (vertical layout)
         settings_container = ttk.Frame(self.settings_frame)
         settings_container.pack(fill="both", expand=True, padx=5, pady=5)
         
-        # Trigger frame (renamed from "Trigger Settings")
         trigger_frame = ttk.LabelFrame(settings_container, text=t("ui.osc_tab.trigger"))
         trigger_frame.grid(column=0, row=0, padx=5, pady=5, sticky="ew")
         
-        # Trigger source (column selection)
         ttk.Label(trigger_frame, text=t("ui.osc_tab.trigger_source")).grid(column=0, row=0, padx=5, pady=2, sticky="w")
         self.trigger_source = PrefEntry(
             trigger_frame,
@@ -141,7 +124,6 @@ class OscTab:
         )
         self.trigger_source.grid(column=1, row=0, padx=5, pady=2)
         
-        # Trigger level
         ttk.Label(trigger_frame, text=t("ui.osc_tab.trigger_level")).grid(column=0, row=1, padx=5, pady=2, sticky="w")
         self.trigger_level = PrefEntry(
             trigger_frame,
@@ -152,7 +134,6 @@ class OscTab:
         )
         self.trigger_level.grid(column=1, row=1, padx=5, pady=2)
         
-        # Trigger edge
         ttk.Label(trigger_frame, text=t("ui.osc_tab.trigger_edge")).grid(column=0, row=2, padx=5, pady=2, sticky="w")
         self.trigger_edge = PrefCombobox(
             trigger_frame,
@@ -169,7 +150,6 @@ class OscTab:
         )
         self.trigger_edge.grid(column=1, row=2, padx=5, pady=2)
         
-        # Trigger mode
         ttk.Label(trigger_frame, text=t("ui.osc_tab.trigger_mode")).grid(column=0, row=3, padx=5, pady=2, sticky="w")
         self.trigger_mode = PrefCombobox(
             trigger_frame,
@@ -185,11 +165,9 @@ class OscTab:
         )
         self.trigger_mode.grid(column=1, row=3, padx=5, pady=2)
         
-        # Capture frame (renamed from "Capture Settings")
         capture_frame = ttk.LabelFrame(settings_container, text=t("ui.osc_tab.capture")) 
         capture_frame.grid(column=0, row=1, padx=5, pady=5, sticky="ew")
         
-        # Window size
         ttk.Label(capture_frame, text=t("ui.osc_tab.window_size")).grid(column=0, row=0, padx=5, pady=2, sticky="w")
         self.window_size = PrefEntry(
             capture_frame,
@@ -200,7 +178,6 @@ class OscTab:
         )
         self.window_size.grid(column=1, row=0, padx=5, pady=2)
         
-        # Manual save controls
         save_controls_frame = ttk.Frame(capture_frame)
         save_controls_frame.grid(column=0, row=1, columnspan=2, padx=5, pady=5, sticky="ew")
         
@@ -218,7 +195,6 @@ class OscTab:
         )
         self.save_data_button.pack(side="left", padx=2)
         
-        # Make settings container expandable
         settings_container.columnconfigure(0, weight=1)
     
     def _toggle_settings(self):
@@ -232,14 +208,12 @@ class OscTab:
             self.settings_button.config(text=t("ui.osc_tab.hide_settings"))
             self.settings_visible = True
         
-        # Save the preference
         self.config_manager.save_setting("osc.ui.settings_visible", self.settings_visible)
     
     def _setup_trigger_monitoring(self):
         """Set up periodic trigger monitoring with optimized refresh rate."""
         if hasattr(self, 'frame') and self.frame.winfo_exists():
             self._check_trigger_conditions()
-            # Use 30 FPS (33ms) for OSC mode instead of 50ms
             self.refresh_timer_id = self.frame.after(self.osc_refresh_rate_ms, self._setup_trigger_monitoring)
     
     def _stop_refresh_timer(self):
@@ -255,10 +229,8 @@ class OscTab:
         """Set whether this tab is currently active (optimization for rendering)."""
         self.is_active = is_active
         if not is_active:
-            # Stop expensive operations when tab is not visible
             self._stop_refresh_timer()
         else:
-            # Resume operations when tab becomes active
             if hasattr(self, 'frame') and self.frame.winfo_exists():
                 self._setup_trigger_monitoring()
     
@@ -277,16 +249,13 @@ class OscTab:
             
         self.capture_start_time = time.time()
         
-        # Clear the chart for new capture
         if hasattr(self, 'graph_manager'):
             self.graph_manager.clear()
             self.graph_manager.canvas.draw_idle()
         
-        # Update status
         if hasattr(self, 'status_label') and self.status_label.winfo_exists():
             self.status_label.config(text=t("ui.osc_tab.triggered"), foreground="red")
         
-        # Start capture
         self._start_capture()
     
     def _start_capture(self):
@@ -295,11 +264,9 @@ class OscTab:
             window_size = int(self.window_size.get_value())
             self.samples_needed = window_size  # How many samples we need total
             
-            # Update status immediately
             if hasattr(self, 'status_label') and self.status_label.winfo_exists():
                 self.status_label.config(text=t("ui.osc_tab.capturing"), foreground="red")
             
-            # Start monitoring for new data
             self._continue_capture()
                 
         except Exception as e:
@@ -312,29 +279,22 @@ class OscTab:
             return
             
         try:
-            # Get current data buffer
             current_data = self.data_tab.get_data()
             
-            # Get all data that came AFTER the trigger point
             trigger_point = self.trigger_manager.get_trigger_point_index()
             new_data_after_trigger = current_data[trigger_point:]
             
-            # Check if we have enough data
             window_size = int(self.window_size.get_value())
             if len(new_data_after_trigger) >= window_size:
-                # We have enough data - complete the capture
                 self.trigger_data = new_data_after_trigger[:window_size]  # Take exactly what we need
                 self._complete_capture()
             else:
-                # Still collecting data - plot what we have so far (only if tab is active)
                 self.trigger_data = new_data_after_trigger
                 if hasattr(self, 'plotter') and getattr(self, 'is_active', True):
                     self.plotter.plot_realtime_data(self.trigger_data)
                 
-                # Update progress (removed samples display as chart is updating)
                 progress = (len(new_data_after_trigger) / window_size) * 100
                 
-                # Continue monitoring with optimized timing
                 if hasattr(self, 'frame') and self.frame.winfo_exists():
                     self.frame.after(self.osc_refresh_rate_ms, self._continue_capture)
                 
@@ -347,33 +307,26 @@ class OscTab:
         try:
             window_size = int(self.window_size.get_value())
             
-            # Trim to exact window size if we got more data than needed
             if len(self.trigger_data) > window_size:
                 self.trigger_data = self.trigger_data[:window_size]
             
-            # Plot the final captured data
             y_data = None
             if hasattr(self, 'plotter'):
                 y_data = self.plotter.plot_final_data(self.trigger_data)
             
-            # Calculate and display frequency
             if y_data:
                 self._calculate_frequency(y_data)
             
-            # Update capture count (removed from status display as chart shows it visually)
             self.capture_count += 1
             
-            # Update status
             if hasattr(self, 'status_label') and self.status_label.winfo_exists():
                 self.status_label.config(text=t("ui.osc_tab.captured"), foreground="green")
             
-            # Handle different trigger modes
             trigger_mode = self.trigger_mode.get_value()
             
             if trigger_mode == t("ui.osc_tab.trigger_modes.single"):
                 self._disarm()  # Single shot - disarm after capture
             elif trigger_mode == t("ui.osc_tab.trigger_modes.continuous"):
-                # Continuous mode - re-arm automatically after brief delay
                 if hasattr(self, 'frame') and self.frame.winfo_exists():
                     self.frame.after(200, self._auto_rearm)  # Re-arm after 200ms
             
@@ -384,7 +337,6 @@ class OscTab:
     def _auto_rearm(self):
         """Re-arm for auto mode after a delay."""
         if hasattr(self, 'frame') and self.frame.winfo_exists():
-            # Just re-arm for continuous mode (no clearing needed with N-set buffer)
             self._arm()
     
     def _calculate_frequency(self, y_data):
@@ -394,7 +346,6 @@ class OscTab:
                 self.freq_label.config(text=t("ui.osc_tab.frequency_unknown"))
                 return
             
-            # Simple zero-crossing frequency estimation
             mean_val = sum(y_data) / len(y_data)
             crossings = 0
             
@@ -403,11 +354,8 @@ class OscTab:
                     crossings += 1
             
             if crossings > 2:
-                # Estimate frequency (assuming uniform sampling)
-                # This is a rough approximation
                 cycles = crossings / 2  # Two crossings per cycle
                 
-                # Display relative frequency information
                 self.freq_label.config(text=t("ui.osc_tab.frequency_cycles", cycles=f"{cycles:.1f}"))
             else:
                 self.freq_label.config(text=t("ui.osc_tab.frequency_unknown"))
@@ -421,19 +369,15 @@ class OscTab:
             return
             
         try:
-            # Create oscilloscope captures directory
             capture_dir = "osc_captures"
             if not os.path.exists(capture_dir):
                 os.makedirs(capture_dir)
             
-            # Generate timestamp filename
             timestamp = time.strftime("%Y%m%d_%H%M%S")
             image_filename = os.path.join(capture_dir, f"osc_capture_{timestamp}.png")
             
-            # Save screenshot as PNG
             self.graph_manager.figure.savefig(image_filename, dpi=300, bbox_inches="tight")
             
-            # Notify user
             self.data_tab.add_message(t("ui.osc_tab.png_saved", filename=f"osc_capture_{timestamp}.png"))
             
         except Exception as e:
@@ -446,21 +390,17 @@ class OscTab:
             return
             
         try:
-            # Create oscilloscope captures directory
             capture_dir = "osc_captures"
             if not os.path.exists(capture_dir):
                 os.makedirs(capture_dir)
             
-            # Generate timestamp filename
             timestamp = time.strftime("%Y%m%d_%H%M%S")
             data_filename = os.path.join(capture_dir, f"osc_capture_{timestamp}.txt")
             
-            # Save data as text file
             with open(data_filename, "w", encoding="utf-8") as f:
                 for line in self.trigger_data:
                     f.write(line + "\n")
             
-            # Notify user
             self.data_tab.add_message(t("ui.osc_tab.data_saved", filename=f"osc_capture_{timestamp}.txt"))
             
         except Exception as e:
@@ -481,13 +421,11 @@ class OscTab:
             
         self.is_armed = True
         
-        # Use trigger manager for state management
         if hasattr(self, 'trigger_manager'):
             self.trigger_manager.arm()
         
         trigger_mode = self.trigger_mode.get_value()
         if trigger_mode == t("ui.osc_tab.trigger_modes.single"):
-            # For single mode, clear the buffer to start fresh
             if hasattr(self, 'plotter'):
                 self.plotter.clear_all_data()
         
@@ -500,7 +438,6 @@ class OscTab:
         """Disarm the oscilloscope."""
         self.is_armed = False
         
-        # Use trigger manager for state management
         if hasattr(self, 'trigger_manager'):
             self.trigger_manager.disarm()
         
@@ -511,7 +448,6 @@ class OscTab:
     
     def _on_trigger_setting_change(self):
         """Handle trigger setting changes."""
-        # Reset trigger state when settings change
         if hasattr(self, 'trigger_manager') and self.trigger_manager and self.is_armed:
             self.trigger_manager.reset_trigger_state()
     

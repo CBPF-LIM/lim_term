@@ -17,7 +17,6 @@ class OscTrigger:
         self.trigger_edge = trigger_edge
         self.trigger_mode = trigger_mode
         
-        # Trigger state
         self.last_sample_value = None
         self.is_armed = False
         self.is_triggered = False
@@ -43,24 +42,20 @@ class OscTrigger:
             return False
             
         try:
-            # Get current data from data tab
             data_lines = self.data_tab.get_data()
             if not data_lines:
                 return False
             
-            # Get trigger settings
             trigger_col = int(self.trigger_source.get_value()) - 1
             trigger_level = float(self.trigger_level.get_value())
             trigger_edge = self.trigger_edge.get_value()
             
-            # Get the latest sample
             latest_line = data_lines[-1]
             try:
                 values = latest_line.split()
                 if trigger_col < len(values):
                     current_value = float(values[trigger_col])
                     
-                    # Check for trigger condition
                     if self.last_sample_value is not None:
                         triggered = self._check_edge_condition(
                             self.last_sample_value, current_value, trigger_level, trigger_edge
@@ -82,7 +77,6 @@ class OscTrigger:
     
     def _check_edge_condition(self, last_value, current_value, trigger_level, trigger_edge):
         """Check if edge condition is met."""
-        # Compare with translated trigger edge values using i18n keys
         if trigger_edge == t("ui.osc_tab.trigger_edges.rising"):
             return (last_value <= trigger_level < current_value)
         elif trigger_edge == t("ui.osc_tab.trigger_edges.falling"): 
@@ -95,7 +89,6 @@ class OscTrigger:
     def _trigger_detected(self, data_lines):
         """Handle trigger detection."""
         self.is_triggered = True
-        # Simply remember where we are in the data buffer right now
         self.trigger_point_index = len(data_lines)  # Data after this point is what we want
     
     def get_trigger_point_index(self):

@@ -80,7 +80,6 @@ class ConfigTab:
         self.equation_frame.grid(column=0, row=2, padx=10, pady=10, sticky="ew")
         self.equation_frame.grid_remove()  # Hidden by default
 
-        # FPS selection for synthetic mode (move up)
         self.fps_label = ttk.Label(self.equation_frame, text="FPS:")
         self.fps_label.grid(
             column=0, row=0, padx=5, pady=5, sticky="w"
@@ -291,7 +290,6 @@ class ConfigTab:
         else:
             self._preferred_port = None
 
-        # Load equations
         equations = self.config_manager.load_setting("equations", {})
         if equations:
             self._load_equations_to_ui(equations)
@@ -307,7 +305,6 @@ class ConfigTab:
             "config", "baudrate", self.baudrate_combobox.get()
         )
 
-        # Save equations
         equations = self._get_equations_from_ui()
         self.config_manager.save_setting("equations", equations)
 

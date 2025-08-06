@@ -848,10 +848,8 @@ class GraphTab:
         """Set whether this tab is currently active (optimization for rendering)."""
         self.is_tab_active = is_active
         if not is_active:
-            # Stop expensive operations when tab is not visible
             self._stop_refresh_timer()
         else:
-            # Resume operations when tab becomes active
             if hasattr(self, 'frame') and self.frame.winfo_exists():
                 self._start_refresh_timer()
 
