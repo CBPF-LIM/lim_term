@@ -95,11 +95,10 @@ class OscTab:
         self.trigger_mode = PrefCombobox(
             trigger_frame,
             pref_key="osc.trigger.mode",
-            default_value=t("ui.osc_tab.trigger_modes.normal"),
+            default_value=t("ui.osc_tab.trigger_modes.continuous"),
             state="readonly",
             values=[
-                t("ui.osc_tab.trigger_modes.normal"),
-                t("ui.osc_tab.trigger_modes.auto"),
+                t("ui.osc_tab.trigger_modes.continuous"),
                 t("ui.osc_tab.trigger_modes.single")
             ],
             width=10,
@@ -122,26 +121,23 @@ class OscTab:
         )
         self.window_size.grid(column=1, row=0, padx=5, pady=2)
         
-        # Pre-trigger percentage
-        ttk.Label(capture_frame, text=t("ui.osc_tab.pre_trigger_percent")).grid(column=0, row=1, padx=5, pady=2, sticky="w") 
-        self.pre_trigger_percent = PrefEntry(
-            capture_frame,
-            pref_key="osc.capture.pre_trigger_percent",
-            default_value="20",
-            width=8,
-            on_change=self._on_capture_setting_change
-        )
-        self.pre_trigger_percent.grid(column=1, row=1, padx=5, pady=2)
+        # Manual save controls
+        save_controls_frame = ttk.Frame(capture_frame)
+        save_controls_frame.grid(column=0, row=1, columnspan=2, padx=5, pady=5, sticky="ew")
         
-        # Auto-save captures
-        self.auto_save_enabled = PrefCheckbutton(
-            capture_frame,
-            pref_key="osc.capture.auto_save",
-            default_value=True,
-            text=t("ui.osc_tab.auto_save_captures"),
-            on_change=self._on_capture_setting_change
+        self.save_png_button = ttk.Button(
+            save_controls_frame,
+            text=t("ui.osc_tab.save_png"),
+            command=self._save_png
         )
-        self.auto_save_enabled.grid(column=0, row=2, columnspan=2, padx=5, pady=2, sticky="w")
+        self.save_png_button.pack(side="left", padx=2)
+        
+        self.save_data_button = ttk.Button(
+            save_controls_frame,
+            text=t("ui.osc_tab.save_data"),
+            command=self._save_data
+        )
+        self.save_data_button.pack(side="left", padx=2)
         
         # Control buttons
         button_frame = ttk.Frame(controls_frame)
@@ -316,10 +312,6 @@ class OscTab:
             if y_data:
                 self._calculate_frequency(y_data)
             
-            # Auto-save if enabled
-            if self.auto_save_enabled.get_value():
-                self._save_capture()
-            
             # Update capture count
             self.capture_count += 1
             if hasattr(self, 'capture_count_label') and self.capture_count_label.winfo_exists():
@@ -336,12 +328,10 @@ class OscTab:
             
             if trigger_mode == t("ui.osc_tab.trigger_modes.single"):
                 self._disarm()  # Single shot - disarm after capture
-            elif trigger_mode == t("ui.osc_tab.trigger_modes.auto"):
-                # Auto mode - re-arm automatically after delay
+            elif trigger_mode == t("ui.osc_tab.trigger_modes.continuous"):
+                # Continuous mode - re-arm automatically after brief delay
                 if hasattr(self, 'frame') and self.frame.winfo_exists():
-                    self.frame.after(500, self._auto_rearm)  # Re-arm after 500ms
-            elif trigger_mode == t("ui.osc_tab.trigger_modes.normal"):
-                self._disarm()  # Normal mode - disarm after capture
+                    self.frame.after(200, self._auto_rearm)  # Re-arm after 200ms
             
         except Exception as e:
             print(t("ui.osc_tab.capture_completion_error", error=str(e)))
@@ -382,8 +372,33 @@ class OscTab:
         except Exception as e:
             self.freq_label.config(text=t("ui.osc_tab.frequency_error"))
     
-    def _save_capture(self):
-        """Save captured data and screenshot."""
+    def _save_png(self):
+        """Save only the screenshot."""
+        if not self.trigger_data or not hasattr(self, 'graph_manager'):
+            return
+            
+        try:
+            # Create oscilloscope captures directory
+            capture_dir = "osc_captures"
+            if not os.path.exists(capture_dir):
+                os.makedirs(capture_dir)
+            
+            # Generate timestamp filename
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            image_filename = os.path.join(capture_dir, f"osc_capture_{timestamp}.png")
+            
+            # Save screenshot as PNG
+            self.graph_manager.figure.savefig(image_filename, dpi=300, bbox_inches="tight")
+            
+            # Notify user
+            self.data_tab.add_message(t("ui.osc_tab.png_saved", filename=f"osc_capture_{timestamp}.png"))
+            
+        except Exception as e:
+            print(f"Save PNG error: {e}")
+            self.data_tab.add_message(t("ui.osc_tab.save_error", error=str(e)))
+    
+    def _save_data(self):
+        """Save only the captured data."""
         if not self.trigger_data:
             return
             
@@ -395,23 +410,18 @@ class OscTab:
             
             # Generate timestamp filename
             timestamp = time.strftime("%Y%m%d_%H%M%S")
-            base_filename = f"osc_capture_{timestamp}"
+            data_filename = os.path.join(capture_dir, f"osc_capture_{timestamp}.txt")
             
             # Save data as text file
-            data_filename = os.path.join(capture_dir, f"{base_filename}.txt")
             with open(data_filename, "w", encoding="utf-8") as f:
                 for line in self.trigger_data:
                     f.write(line + "\n")
             
-            # Save screenshot as PNG
-            image_filename = os.path.join(capture_dir, f"{base_filename}.png")
-            self.graph_manager.figure.savefig(image_filename, dpi=300, bbox_inches="tight")
-            
             # Notify user
-            self.data_tab.add_message(t("ui.osc_tab.capture_saved", filename=base_filename))
+            self.data_tab.add_message(t("ui.osc_tab.data_saved", filename=f"osc_capture_{timestamp}.txt"))
             
         except Exception as e:
-            print(f"Save capture error: {e}")
+            print(f"Save data error: {e}")
             self.data_tab.add_message(t("ui.osc_tab.save_error", error=str(e)))
     
     def _toggle_arm(self):

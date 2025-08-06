@@ -99,8 +99,8 @@ ui:
     trigger_mode: "Trigger Mode:"
     capture_settings: "Capture Settings"
     window_size: "Window Size:"
-    pre_trigger_percent: "Pre-trigger %:"
-    auto_save_captures: "Auto-save captures"
+    save_png: "Save PNG"
+    save_data: "Save Data"
     status: "Status"
     arm: "ARM"
     disarm: "DISARM"
@@ -135,6 +135,8 @@ ui:
     column_label: "Column {column}"
     capture_completion_error: "Capture completion error: {error}"
     trigger_monitoring_error: "Trigger monitoring error: {error}"
+    png_saved: "PNG saved: {filename}"
+    data_saved: "Data saved: {filename}"
     
     trigger_edges:
       rising: "Rising"
@@ -142,9 +144,8 @@ ui:
       both: "Both"
       
     trigger_modes:
-      normal: "Normal"
-      auto: "Auto"
-      single: "Single"
+      continuous: "Continuous"
+      single: "Single Shot"
 
   graph_types:
     line: "Line"

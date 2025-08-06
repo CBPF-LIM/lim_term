@@ -48,14 +48,6 @@ class OscTrigger:
             if not data_lines:
                 return False
             
-            # Check for auto mode timeout (force trigger after 2 seconds)
-            trigger_mode = self.trigger_mode.get_value()
-            if trigger_mode == t("ui.osc_tab.trigger_modes.auto") and self.arm_start_time:
-                time_armed = time.time() - self.arm_start_time
-                if time_armed > 2.0:  # 2 second timeout for auto mode
-                    self._trigger_detected(data_lines)
-                    return True
-                
             # Get trigger settings
             trigger_col = int(self.trigger_source.get_value()) - 1
             trigger_level = float(self.trigger_level.get_value())
