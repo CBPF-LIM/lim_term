@@ -104,7 +104,6 @@ ui:
     status: "Status"
     arm: "ARM"
     disarm: "DISARM"
-    single_shot: "Single Shot"
     clear_data: "Clear Data"
     ready: "Ready"
     armed: "ARMED"

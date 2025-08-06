@@ -150,13 +150,6 @@ class OscTab:
         )
         self.arm_button.pack(pady=2, fill="x")
         
-        self.single_shot_button = ttk.Button(
-            button_frame,
-            text=t("ui.osc_tab.single_shot"),
-            command=self._single_shot_capture
-        )
-        self.single_shot_button.pack(pady=2, fill="x")
-        
         self.clear_button = ttk.Button(
             button_frame,
             text=t("ui.osc_tab.clear_data"), 
@@ -465,14 +458,6 @@ class OscTab:
             self.arm_button.config(text=t("ui.osc_tab.arm"))
         if hasattr(self, 'status_label') and self.status_label.winfo_exists():
             self.status_label.config(text=t("ui.osc_tab.ready"), foreground="blue")
-    
-    def _single_shot_capture(self):
-        """Perform a single-shot capture."""
-        # Clear any existing data first
-        self._clear_capture_data()
-        
-        # Arm for single capture
-        self._arm()
     
     def _clear_capture_data(self):
         """Clear captured data and graph."""
