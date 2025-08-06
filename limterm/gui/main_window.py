@@ -101,15 +101,15 @@ class MainWindow:
             if hasattr(self.osc_tab, 'set_tab_active'):
                 self.osc_tab.set_tab_active(False)
             
-            if active_tab_index == 2:  # Graph tab
+            if active_tab_index == 2:
                 if hasattr(self.graph_tab, 'set_tab_active'):
                     self.graph_tab.set_tab_active(True)
-            elif active_tab_index == 3:  # OSC tab
+            elif active_tab_index == 3:
                 if hasattr(self.osc_tab, 'set_tab_active'):
                     self.osc_tab.set_tab_active(True)
                     
         except:
-            pass  # Handle any tab indexing errors gracefully
+            pass
 
     def _on_data_received(self, line):
         self.data_tab.add_data(line)
@@ -157,7 +157,7 @@ class MainWindow:
                 
                         
             except:
-                pass  # Handle tab indexing errors
+                pass
 
         except tk.TclError:
             self._running = False

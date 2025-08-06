@@ -78,7 +78,7 @@ class ConfigTab:
             self.frame, text=t("ui.config_tab.mode_synthetic_data_equations")
         )
         self.equation_frame.grid(column=0, row=2, padx=10, pady=10, sticky="ew")
-        self.equation_frame.grid_remove()  # Hidden by default
+        self.equation_frame.grid_remove()
 
         self.fps_label = ttk.Label(self.equation_frame, text="FPS:")
         self.fps_label.grid(

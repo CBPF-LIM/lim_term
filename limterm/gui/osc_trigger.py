@@ -68,7 +68,7 @@ class OscTrigger:
                     self.last_sample_value = current_value
                     
             except (ValueError, IndexError):
-                pass  # Skip invalid data lines
+                pass
                 
         except Exception as e:
             print(t("ui.osc_tab.trigger_monitoring_error", error=str(e)))
@@ -89,7 +89,7 @@ class OscTrigger:
     def _trigger_detected(self, data_lines):
         """Handle trigger detection."""
         self.is_triggered = True
-        self.trigger_point_index = len(data_lines)  # Data after this point is what we want
+        self.trigger_point_index = len(data_lines)
     
     def get_trigger_point_index(self):
         """Get the index where trigger was detected."""

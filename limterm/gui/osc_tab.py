@@ -31,14 +31,14 @@ class OscTab:
         self.is_armed = False
         self.trigger_data = []
         self.capture_start_time = None
-        self.capture_count = 0  # Track number of captures
+        self.capture_count = 0
         
-        self.osc_refresh_rate_ms = 33  # 30 FPS for OSC mode
+        self.osc_refresh_rate_ms = 33
         self.refresh_timer_id = None
-        self.is_tab_active = False  # Track if this tab is currently visible
+        self.is_tab_active = False
         
-        self.trigger_manager = None  # Will be initialized after widgets
-        self.plotter = None  # Will be initialized after widgets
+        self.trigger_manager = None
+        self.plotter = None
         
         self._create_widgets()
         self._setup_trigger_monitoring()
@@ -85,9 +85,9 @@ class OscTab:
             self.settings_frame.grid_remove()
             self.settings_button.config(text=t("ui.osc_tab.show_settings"))
         
-        main_controls_frame.columnconfigure(0, weight=0)  # ARM control fixed
-        main_controls_frame.columnconfigure(1, weight=0)  # Status fixed
-        main_controls_frame.columnconfigure(2, weight=1)  # Settings expandable
+        main_controls_frame.columnconfigure(0, weight=0)
+        main_controls_frame.columnconfigure(1, weight=0)
+        main_controls_frame.columnconfigure(2, weight=1)
         
         self.graph_manager = GraphManager(self.frame)
         self.graph_manager.get_widget().grid(
@@ -262,7 +262,7 @@ class OscTab:
         """Start data capture after trigger."""
         try:
             window_size = int(self.window_size.get_value())
-            self.samples_needed = window_size  # How many samples we need total
+            self.samples_needed = window_size
             
             if hasattr(self, 'status_label') and self.status_label.winfo_exists():
                 self.status_label.config(text=t("ui.osc_tab.capturing"), foreground="red")
@@ -286,7 +286,7 @@ class OscTab:
             
             window_size = int(self.window_size.get_value())
             if len(new_data_after_trigger) >= window_size:
-                self.trigger_data = new_data_after_trigger[:window_size]  # Take exactly what we need
+                self.trigger_data = new_data_after_trigger[:window_size]
                 self._complete_capture()
             else:
                 self.trigger_data = new_data_after_trigger
@@ -325,10 +325,10 @@ class OscTab:
             trigger_mode = self.trigger_mode.get_value()
             
             if trigger_mode == t("ui.osc_tab.trigger_modes.single"):
-                self._disarm()  # Single shot - disarm after capture
+                self._disarm()
             elif trigger_mode == t("ui.osc_tab.trigger_modes.continuous"):
                 if hasattr(self, 'frame') and self.frame.winfo_exists():
-                    self.frame.after(200, self._auto_rearm)  # Re-arm after 200ms
+                    self.frame.after(200, self._auto_rearm)
             
         except Exception as e:
             print(t("ui.osc_tab.capture_completion_error", error=str(e)))
@@ -342,7 +342,7 @@ class OscTab:
     def _calculate_frequency(self, y_data):
         """Calculate approximate frequency of the signal."""
         try:
-            if len(y_data) < 10:  # Need sufficient data points
+            if len(y_data) < 10:
                 self.freq_label.config(text=t("ui.osc_tab.frequency_unknown"))
                 return
             
@@ -354,7 +354,7 @@ class OscTab:
                     crossings += 1
             
             if crossings > 2:
-                cycles = crossings / 2  # Two crossings per cycle
+                cycles = crossings / 2
                 
                 self.freq_label.config(text=t("ui.osc_tab.frequency_cycles", cycles=f"{cycles:.1f}"))
             else:
@@ -453,7 +453,7 @@ class OscTab:
     
     def _on_capture_setting_change(self):
         """Handle capture setting changes."""
-        pass  # Settings are automatically saved by preference widgets
+        pass
     
     def get_frame(self):
         """Get the tab frame."""

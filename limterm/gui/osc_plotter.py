@@ -22,13 +22,13 @@ class OscPlotter:
         self.trigger_point_line = None
         self.expected_window_line = None
         
-        self.use_lines_only = True  # No markers for performance
-        self.persistent_plotting = True  # Don't clear, keep adding data
-        self.background = None  # For blitting optimization
+        self.use_lines_only = True
+        self.persistent_plotting = True
+        self.background = None
         
-        self.set_buffer_size = 4  # N=4 sets
-        self.capture_sets = []  # Ring buffer for captures
-        self.current_set_index = 0  # Track which slot is current (ring buffer logic)
+        self.set_buffer_size = 4
+        self.capture_sets = []
+        self.current_set_index = 0
         self.set_colors = self._generate_color_palette()
     
     def plot_realtime_data(self, trigger_data):
@@ -63,7 +63,7 @@ class OscPlotter:
                 
                 self._plot_buffer_sets(trigger_col, t("ui.osc_tab.capture_complete_title"))
                 
-                return y_data  # Return for frequency calculation
+                return y_data
                 
         except Exception as e:
             print(f"Final plot error: {e}")
@@ -74,7 +74,7 @@ class OscPlotter:
         colors = []
         N = self.set_buffer_size
         for n in range(N):
-            intensity = n / (N - 1) if N > 1 else 0  # 0 for newest, 1 for oldest
+            intensity = n / (N - 1) if N > 1 else 0
             color = (1, intensity, intensity)
             colors.append(color)
         return colors
@@ -97,13 +97,13 @@ class OscPlotter:
         for buffer_index, age in plot_order:
             if self.capture_sets[buffer_index] is not None:
                 x_data, y_data = self.capture_sets[buffer_index]
-                color = self.set_colors[age]  # age 0=newest/red, 1=older/white
+                color = self.set_colors[age]
                 self.graph_manager.ax.plot(x_data, y_data, color=color, 
-                                         linewidth=1.0)  # No label for legend
+                                         linewidth=1.0)
         
         if current_x and current_y:
             self.graph_manager.ax.plot(current_x, current_y, color='red', 
-                                     linewidth=1.5)  # Slightly thicker for current
+                                     linewidth=1.5)
         
         self._add_static_elements(trigger_col, title)
         
@@ -120,9 +120,9 @@ class OscPlotter:
         for buffer_index, age in plot_order:
             if self.capture_sets[buffer_index] is not None:
                 x_data, y_data = self.capture_sets[buffer_index]
-                color = self.set_colors[age]  # age 0=newest/red, 1=older/white
+                color = self.set_colors[age]
                 self.graph_manager.ax.plot(x_data, y_data, color=color, 
-                                         linewidth=1.0)  # No label for legend
+                                         linewidth=1.0)
         
         self._add_static_elements(trigger_col, title)
         
@@ -138,13 +138,13 @@ class OscPlotter:
         for i in range(self.set_buffer_size):
             if self.capture_sets[i] is not None:
                 if i == self.current_set_index:
-                    continue  # Skip empty future slot
+                    continue
                 
                 steps_back = (self.current_set_index - i) % self.set_buffer_size
                 if steps_back == 0:
-                    steps_back = self.set_buffer_size  # Full ring distance
+                    steps_back = self.set_buffer_size
                 
-                age = steps_back - 1  # Convert to 0-based age (0=newest)
+                age = steps_back - 1
                 plot_order.append((i, age))
         
         plot_order.sort(key=lambda x: x[1], reverse=True)
@@ -209,14 +209,14 @@ class OscPlotter:
             self.graph_manager.clear()
     def _extract_plot_data(self, trigger_data, trigger_col):
         """Extract X and Y data from trigger data for plotting."""
-        x_data = []  # Sample numbers starting from 0 (trigger point)
-        y_data = []  # Values from trigger column
+        x_data = []
+        y_data = []
         
         for i, line in enumerate(trigger_data):
             try:
                 values = line.split()
                 if trigger_col < len(values):
-                    x_data.append(i)  # Sample number starting from 0
+                    x_data.append(i)
                     y_data.append(float(values[trigger_col]))
             except (ValueError, IndexError):
                 continue
