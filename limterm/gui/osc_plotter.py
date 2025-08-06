@@ -97,7 +97,8 @@ class OscPlotter:
         for buffer_index, age in plot_order:
             if self.capture_sets[buffer_index] is not None:
                 x_data, y_data = self.capture_sets[buffer_index]
-                color = self.set_colors[age]
+                safe_age = min(age, len(self.set_colors) - 1)
+                color = self.set_colors[safe_age]
                 self.graph_manager.ax.plot(x_data, y_data, color=color, 
                                          linewidth=1.0)
         
@@ -120,7 +121,8 @@ class OscPlotter:
         for buffer_index, age in plot_order:
             if self.capture_sets[buffer_index] is not None:
                 x_data, y_data = self.capture_sets[buffer_index]
-                color = self.set_colors[age]
+                safe_age = min(age, len(self.set_colors) - 1)
+                color = self.set_colors[safe_age]
                 self.graph_manager.ax.plot(x_data, y_data, color=color, 
                                          linewidth=1.0)
         
@@ -135,7 +137,13 @@ class OscPlotter:
         Returns list of (buffer_index, age) tuples where age 0=newest."""
         plot_order = []
         
-        for i in range(self.set_buffer_size):
+        while len(self.capture_sets) < self.set_buffer_size:
+            self.capture_sets.append(None)
+        
+        for i in range(len(self.capture_sets)):
+            if i >= self.set_buffer_size:
+                break
+                
             if self.capture_sets[i] is not None:
                 if i == self.current_set_index:
                     continue
@@ -145,6 +153,8 @@ class OscPlotter:
                     steps_back = self.set_buffer_size
                 
                 age = steps_back - 1
+                age = max(0, min(age, self.set_buffer_size - 1))
+                
                 plot_order.append((i, age))
         
         plot_order.sort(key=lambda x: x[1], reverse=True)
