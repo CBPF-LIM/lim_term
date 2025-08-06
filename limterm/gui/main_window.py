@@ -81,7 +81,39 @@ class MainWindow:
         self.tab_control.add(self.graph_tab.get_frame(), text=t("ui.tabs.graph"))
         self.tab_control.add(self.osc_tab.get_frame(), text="Oscilloscope")
 
+        # Bind tab change event for optimization
+        self.tab_control.bind("<<NotebookTabChanged>>", self._on_tab_changed)
+        
         self.tab_control.pack(expand=1, fill="both")
+        
+        # Initialize active tab tracking
+        self._update_active_tab()
+    
+    def _on_tab_changed(self, event):
+        """Handle tab change for rendering optimization."""
+        self._update_active_tab()
+    
+    def _update_active_tab(self):
+        """Update which tab is active for rendering optimization."""
+        try:
+            active_tab_index = self.tab_control.index("current")
+            
+            # Set all tabs as inactive first
+            if hasattr(self.graph_tab, 'set_tab_active'):
+                self.graph_tab.set_tab_active(False)
+            if hasattr(self.osc_tab, 'set_tab_active'):
+                self.osc_tab.set_tab_active(False)
+            
+            # Set the active tab
+            if active_tab_index == 2:  # Graph tab
+                if hasattr(self.graph_tab, 'set_tab_active'):
+                    self.graph_tab.set_tab_active(True)
+            elif active_tab_index == 3:  # OSC tab
+                if hasattr(self.osc_tab, 'set_tab_active'):
+                    self.osc_tab.set_tab_active(True)
+                    
+        except:
+            pass  # Handle any tab indexing errors gracefully
 
     def _on_data_received(self, line):
         self.data_tab.add_data(line)
@@ -119,9 +151,20 @@ class MainWindow:
             self.root.update()
 
             current_time = time.time()
-            if hasattr(self.graph_tab, "should_render_now"):
-                if self.graph_tab.should_render_now(current_time):
-                    self.graph_tab.render_frame()
+            
+            # Only render if tab is active (optimization)
+            try:
+                active_tab_index = self.tab_control.index("current")
+                
+                # Graph tab rendering
+                if active_tab_index == 2 and hasattr(self.graph_tab, "should_render_now"):
+                    if self.graph_tab.should_render_now(current_time):
+                        self.graph_tab.render_frame()
+                
+                # OSC tab has its own optimized refresh system, no need to call here
+                        
+            except:
+                pass  # Handle tab indexing errors
 
         except tk.TclError:
             self._running = False

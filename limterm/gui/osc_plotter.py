@@ -5,6 +5,8 @@ This module provides plotting functionality for the oscilloscope tab.
 """
 
 from ..i18n import t
+import matplotlib.pyplot as plt
+import numpy as np
 
 class OscPlotter:
     """Handles oscilloscope data plotting and visualization."""
@@ -14,9 +16,28 @@ class OscPlotter:
         self.trigger_source = trigger_source
         self.trigger_level = trigger_level
         self.window_size = window_size
+        
+        # Optimization: persistent line objects for blitting
+        self.data_line = None
+        self.trigger_level_line = None
+        self.trigger_point_line = None
+        self.expected_window_line = None
+        
+        # OSC-style plotting settings
+        self.use_lines_only = True  # No markers for performance
+        self.persistent_plotting = True  # Don't clear, keep adding data
+        self.background = None  # For blitting optimization
+        
+        # Data management for N-set buffer (onion skin effect)
+        self.set_buffer_size = 4  # N=4 sets
+        self.capture_sets = []  # Ring buffer for captures
+        self.current_set_index = 0  # Track which slot is current (ring buffer logic)
+        # New color palette: newest = red, oldest = white
+        # RGB formula: (1, intensity, intensity) where intensity 0=red, 1=white
+        self.set_colors = self._generate_color_palette()
     
     def plot_realtime_data(self, trigger_data):
-        """Plot captured data during real-time capture."""
+        """Plot captured data during real-time capture using optimized blitting."""
         if not trigger_data or not hasattr(self, 'graph_manager'):
             return
             
@@ -28,18 +49,9 @@ class OscPlotter:
             x_data, y_data = self._extract_plot_data(trigger_data, trigger_col)
             
             if x_data and y_data:
-                # Clear and plot current data
-                self.graph_manager.clear()
-                self.graph_manager.plot_line(x_data, y_data, color="blue", marker="o")
-                
-                # Add visual elements
-                self._add_trigger_level_line()
-                self._add_trigger_point_marker()
-                self._add_expected_window(len(x_data))
-                self._set_plot_labels(trigger_col, t("ui.osc_tab.capture_live_title"))
-                
-                # Update canvas
-                self.graph_manager.canvas.draw_idle()
+                # For real-time, update the current (incomplete) capture
+                self._plot_current_and_buffer_sets(x_data, y_data, trigger_col, 
+                                                  t("ui.osc_tab.capture_live_title"))
                 
         except Exception as e:
             print(f"Real-time plot error: {e}")
@@ -57,18 +69,11 @@ class OscPlotter:
             x_data, y_data = self._extract_plot_data(trigger_data, trigger_col)
             
             if x_data and y_data:
-                # Clear and plot final data
-                self.graph_manager.clear()
-                self.graph_manager.plot_line(x_data, y_data, color="blue", marker="o")
+                # Add completed capture to buffer
+                self._add_to_buffer(x_data, y_data)
                 
-                # Add visual elements
-                self._add_trigger_level_line(max_x=max(x_data) if x_data else 1)
-                self._add_trigger_point_marker()
-                self._set_plot_labels(trigger_col, t("ui.osc_tab.capture_complete_title"))
-                
-                # Force immediate update
-                self.graph_manager.update()
-                self.graph_manager.canvas.draw_idle()
+                # Plot all buffer sets with onion skin effect
+                self._plot_buffer_sets(trigger_col, t("ui.osc_tab.capture_complete_title"))
                 
                 return y_data  # Return for frequency calculation
                 
@@ -76,6 +81,178 @@ class OscPlotter:
             print(f"Final plot error: {e}")
             return None
     
+    def _generate_color_palette(self):
+        """Generate color palette: newest = red, oldest = black using RGB formula."""
+        colors = []
+        N = self.set_buffer_size
+        for n in range(N):
+            # n=0: bright red (1,0,0), n=N: white (1,1,1) (N not included)
+            intensity = n / (N - 1) if N > 1 else 0  # 0 for newest, 1 for oldest
+            # Interpolate between red and white
+            color = (1, intensity, intensity)
+            colors.append(color)
+        return colors
+    
+    def _add_to_buffer(self, x_data, y_data):
+        """Add completed capture to N-set ring buffer."""
+        # Initialize buffer if empty
+        while len(self.capture_sets) < self.set_buffer_size:
+            self.capture_sets.append(None)
+        
+        # Add to current slot in ring buffer
+        self.capture_sets[self.current_set_index] = (x_data, y_data)
+        
+        # Move to next slot (ring buffer logic)
+        self.current_set_index = (self.current_set_index + 1) % self.set_buffer_size
+    
+    def _plot_current_and_buffer_sets(self, current_x, current_y, trigger_col, title):
+        """Plot current incomplete capture plus buffered complete captures."""
+        # Clear for fresh plot
+        self.graph_manager.clear()
+        
+        # Plot buffered complete sets in correct order (oldest to newest)
+        # This ensures newest (reddest) is plotted on top
+        plot_order = self._get_plot_order()
+        
+        for buffer_index, age in plot_order:
+            if self.capture_sets[buffer_index] is not None:
+                x_data, y_data = self.capture_sets[buffer_index]
+                color = self.set_colors[age]  # age 0=newest/red, 1=older/white
+                self.graph_manager.ax.plot(x_data, y_data, color=color, 
+                                         linewidth=1.0)  # No label for legend
+        
+        # Plot current incomplete capture (always bright red on top)
+        if current_x and current_y:
+            self.graph_manager.ax.plot(current_x, current_y, color='red', 
+                                     linewidth=1.5)  # Slightly thicker for current
+        
+        # Add static elements
+        self._add_static_elements(trigger_col, title)
+        
+        # Update axis to fit all data
+        self._update_axis_limits()
+        
+        # Update canvas
+        self.graph_manager.canvas.draw_idle()
+    
+    def _plot_buffer_sets(self, trigger_col, title):
+        """Plot all buffered complete captures with onion skin effect."""
+        # Clear for fresh plot
+        self.graph_manager.clear()
+        
+        # Plot buffered complete sets in correct order (oldest to newest)
+        # This ensures newest (reddest) is plotted on top
+        plot_order = self._get_plot_order()
+        
+        for buffer_index, age in plot_order:
+            if self.capture_sets[buffer_index] is not None:
+                x_data, y_data = self.capture_sets[buffer_index]
+                color = self.set_colors[age]  # age 0=newest/red, 1=older/white
+                self.graph_manager.ax.plot(x_data, y_data, color=color, 
+                                         linewidth=1.0)  # No label for legend
+        
+        # Add static elements
+        self._add_static_elements(trigger_col, title)
+        
+        # Update axis to fit all data
+        self._update_axis_limits()
+        
+        # Update canvas
+        self.graph_manager.canvas.draw()
+    
+    def _get_plot_order(self):
+        """Get plotting order: oldest first (background), newest last (top).
+        Returns list of (buffer_index, age) tuples where age 0=newest."""
+        plot_order = []
+        
+        # Calculate age for each slot relative to current
+        for i in range(self.set_buffer_size):
+            if self.capture_sets[i] is not None:
+                # Calculate how many steps back this slot is from current
+                if i == self.current_set_index:
+                    # This will be the NEXT slot to write (current capture not yet stored)
+                    continue  # Skip empty future slot
+                
+                # Calculate age: how far back from the most recent
+                steps_back = (self.current_set_index - i) % self.set_buffer_size
+                if steps_back == 0:
+                    steps_back = self.set_buffer_size  # Full ring distance
+                
+                age = steps_back - 1  # Convert to 0-based age (0=newest)
+                plot_order.append((i, age))
+        
+        # Sort by age (oldest first for background plotting)
+        plot_order.sort(key=lambda x: x[1], reverse=True)
+        return plot_order
+    
+    def _add_static_elements(self, trigger_col, title):
+        """Add static elements like trigger level line and labels."""
+        # Always plot trigger level line (dashed red)
+        trigger_level = float(self.trigger_level.get_value())
+        
+        # Get current axis limits to draw trigger line across entire plot
+        all_x = []
+        for capture_set in self.capture_sets:
+            if capture_set is not None:
+                x_data, _ = capture_set
+                all_x.extend(x_data)
+        
+        if all_x:
+            min_x, max_x = min(all_x), max(all_x)
+        else:
+            min_x, max_x = 0, int(self.window_size.get_value())
+        
+        # Add trigger level line (only element with label)
+        self.graph_manager.ax.plot([min_x, max_x], [trigger_level, trigger_level], 
+                                 color="red", linestyle="--", alpha=0.8, 
+                                 label=t("ui.osc_tab.trigger_level_line"))
+        
+        # Set labels and formatting
+        self.graph_manager.ax.set_xlabel(t("ui.osc_tab.samples_after_trigger"))
+        self.graph_manager.ax.set_ylabel(t("ui.osc_tab.column_label", column=trigger_col + 1))
+        self.graph_manager.ax.set_title(title)
+        self.graph_manager.ax.grid(True, alpha=0.3)
+        # Remove legend as requested
+        # self.graph_manager.ax.legend()
+    
+    def _update_axis_limits(self):
+        """Update axis limits to fit all buffered data automatically."""
+        all_x = []
+        all_y = []
+        
+        # Collect data from ring buffer (skip None entries)
+        for capture_set in self.capture_sets:
+            if capture_set is not None:
+                x_data, y_data = capture_set
+                all_x.extend(x_data)
+                all_y.extend(y_data)
+        
+        if not all_x or not all_y:
+            # Default limits if no data
+            self.graph_manager.ax.set_xlim(0, int(self.window_size.get_value()))
+            return
+        
+        # Add small margins
+        x_margin = (max(all_x) - min(all_x)) * 0.05
+        y_margin = (max(all_y) - min(all_y)) * 0.1
+        
+        # Set limits with margins
+        self.graph_manager.ax.set_xlim(min(all_x) - x_margin, max(all_x) + x_margin)
+        self.graph_manager.ax.set_ylim(min(all_y) - y_margin, max(all_y) + y_margin)
+    
+    def clear_all_data(self):
+        """Clear all plotting data and reset for new session."""
+        self.capture_sets = []
+        self.current_set_index = 0
+        self.data_line = None
+        self.trigger_level_line = None
+        self.trigger_point_line = None
+        self.expected_window_line = None
+        self.background = None
+        
+        # Clear the actual plot
+        if hasattr(self, 'graph_manager'):
+            self.graph_manager.clear()
     def _extract_plot_data(self, trigger_data, trigger_col):
         """Extract X and Y data from trigger data for plotting."""
         x_data = []  # Sample numbers starting from 0 (trigger point)
@@ -91,43 +268,3 @@ class OscPlotter:
                 continue
                 
         return x_data, y_data
-    
-    def _add_trigger_level_line(self, max_x=None):
-        """Add horizontal trigger level line to plot."""
-        trigger_level = float(self.trigger_level.get_value())
-        window_size = int(self.window_size.get_value())
-        
-        if max_x is None:
-            max_x = window_size
-            
-        trigger_line_x = [0, max_x]
-        trigger_line_y = [trigger_level, trigger_level]
-        self.graph_manager.ax.plot(trigger_line_x, trigger_line_y, 
-                                 color="red", linestyle="--", alpha=0.7, 
-                                 label=t("ui.osc_tab.trigger_level_line"))
-    
-    def _add_trigger_point_marker(self):
-        """Add vertical line marking the trigger point at x=0."""
-        self.graph_manager.ax.axvline(x=0, color="red", linestyle=":", 
-                                    alpha=0.7, label=t("ui.osc_tab.trigger_point_line"))
-    
-    def _add_expected_window(self, current_samples):
-        """Add gray line showing expected window size."""
-        window_size = int(self.window_size.get_value())
-        trigger_level = float(self.trigger_level.get_value())
-        
-        if current_samples < window_size:
-            remaining_x = list(range(current_samples, window_size))
-            remaining_y = [trigger_level] * len(remaining_x)
-            self.graph_manager.ax.plot(remaining_x, remaining_y, 
-                                     color="gray", linestyle=":", alpha=0.5, 
-                                     label=t("ui.osc_tab.expected_window"))
-    
-    def _set_plot_labels(self, trigger_col, title):
-        """Set plot labels and formatting."""
-        self.graph_manager.ax.set_xlabel(t("ui.osc_tab.samples_after_trigger"))
-        self.graph_manager.ax.set_ylabel(t("ui.osc_tab.column_label", column=trigger_col + 1))
-        self.graph_manager.ax.set_xlim(0, int(self.window_size.get_value()))
-        self.graph_manager.ax.set_title(title)
-        self.graph_manager.ax.legend()
-        self.graph_manager.ax.grid(True, alpha=0.3)
