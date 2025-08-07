@@ -3,15 +3,15 @@ from tkinter import ttk
 import time
 from ..config import DEFAULT_GEOMETRY
 from ..core import SerialManager
-from ..i18n import t, initialize as init_i18n, get_available_languages, set_language
+from ..i18n import t, get_available_languages, set_language
 from .config_tab import ConfigTab
 from .data_tab import DataTab
 from .graph_tab import GraphTab
+from .osc_tab import OscTab
 
 
 class MainWindow:
     def __init__(self):
-        init_i18n()
 
         self.root = tk.Tk()
         self.root.title(t("ui.main_window.title"))
@@ -63,7 +63,7 @@ class MainWindow:
 
         from tkinter import messagebox
 
-        messagebox.showinfo("Language Changed", t("ui.main_window.restart_required"))
+        messagebox.showinfo(t("dialogs.language_changed"), t("ui.main_window.restart_required"))
 
     def _create_tabs(self):
         self.tab_control = ttk.Notebook(self.root)
@@ -71,14 +71,44 @@ class MainWindow:
         self.config_tab = ConfigTab(self.tab_control, self.serial_manager)
         self.data_tab = DataTab(self.tab_control)
         self.graph_tab = GraphTab(self.tab_control, self.data_tab, None)
+        self.osc_tab = OscTab(self.tab_control, self.data_tab)
 
         self.tab_control.add(
             self.config_tab.get_frame(), text=t("ui.tabs.configuration")
         )
         self.tab_control.add(self.data_tab.get_frame(), text=t("ui.tabs.data"))
         self.tab_control.add(self.graph_tab.get_frame(), text=t("ui.tabs.graph"))
+        self.tab_control.add(self.osc_tab.get_frame(), text=t("ui.tabs.oscilloscope"))
 
+        self.tab_control.bind("<<NotebookTabChanged>>", self._on_tab_changed)
+        
         self.tab_control.pack(expand=1, fill="both")
+        
+        self._update_active_tab()
+    
+    def _on_tab_changed(self, event):
+        """Handle tab change for rendering optimization."""
+        self._update_active_tab()
+    
+    def _update_active_tab(self):
+        """Update which tab is active for rendering optimization."""
+        try:
+            active_tab_index = self.tab_control.index("current")
+            
+            if hasattr(self.graph_tab, 'set_tab_active'):
+                self.graph_tab.set_tab_active(False)
+            if hasattr(self.osc_tab, 'set_tab_active'):
+                self.osc_tab.set_tab_active(False)
+            
+            if active_tab_index == 2:
+                if hasattr(self.graph_tab, 'set_tab_active'):
+                    self.graph_tab.set_tab_active(True)
+            elif active_tab_index == 3:
+                if hasattr(self.osc_tab, 'set_tab_active'):
+                    self.osc_tab.set_tab_active(True)
+                    
+        except:
+            pass
 
     def _on_data_received(self, line):
         self.data_tab.add_data(line)
@@ -102,6 +132,9 @@ class MainWindow:
 
             if hasattr(self, "data_tab"):
                 self.data_tab.cleanup()
+            
+            if hasattr(self, "osc_tab"):
+                self.osc_tab.cleanup()
 
             self.serial_manager.disconnect()
 
@@ -113,15 +146,23 @@ class MainWindow:
             self.root.update()
 
             current_time = time.time()
-            if hasattr(self.graph_tab, "should_render_now"):
-                if self.graph_tab.should_render_now(current_time):
-                    self.graph_tab.render_frame()
+            
+            try:
+                active_tab_index = self.tab_control.index("current")
+                
+                if active_tab_index == 2 and hasattr(self.graph_tab, "should_render_now"):
+                    if self.graph_tab.should_render_now(current_time):
+                        self.graph_tab.render_frame()
+                
+                        
+            except:
+                pass
 
         except tk.TclError:
             self._running = False
             return
         except Exception as e:
-            print(f"Game loop error: {e}")
+            print(t("errors.main_loop_error", error=str(e)))
 
         if self._running and self.root.winfo_exists():
             self.root.after(16, self._game_loop)

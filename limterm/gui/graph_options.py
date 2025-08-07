@@ -142,4 +142,4 @@ class GraphOptionsWindow:
             self.window.destroy()
 
         except Exception as e:
-            print(f"Erro ao aplicar configurações: {e}")
+            print(t("errors.config_save_error", error=str(e)))

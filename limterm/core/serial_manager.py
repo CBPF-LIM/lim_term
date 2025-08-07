@@ -1,6 +1,7 @@
 import threading
 from ..utils import SerialPortManager
 from ..config import SERIAL_TIMEOUT
+from ..i18n import t
 
 
 class SerialManager:
@@ -24,7 +25,7 @@ class SerialManager:
 
         except Exception as e:
             if self.error_callback:
-                self.error_callback(f"Erro ao conectar: {e}")
+                self.error_callback(t("errors.connection_error", error=str(e)))
             return False
 
     def disconnect(self):
@@ -42,7 +43,7 @@ class SerialManager:
 
             except Exception as e:
                 if self.error_callback:
-                    self.error_callback(f"Erro ao ler dados: {e}")
+                    self.error_callback(t("errors.data_read_error", error=str(e)))
                 break
 
     def get_available_ports(self):

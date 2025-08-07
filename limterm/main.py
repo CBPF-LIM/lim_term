@@ -13,17 +13,20 @@ if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
 from limterm.gui import MainWindow
+from limterm.i18n import t, initialize as init_i18n
 
 
 def main():
     """Main entry point for Lim Terminal application"""
+    init_i18n()
+    
     try:
         app = MainWindow()
         app.run()
     except KeyboardInterrupt:
-        print("\nApplication interrupted by user")
+        print(f"\n{t('errors.application_interrupted')}")
     except Exception as e:
-        print(f"Application error: {e}")
+        print(t('errors.application_error', error=str(e)))
         sys.exit(1)
 
 
