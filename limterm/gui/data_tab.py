@@ -27,12 +27,45 @@ class DataTab:
         self._create_widgets()
 
     def _create_widgets(self):
-        # Main data settings frame with toggle button
-        settings_header = ttk.Frame(self.frame)
-        settings_header.pack(fill="x", padx=10, pady=(5, 0))
+        # Button toolbar with toggle on the right
+        toolbar_frame = ttk.Frame(self.frame)
+        toolbar_frame.pack(fill="x", padx=10, pady=(5, 0))
+        
+        button_container = ttk.Frame(toolbar_frame)
+        button_container.pack(side="left", fill="x", expand=True)
+        
+        self.save_button = ttk.Button(
+            button_container, text=t("ui.data_tab.save"), command=self._save_data
+        )
+        self.save_button.pack(side="left", padx=(0, 10))
+
+        self.load_button = ttk.Button(
+            button_container, text=t("ui.data_tab.load"), command=self._load_data
+        )
+        self.load_button.pack(side="left", padx=(0, 10))
+
+        self.clear_button = ttk.Button(
+            button_container, text=t("ui.data_tab.clear"), command=self._clear_data
+        )
+        self.clear_button.pack(side="left", padx=(0, 10))
+
+        # Preview control buttons in the same toolbar
+        self.pause_button = ttk.Button(
+            button_container,
+            text=t("ui.data_tab.pause_preview"),
+            command=self._toggle_preview_pause
+        )
+        self.pause_button.pack(side="left", padx=(0, 10))
+
+        self.reset_timestamp_button = ttk.Button(
+            button_container,
+            text=t("ui.data_tab.reset_timestamp"),
+            command=self._reset_timestamp
+        )
+        self.reset_timestamp_button.pack(side="left", padx=(0, 10))
         
         self.toggle_settings_button = ttk.Button(
-            settings_header, 
+            toolbar_frame, 
             text=t("ui.data_tab.hide_settings"), 
             command=self._toggle_settings
         )
@@ -153,40 +186,6 @@ class DataTab:
             on_change=self._on_timestamp_enabled_change,
         )
         self.timestamp_enabled.grid(column=0, row=2, columnspan=2, padx=5, pady=2, sticky="w")
-
-        # Main button frame (moved preview controls here)
-        button_frame = ttk.Frame(self.frame)
-        button_frame.pack(fill="x", padx=10, pady=5)
-
-        self.save_button = ttk.Button(
-            button_frame, text=t("ui.data_tab.save"), command=self._save_data
-        )
-        self.save_button.pack(side="left", padx=(0, 5))
-
-        self.load_button = ttk.Button(
-            button_frame, text=t("ui.data_tab.load"), command=self._load_data
-        )
-        self.load_button.pack(side="left", padx=(0, 5))
-
-        self.clear_button = ttk.Button(
-            button_frame, text=t("ui.data_tab.clear"), command=self._clear_data
-        )
-        self.clear_button.pack(side="left", padx=(0, 5))
-
-        # Preview control buttons
-        self.pause_button = ttk.Button(
-            button_frame,
-            text=t("ui.data_tab.pause_preview"),
-            command=self._toggle_preview_pause
-        )
-        self.pause_button.pack(side="left", padx=(0, 5))
-
-        self.reset_timestamp_button = ttk.Button(
-            button_frame,
-            text=t("ui.data_tab.reset_timestamp"),
-            command=self._reset_timestamp
-        )
-        self.reset_timestamp_button.pack(side="left", padx=(0, 5))
 
         self.text_frame = ttk.Frame(self.frame)
         self.text_frame.pack(expand=1, fill="both", padx=10, pady=5)

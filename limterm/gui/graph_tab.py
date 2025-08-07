@@ -11,6 +11,7 @@ class GraphTab:
     def __init__(self, parent, data_tab, open_options_callback):
         self.frame = ttk.Frame(parent)
         self.data_tab = data_tab
+        self.config_manager = get_config_manager()
         self.graph_settings = {}
         self.options_visible = False
         self.is_paused = False
@@ -25,56 +26,68 @@ class GraphTab:
         self._create_widgets()
 
     def _create_widgets(self):
-        top_row = ttk.Frame(self.frame)
-        top_row.grid(column=0, row=0, sticky="w", padx=10, pady=10)
+        toolbar_frame = ttk.Frame(self.frame)
+        toolbar_frame.grid(column=0, row=0, sticky="ew", padx=10, pady=(10, 5))
+        toolbar_frame.columnconfigure(0, weight=1)
 
-        self.x_label = ttk.Label(top_row, text=t("ui.graph_tab.column_x"))
-        self.x_label.pack(side="left", padx=(0, 5))
-        self.x_column_entry = PrefEntry(
-            top_row,
-            pref_key="graph.general.x_column",
-            default_value=str(DEFAULT_X_COLUMN),
-            width=10,
-            on_change=self._on_setting_change,
-        )
-        self.x_column_entry.pack(side="left", padx=(0, 15))
+        button_container = ttk.Frame(toolbar_frame)
+        button_container.grid(column=0, row=0, sticky="w")
 
         self.plot_button = ttk.Button(
-            top_row, text=t("ui.graph_tab.update_graph"), command=self.plot_graph
+            button_container, text=t("ui.graph_tab.update_graph"), command=self.plot_graph
         )
         self.plot_button.pack(side="left", padx=(0, 10))
 
         self.pause_button = ttk.Button(
-            top_row, text=t("ui.graph_tab.pause"), command=self._toggle_pause
+            button_container, text=t("ui.graph_tab.pause"), command=self._toggle_pause
         )
         self.pause_button.pack(side="left", padx=(0, 10))
 
-        self.options_button = ttk.Button(
-            top_row, text=t("ui.graph_tab.show_options"), command=self._toggle_options
-        )
-        self.options_button.pack(side="left", padx=(0, 10))
-
         self.save_button = ttk.Button(
-            top_row, text=t("ui.graph_tab.save_png"), command=self._save_chart
+            button_container, text=t("ui.graph_tab.save_png"), command=self._save_chart
         )
         self.save_button.pack(side="left", padx=(0, 10))
 
         self.save_data_button = ttk.Button(
-            top_row, text=t("ui.graph_tab.save_data"), command=self._save_data
+            button_container, text=t("ui.graph_tab.save_data"), command=self._save_data
         )
         self.save_data_button.pack(side="left", padx=(0, 10))
 
-        self.y_columns_frame = ttk.LabelFrame(
-            self.frame, text=t("ui.graph_tab.y_columns")
+        self.options_button = ttk.Button(
+            toolbar_frame, text=t("ui.graph_tab.show_settings"), command=self._toggle_options
         )
-        self.y_columns_frame.grid(
+        self.options_button.grid(column=1, row=0, sticky="e")
+
+        self.axis_columns_frame = ttk.LabelFrame(
+            self.frame, text=t("ui.graph_tab.axis_and_columns")
+        )
+        self.axis_columns_frame.grid(
             column=0, row=1, columnspan=4, padx=10, pady=5, sticky="ew"
         )
 
+        x_frame = ttk.Frame(self.axis_columns_frame)
+        x_frame.grid(column=0, row=0, padx=5, pady=5, sticky="w")
+
+        self.x_label = ttk.Label(x_frame, text=t("ui.graph_tab.column_x"))
+        self.x_label.pack(side="top")
+        self.x_column_entry = PrefEntry(
+            x_frame,
+            pref_key="graph.general.x_column",
+            default_value=str(DEFAULT_X_COLUMN),
+            width=10,
+            justify="center",
+            on_change=self._on_setting_change,
+        )
+        self.x_column_entry.pack(side="top")
+
+        # Add vertical separator between X and Y columns
+        separator = ttk.Separator(self.axis_columns_frame, orient="vertical")
+        separator.grid(column=1, row=0, sticky="ns", padx=10)
+
         self.y_entries = []
         for i in range(1, 6):
-            y_frame = ttk.Frame(self.y_columns_frame)
-            y_frame.grid(column=i - 1, row=0, padx=5, pady=5, sticky="w")
+            y_frame = ttk.Frame(self.axis_columns_frame)
+            y_frame.grid(column=i+1, row=0, padx=5, pady=5, sticky="w")
 
             y_label = ttk.Label(y_frame, text=t(f"ui.graph_tab.column_y{i}"))
             y_label.pack(side="top")
@@ -83,6 +96,7 @@ class GraphTab:
                 pref_key=f"graph.general.y{i}_column",
                 default_value="",
                 width=8,
+                justify="center",
                 on_change=self._on_setting_change,
             )
             y_entry.pack(side="top")
@@ -91,24 +105,37 @@ class GraphTab:
         self.options_frame = ttk.LabelFrame(
             self.frame, text=t("ui.graph_tab.options_frame")
         )
+        self.options_frame.grid(column=0, row=2, sticky="ew", padx=10, pady=5)
         self._create_options_widgets()
 
-        self.graph_manager = GraphManager(self.frame)
-        self.graph_manager.get_widget().grid(
-            column=0, row=4, columnspan=4, padx=10, pady=10, sticky="nsew"
-        )
+        # Set initial options visibility and button text
+        self.options_visible = self.config_manager.load_setting("graph.ui.options_visible", False)
+        if not self.options_visible:
+            self.options_frame.grid_remove()
+            self.options_button.config(text=t("ui.graph_tab.show_settings"))
+        else:
+            self.options_button.config(text=t("ui.graph_tab.hide_settings"))
 
-        self.frame.rowconfigure(4, weight=1)
+        # Chart frame - separate container for proper layout
+        chart_frame = ttk.Frame(self.frame)
+        chart_frame.grid(column=0, row=3, columnspan=4, padx=10, pady=10, sticky="nsew")
+
+        self.graph_manager = GraphManager(chart_frame)
+        self.graph_manager.get_widget().pack(fill="both", expand=True)
+
+        self.frame.rowconfigure(3, weight=1)
         self.frame.columnconfigure(0, weight=1)
-        self.frame.columnconfigure(1, weight=1)
-        self.frame.columnconfigure(2, weight=1)
-        self.frame.columnconfigure(3, weight=1)
 
     def _create_options_widgets(self):
+        # Create main container for side-by-side layout
+        main_container = ttk.Frame(self.options_frame)
+        main_container.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        # Global settings frame
         global_frame = ttk.LabelFrame(
-            self.options_frame, text=t("ui.graph_tab.global_settings")
+            main_container, text=t("ui.graph_tab.global_settings")
         )
-        global_frame.grid(column=0, row=0, columnspan=6, padx=5, pady=5, sticky="ew")
+        global_frame.grid(column=0, row=0, padx=(0, 5), pady=5, sticky="nsew")
 
         self.group_label = ttk.Label(
             global_frame, text=t("ui.graph_tab.visualization_group_label")
@@ -133,23 +160,24 @@ class GraphTab:
         self.group_combobox.grid(column=1, row=0, padx=5, pady=5, sticky="w")
 
         self.window_label = ttk.Label(global_frame, text=t("ui.graph_tab.window_label"))
-        self.window_label.grid(column=2, row=0, padx=5, pady=5, sticky="w")
+        self.window_label.grid(column=0, row=1, padx=5, pady=5, sticky="w")
         self.data_window_entry = PrefEntry(
             global_frame,
             pref_key="graph.general.window_size",
             default_value="50",
             width=12,
+            justify="center",
             on_change=self._on_setting_change,
         )
-        self.data_window_entry.grid(column=3, row=0, padx=5, pady=5, sticky="w")
+        self.data_window_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
 
         self.fps_label = ttk.Label(
             global_frame, text=t("ui.graph_tab.refresh_rate_label")
         )
-        self.fps_label.grid(column=4, row=0, padx=5, pady=5, sticky="w")
+        self.fps_label.grid(column=0, row=2, padx=5, pady=5, sticky="w")
 
         fps_frame = ttk.Frame(global_frame)
-        fps_frame.grid(column=5, row=0, padx=5, pady=5, sticky="w")
+        fps_frame.grid(column=1, row=2, padx=5, pady=5, sticky="w")
 
         self.fps_combobox = PrefCombobox(
             fps_frame,
@@ -163,65 +191,72 @@ class GraphTab:
         self.fps_combobox.pack(side="left")
 
         self.fps_debug_label = ttk.Label(
-            fps_frame, text="(33ms)", font=("TkDefaultFont", 8)
+            fps_frame, text="(30 Hz = 33ms)", font=("TkDefaultFont", 8)
         )
         self.fps_debug_label.pack(side="left", padx=(5, 0))
 
-        self.min_y_label = ttk.Label(global_frame, text=t("ui.graph_tab.min_y_label"))
-        self.min_y_label.grid(column=0, row=1, padx=5, pady=5, sticky="w")
+        self.y_limits_label = ttk.Label(global_frame, text=t("ui.graph_tab.y_limits_label"))
+        self.y_limits_label.grid(column=0, row=3, padx=5, pady=5, sticky="w")
+        
+        y_limits_frame = ttk.Frame(global_frame)
+        y_limits_frame.grid(column=1, row=3, padx=5, pady=5, sticky="w")
+        
         self.min_y_entry = PrefEntry(
-            global_frame,
+            y_limits_frame,
             pref_key="graph.general.min_y",
             default_value="",
             width=12,
+            justify="center",
             on_change=self._on_setting_change,
         )
-        self.min_y_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
+        self.min_y_entry.pack(side="left", padx=(0, 5))
 
-        self.max_y_label = ttk.Label(global_frame, text=t("ui.graph_tab.max_y_label"))
-        self.max_y_label.grid(column=2, row=1, padx=5, pady=5, sticky="w")
         self.max_y_entry = PrefEntry(
-            global_frame,
+            y_limits_frame,
             pref_key="graph.general.max_y",
             default_value="",
             width=12,
+            justify="center",
             on_change=self._on_setting_change,
         )
-        self.max_y_entry.grid(column=3, row=1, padx=5, pady=5, sticky="w")
+        self.max_y_entry.pack(side="left")
 
-        colors_label = ttk.Label(global_frame, text=t("ui.graph_tab.color_label"))
-        colors_label.grid(column=0, row=2, padx=5, pady=5, sticky="w")
+        # Colors settings frame
+        colors_frame = ttk.LabelFrame(
+            main_container, text=t("ui.graph_tab.colors_settings")
+        )
+        colors_frame.grid(column=1, row=0, padx=5, pady=5, sticky="nsew")
 
         self.y_color_combos = []
         default_colors = ["blue", "red", "green", "orange", "magenta"]
 
-        colors_frame = ttk.Frame(global_frame)
-        colors_frame.grid(column=1, row=2, columnspan=3, padx=5, pady=5, sticky="w")
-
         for i in range(5):
-            y_frame = ttk.Frame(colors_frame)
-            y_frame.grid(column=i, row=0, padx=2, pady=2)
-
-            ttk.Label(y_frame, text=f"Y{i+1}").pack()
+            color_label = ttk.Label(colors_frame, text=f"Y{i+1}:")
+            color_label.grid(column=0, row=i, padx=5, pady=2, sticky="w")
+            
             color_combo = PrefCombobox(
-                y_frame,
+                colors_frame,
                 pref_key=f"graph.general.y{i+1}_color",
                 default_value=default_colors[i],
                 state="readonly",
                 values=self._get_translated_colors(),
-                width=8,
+                width=10,
                 value_mapping=self._get_color_mapping(),
                 on_change=lambda idx=i: self._on_color_setting_change(idx),
             )
-            color_combo.pack()
+            color_combo.grid(column=1, row=i, padx=5, pady=2, sticky="w")
             self.y_color_combos.append(color_combo)
 
         self.series_config_frame = ttk.LabelFrame(
-            self.options_frame, text=t("ui.graph_tab.series_settings")
+            main_container, text=t("ui.graph_tab.series_settings")
         )
         self.series_config_frame.grid(
-            column=0, row=1, columnspan=6, padx=5, pady=5, sticky="ew"
+            column=2, row=0, padx=(5, 0), pady=5, sticky="nsew"
         )
+
+        main_container.columnconfigure(0, weight=1)
+        main_container.columnconfigure(1, weight=1)
+        main_container.columnconfigure(2, weight=1)
 
         self._create_series_widgets()
 
@@ -277,13 +312,13 @@ class GraphTab:
     def _toggle_options(self):
         if self.options_visible:
             self.options_frame.grid_remove()
-            self.options_button.config(text=t("ui.graph_tab.show_options"))
+            self.options_button.config(text=t("ui.graph_tab.show_settings"))
             self.options_visible = False
         else:
             self.options_frame.grid(
-                column=0, row=2, columnspan=4, padx=10, pady=10, sticky="ew"
+                column=0, row=2, columnspan=4, padx=10, pady=5, sticky="ew"
             )
-            self.options_button.config(text=t("ui.graph_tab.hide_options"))
+            self.options_button.config(text=t("ui.graph_tab.hide_settings"))
             self.options_visible = True
 
     def _on_series_setting_change(self, series_index):
@@ -723,16 +758,6 @@ class GraphTab:
     def _create_time_series_widgets(self):
         self.series_config_frame.config(text=t("ui.graph_tab.time_series_settings"))
 
-        ttk.Label(self.series_config_frame, text=t("ui.graph_tab.series_label")).grid(
-            column=0, row=0, padx=5, pady=5
-        )
-        ttk.Label(self.series_config_frame, text=t("ui.graph_tab.type_label")).grid(
-            column=1, row=0, padx=5, pady=5
-        )
-        ttk.Label(self.series_config_frame, text=t("ui.graph_tab.point_label")).grid(
-            column=2, row=0, padx=5, pady=5
-        )
-
         self.series_widgets = []
         for i in range(1, 6):
             self._create_time_series_row(self.series_config_frame, i, f"Y{i}", i - 1)
@@ -854,7 +879,7 @@ class GraphTab:
             fps = int(self.fps_combobox.get_value())
             self._set_refresh_rate(fps)
 
-            self.fps_debug_label.config(text=f"({self.refresh_rate_ms}ms)")
+            self.fps_debug_label.config(text=f"({fps} Hz = {self.refresh_rate_ms}ms)")
 
             import time
 

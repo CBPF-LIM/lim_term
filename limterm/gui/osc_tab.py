@@ -44,40 +44,31 @@ class OscTab:
         main_controls_frame = ttk.Frame(self.frame)
         main_controls_frame.grid(column=0, row=0, padx=10, pady=5, sticky="ew")
 
-        arm_frame = ttk.LabelFrame(
-            main_controls_frame, text=t("ui.osc_tab.oscilloscope_controls")
-        )
-        arm_frame.grid(column=0, row=0, padx=5, pady=5, sticky="ew")
+        controls_left = ttk.Frame(main_controls_frame)
+        controls_left.pack(side="left", fill="x", expand=True)
+
+        controls_right = ttk.Frame(main_controls_frame)
+        controls_right.pack(side="right", padx=(10, 0))
 
         self.arm_button = ttk.Button(
-            arm_frame, text=t("ui.osc_tab.arm"), command=self._toggle_arm
+            controls_left, text=t("ui.osc_tab.arm"), command=self._toggle_arm
         )
-        self.arm_button.pack(pady=5, fill="x")
-
-        self.settings_button = ttk.Button(
-            arm_frame, text=t("ui.osc_tab.show_settings"), command=self._toggle_settings
-        )
-        self.settings_button.pack(pady=2, fill="x")
-
-        status_frame = ttk.LabelFrame(main_controls_frame, text=t("ui.osc_tab.status"))
-        status_frame.grid(column=1, row=0, padx=5, pady=5, sticky="nsew")
+        self.arm_button.pack(side="left", padx=(0, 10))
 
         self.status_label = ttk.Label(
-            status_frame, text=t("ui.osc_tab.ready"), foreground="blue"
+            controls_left, text=t("ui.osc_tab.ready"), foreground="blue"
         )
-        self.status_label.pack(pady=5)
+        self.status_label.pack(side="left")
 
-        self.freq_label = ttk.Label(
-            status_frame,
-            text=t("ui.osc_tab.frequency_unknown"),
-            font=("TkDefaultFont", 8),
+        self.settings_button = ttk.Button(
+            controls_right, text=t("ui.osc_tab.show_settings"), command=self._toggle_settings
         )
-        self.freq_label.pack()
+        self.settings_button.pack(side="right")
 
         self.settings_frame = ttk.LabelFrame(
-            main_controls_frame, text=t("ui.osc_tab.oscilloscope_settings")
+            self.frame, text=t("ui.osc_tab.oscilloscope_settings")
         )
-        self.settings_frame.grid(column=2, row=0, padx=5, pady=5, sticky="ew")
+        self.settings_frame.grid(column=0, row=1, padx=10, pady=5, sticky="ew")
 
         self.settings_visible = self.config_manager.load_setting(
             "osc.ui.settings_visible", True
@@ -89,16 +80,12 @@ class OscTab:
             self.settings_frame.grid_remove()
             self.settings_button.config(text=t("ui.osc_tab.show_settings"))
 
-        main_controls_frame.columnconfigure(0, weight=0)
-        main_controls_frame.columnconfigure(1, weight=0)
-        main_controls_frame.columnconfigure(2, weight=1)
-
         self.graph_manager = GraphManager(self.frame)
         self.graph_manager.get_widget().grid(
-            column=0, row=1, columnspan=4, padx=10, pady=10, sticky="nsew"
+            column=0, row=2, padx=10, pady=10, sticky="nsew"
         )
 
-        self.frame.rowconfigure(1, weight=1)
+        self.frame.rowconfigure(2, weight=1)
         self.frame.columnconfigure(0, weight=1)
 
     def _create_settings_widgets(self):
@@ -107,7 +94,7 @@ class OscTab:
         settings_container.pack(fill="both", expand=True, padx=5, pady=5)
 
         trigger_frame = ttk.LabelFrame(settings_container, text=t("ui.osc_tab.trigger"))
-        trigger_frame.grid(column=0, row=0, padx=5, pady=5, sticky="ew")
+        trigger_frame.grid(column=0, row=0, padx=(0, 5), pady=5, sticky="new")
 
         ttk.Label(trigger_frame, text=t("ui.osc_tab.trigger_source")).grid(
             column=0, row=0, padx=5, pady=2, sticky="w"
@@ -174,7 +161,7 @@ class OscTab:
         self.trigger_mode.grid(column=1, row=3, padx=5, pady=2)
 
         capture_frame = ttk.LabelFrame(settings_container, text=t("ui.osc_tab.capture"))
-        capture_frame.grid(column=0, row=1, padx=5, pady=5, sticky="ew")
+        capture_frame.grid(column=1, row=0, padx=(5, 0), pady=5, sticky="new")
 
         ttk.Label(capture_frame, text=t("ui.osc_tab.window_size")).grid(
             column=0, row=0, padx=5, pady=2, sticky="w"
@@ -208,6 +195,7 @@ class OscTab:
         self.clear_button.pack(side="left", padx=2)
 
         settings_container.columnconfigure(0, weight=1)
+        settings_container.columnconfigure(1, weight=1)
 
     def _toggle_settings(self):
         """Toggle the visibility of the settings frame."""
@@ -442,32 +430,6 @@ class OscTab:
             
         except Exception as e:
             logger.error(f"Error plotting all sets: {e}")
-
-    def _calculate_frequency(self, y_data):
-        try:
-            if len(y_data) < 10:
-                self.freq_label.config(text=t("ui.osc_tab.frequency_unknown"))
-                return
-
-            mean_val = sum(y_data) / len(y_data)
-            crossings = 0
-
-            for i in range(1, len(y_data)):
-                if (y_data[i - 1] <= mean_val < y_data[i]) or (
-                    y_data[i - 1] >= mean_val > y_data[i]
-                ):
-                    crossings += 1
-
-            if crossings > 2:
-                cycles = crossings / 2
-                self.freq_label.config(
-                    text=t("ui.osc_tab.frequency_cycles", cycles=f"{cycles:.1f}")
-                )
-            else:
-                self.freq_label.config(text=t("ui.osc_tab.frequency_unknown"))
-
-        except Exception as e:
-            self.freq_label.config(text=t("ui.osc_tab.frequency_error"))
 
     def _clear_display(self):
         """Clear the oscilloscope display and accumulated trigger sets."""
