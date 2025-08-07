@@ -1,11 +1,6 @@
 """
 Oscilloscope-inspired data capture and visualization tab.
 
-This module provides oscilloscope functionality including:
-- Trigger detection with configurable level and edge detection
-- One-shot capture mode with pre-trigger data
-- Auto-save of captured data and screenshots
-- Real-time status monitoring
 """
 
 import tkinter as tk
@@ -122,7 +117,6 @@ class OscTab:
             pref_key="osc.trigger.source_column",
             default_value="2",
             width=8,
-            on_change=self._on_trigger_setting_change,
         )
         self.trigger_source.grid(column=1, row=0, padx=5, pady=2)
 
@@ -134,7 +128,6 @@ class OscTab:
             pref_key="osc.trigger.level",
             default_value="0.0",
             width=8,
-            on_change=self._on_trigger_setting_change,
         )
         self.trigger_level.grid(column=1, row=1, padx=5, pady=2)
 
@@ -157,7 +150,6 @@ class OscTab:
                 t("ui.osc_tab.trigger_edges.both"): "both",
             },
             width=10,
-            on_change=self._on_trigger_setting_change,
         )
         self.trigger_edge.grid(column=1, row=2, padx=5, pady=2)
 
@@ -178,7 +170,6 @@ class OscTab:
                 t("ui.osc_tab.trigger_modes.single"): "single",
             },
             width=10,
-            on_change=self._on_trigger_setting_change,
         )
         self.trigger_mode.grid(column=1, row=3, padx=5, pady=2)
 
@@ -193,7 +184,6 @@ class OscTab:
             pref_key="osc.capture.window_size",
             default_value="100",
             width=8,
-            on_change=self._on_capture_setting_change,
         )
         self.window_size.grid(column=1, row=0, padx=5, pady=2)
 
@@ -235,20 +225,27 @@ class OscTab:
         )
 
     def _setup_trigger_monitoring(self):
-        if self._is_frame_valid() and self.is_armed:
+        if not self._is_frame_valid() or not self.is_armed:
+            return
+            
+        try:
             if self.data_tab.get_data():
                 self._check_trigger_conditions()
             
-            self.refresh_timer_id = self.frame.after(
-                self.osc_refresh_rate_ms, self._setup_trigger_monitoring
-            )
+            if self._is_frame_valid() and self.is_armed:
+                self.refresh_timer_id = self.frame.after(
+                    self.osc_refresh_rate_ms, self._setup_trigger_monitoring
+                )
+        except tk.TclError:
+            self.is_armed = False
 
     def _stop_refresh_timer(self):
         """Stop the refresh timer."""
         if self.refresh_timer_id:
             try:
-                self.frame.after_cancel(self.refresh_timer_id)
-            except:
+                if self._is_frame_valid():
+                    self.frame.after_cancel(self.refresh_timer_id)
+            except (tk.TclError, AttributeError):
                 pass
             self.refresh_timer_id = None
 
@@ -261,16 +258,24 @@ class OscTab:
     def _cancel_all_callbacks(self):
         for callback_id in self.pending_callbacks[:]:
             try:
-                self.frame.after_cancel(callback_id)
+                if self._is_frame_valid():
+                    self.frame.after_cancel(callback_id)
                 self.pending_callbacks.remove(callback_id)
-            except:
+            except (tk.TclError, AttributeError, ValueError):
                 pass
+        self.pending_callbacks.clear()
 
     def _is_widget_valid(self, widget_name):
-        return hasattr(self, widget_name) and getattr(self, widget_name).winfo_exists()
+        try:
+            return hasattr(self, widget_name) and getattr(self, widget_name).winfo_exists()
+        except tk.TclError:
+            return False
 
     def _is_frame_valid(self):
-        return hasattr(self, "frame") and self.frame.winfo_exists()
+        try:
+            return hasattr(self, "frame") and self.frame.winfo_exists()
+        except tk.TclError:
+            return False
 
     def set_tab_active(self, is_active):
         self.is_active = is_active
@@ -347,7 +352,7 @@ class OscTab:
                     if len(window_data) >= window_size // 2:
                         self._process_triggered_data(window_data, 0)
                         
-                        self._schedule_after(500, self._pause_callback)
+                        self._schedule_after(500, lambda: None)
                         break
                         
         except Exception as e:
@@ -385,9 +390,6 @@ class OscTab:
     def _update_status_to_armed(self):
         if self.is_armed and self._is_widget_valid("status_label"):
             self.status_label.config(text=t("ui.osc_tab.armed"), foreground="orange")
-
-    def _pause_callback(self):
-        pass
 
     def _plot_all_sets(self):
         """Plot all trigger sets with color gradient from oldest (light) to newest (dark)."""
@@ -562,12 +564,6 @@ class OscTab:
         if self._is_widget_valid("status_label"):
             self.status_label.config(text=t("ui.osc_tab.ready"), foreground="blue")
 
-    def _on_trigger_setting_change(self):
-        pass
-
-    def _on_capture_setting_change(self):
-        pass
-
     def get_frame(self):
         """Get the tab frame."""
         return self.frame
@@ -575,5 +571,7 @@ class OscTab:
     def cleanup(self):
         """Clean up resources."""
         self._stop_refresh_timer()
-        self._cancel_all_callbacks()
-        self._disarm()
+        self._cancel_all_callbacks() 
+        self.is_armed = False
+        if hasattr(self, 'trigger_sets'):
+            self.trigger_sets.clear()

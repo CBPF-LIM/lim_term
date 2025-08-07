@@ -167,5 +167,8 @@ class MainWindow:
         except Exception as e:
             print(t("errors.main_loop_error", error=str(e)))
 
-        if self._running and self.root.winfo_exists():
-            self.root.after(16, self._game_loop)
+        try:
+            if self._running and self.root.winfo_exists():
+                self.root.after(16, self._game_loop)
+        except tk.TclError:
+            self._running = False
