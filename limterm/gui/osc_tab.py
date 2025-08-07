@@ -14,11 +14,8 @@ import time
 import os
 import logging
 from ..core import GraphManager
-from ..utils import DataParser
 from ..i18n import t, get_config_manager
-from .preference_widgets import PrefEntry, PrefCombobox, PrefCheckbutton
-from .osc_trigger import OscTrigger
-from .osc_plotter import OscPlotter
+from .preference_widgets import PrefEntry, PrefCombobox
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +38,8 @@ class OscTab:
 
         self.osc_refresh_rate_ms = 33
         self.refresh_timer_id = None
-        self.pending_callbacks = []  # Track all pending after callbacks
+        self.pending_callbacks = []
         self.is_tab_active = False
-
-        self.trigger_manager = None
-        self.plotter = None
 
         self._create_widgets()
         self._setup_trigger_monitoring()
@@ -111,20 +105,6 @@ class OscTab:
 
         self.frame.rowconfigure(1, weight=1)
         self.frame.columnconfigure(0, weight=1)
-
-        self.trigger_manager = OscTrigger(
-            self.data_tab,
-            self.trigger_source,
-            self.trigger_level,
-            self.trigger_edge,
-            self.trigger_mode,
-        )
-        self.plotter = OscPlotter(
-            self.graph_manager,
-            self.trigger_source,
-            self.trigger_level,
-            self.window_size,
-        )
 
     def _create_settings_widgets(self):
         """Create the settings widgets inside the collapsible frame."""
@@ -255,13 +235,10 @@ class OscTab:
         )
 
     def _setup_trigger_monitoring(self):
-        """Set up simple trigger monitoring."""
-        if hasattr(self, "frame") and self.frame.winfo_exists() and self.is_armed:
-            # Simple trigger check based on data availability
+        if self._is_frame_valid() and self.is_armed:
             if self.data_tab.get_data():
                 self._check_trigger_conditions()
             
-            # Continue monitoring while armed
             self.refresh_timer_id = self.frame.after(
                 self.osc_refresh_rate_ms, self._setup_trigger_monitoring
             )
@@ -282,22 +259,25 @@ class OscTab:
         return callback_id
 
     def _cancel_all_callbacks(self):
-        """Cancel all pending after callbacks."""
-        for callback_id in self.pending_callbacks[:]:  # Copy the list to avoid modification during iteration
+        for callback_id in self.pending_callbacks[:]:
             try:
                 self.frame.after_cancel(callback_id)
                 self.pending_callbacks.remove(callback_id)
             except:
                 pass
 
+    def _is_widget_valid(self, widget_name):
+        return hasattr(self, widget_name) and getattr(self, widget_name).winfo_exists()
+
+    def _is_frame_valid(self):
+        return hasattr(self, "frame") and self.frame.winfo_exists()
+
     def set_tab_active(self, is_active):
-        """Set whether this tab is currently active (optimization for rendering)."""
         self.is_active = is_active
         if not is_active:
             self._stop_refresh_timer()
-        else:
-            if hasattr(self, "frame") and self.frame.winfo_exists():
-                self._setup_trigger_monitoring()
+        elif self._is_frame_valid():
+            self._setup_trigger_monitoring()
 
     def _check_trigger_conditions(self):
         """Check if trigger conditions are met with simple data processing."""
@@ -365,10 +345,9 @@ class OscTab:
                     
                     window_data = values[start_idx:end_idx]
                     if len(window_data) >= window_size // 2:
-                        self._process_triggered_data(window_data, 0)  # Trigger point is at index 0
+                        self._process_triggered_data(window_data, 0)
                         
-                        # Pause between triggers to avoid too many
-                        self._schedule_after(500, lambda: None)
+                        self._schedule_after(500, self._pause_callback)
                         break
                         
         except Exception as e:
@@ -395,16 +374,20 @@ class OscTab:
             # Plot all sets with color gradient (oldest to newest)
             self._plot_all_sets()
             
-            # Update status
-            self.status_label.config(text=t("ui.osc_tab.triggered"), foreground="red")
+            if self._is_widget_valid("status_label"):
+                self.status_label.config(text=t("ui.osc_tab.triggered"), foreground="red")
             
-            # Brief status update
-            self._schedule_after(300, lambda: self.status_label.config(
-                text=t("ui.osc_tab.armed"), foreground="orange"
-            ) if self.is_armed else None)
+            self._schedule_after(300, self._update_status_to_armed)
             
         except Exception as e:
             logger.error(f"Error processing triggered data: {e}")
+
+    def _update_status_to_armed(self):
+        if self.is_armed and self._is_widget_valid("status_label"):
+            self.status_label.config(text=t("ui.osc_tab.armed"), foreground="orange")
+
+    def _pause_callback(self):
+        pass
 
     def _plot_all_sets(self):
         """Plot all trigger sets with color gradient from oldest (light) to newest (dark)."""
@@ -447,9 +430,9 @@ class OscTab:
             
             # Set proper axis labels and limits
             self.graph_manager.set_labels(
-                title="Oscilloscope Capture",
-                xlabel="Samples", 
-                ylabel="Value"
+                title=t("ui.osc_tab.oscilloscope_capture_title"),
+                xlabel=t("ui.osc_tab.samples_label"), 
+                ylabel=t("ui.osc_tab.value_label")
             )
             
             # Update the display
@@ -458,117 +441,7 @@ class OscTab:
         except Exception as e:
             logger.error(f"Error plotting all sets: {e}")
 
-    def _trigger_detected(self):
-        """Handle trigger detection."""
-        if (
-            not self.is_armed
-            or not hasattr(self, "frame")
-            or not self.frame.winfo_exists()
-        ):
-            return
-
-        self.capture_start_time = time.time()
-
-        if hasattr(self, "graph_manager"):
-            self.graph_manager.clear()
-            self.graph_manager.canvas.draw_idle()
-
-        if hasattr(self, "status_label") and self.status_label.winfo_exists():
-            self.status_label.config(text=t("ui.osc_tab.triggered"), foreground="red")
-
-        self._start_capture()
-
-    def _start_capture(self):
-        """Start data capture after trigger."""
-        try:
-            window_size = int(self.window_size.get_value())
-            self.samples_needed = window_size
-
-            if hasattr(self, "status_label") and self.status_label.winfo_exists():
-                self.status_label.config(
-                    text=t("ui.osc_tab.capturing"), foreground="red"
-                )
-
-            self._continue_capture()
-
-        except Exception as e:
-            logger.error(f"Capture start error: {e}")
-            self._disarm()
-
-    def _continue_capture(self):
-        """Continue capturing data in real-time after trigger."""
-        if (
-            not self.trigger_manager.is_triggered
-            or not hasattr(self, "frame")
-            or not self.frame.winfo_exists()
-        ):
-            return
-
-        try:
-            current_data = self.data_tab.get_data()
-
-            trigger_point = self.trigger_manager.get_trigger_point_index()
-            new_data_after_trigger = current_data[trigger_point:]
-
-            window_size = int(self.window_size.get_value())
-            if len(new_data_after_trigger) >= window_size:
-                self.trigger_data = new_data_after_trigger[:window_size]
-                self._complete_capture()
-            else:
-                self.trigger_data = new_data_after_trigger
-                if hasattr(self, "plotter") and getattr(self, "is_active", True):
-                    self.plotter.plot_realtime_data(self.trigger_data)
-
-                progress = (len(new_data_after_trigger) / window_size) * 100
-
-                if hasattr(self, "frame") and self.frame.winfo_exists():
-                    self._schedule_after(self.osc_refresh_rate_ms, self._continue_capture)
-
-        except Exception as e:
-            logger.error(f"Continue capture error: {e}")
-            self._disarm()
-
-    def _complete_capture(self):
-        """Complete the capture and display results."""
-        try:
-            window_size = int(self.window_size.get_value())
-
-            if len(self.trigger_data) > window_size:
-                self.trigger_data = self.trigger_data[:window_size]
-
-            y_data = None
-            if hasattr(self, "plotter"):
-                y_data = self.plotter.plot_final_data(self.trigger_data)
-
-            if y_data:
-                self._calculate_frequency(y_data)
-
-            self.capture_count += 1
-
-            if hasattr(self, "status_label") and self.status_label.winfo_exists():
-                self.status_label.config(
-                    text=t("ui.osc_tab.captured"), foreground="green"
-                )
-
-            trigger_mode = self.trigger_mode.get_value()
-
-            if trigger_mode == "single":
-                self._disarm()
-            elif trigger_mode == "continuous":
-                if hasattr(self, "frame") and self.frame.winfo_exists():
-                    self._schedule_after(200, self._auto_rearm)
-
-        except Exception as e:
-            print(t("ui.osc_tab.capture_completion_error", error=str(e)))
-            self._disarm()
-
-    def _auto_rearm(self):
-        """Re-arm for auto mode after a delay."""
-        if hasattr(self, "frame") and self.frame.winfo_exists():
-            self._arm()
-
     def _calculate_frequency(self, y_data):
-        """Calculate approximate frequency of the signal."""
         try:
             if len(y_data) < 10:
                 self.freq_label.config(text=t("ui.osc_tab.frequency_unknown"))
@@ -585,7 +458,6 @@ class OscTab:
 
             if crossings > 2:
                 cycles = crossings / 2
-
                 self.freq_label.config(
                     text=t("ui.osc_tab.frequency_cycles", cycles=f"{cycles:.1f}")
                 )
@@ -606,8 +478,7 @@ class OscTab:
             logger.error(f"Clear display error: {e}")
 
     def _save_png(self):
-        """Save only the screenshot."""
-        if not self.trigger_data or not hasattr(self, "graph_manager"):
+        if not self.trigger_sets or not hasattr(self, "graph_manager"):
             return
 
         try:
@@ -631,8 +502,7 @@ class OscTab:
             self.data_tab.add_message(t("ui.osc_tab.save_error", error=str(e)))
 
     def _save_data(self):
-        """Save only the captured data."""
-        if not self.trigger_data:
+        if not self.trigger_sets:
             return
 
         try:
@@ -644,8 +514,11 @@ class OscTab:
             data_filename = os.path.join(capture_dir, f"osc_capture_{timestamp}.txt")
 
             with open(data_filename, "w", encoding="utf-8") as f:
-                for line in self.trigger_data:
-                    f.write(line + "\n")
+                for i, trigger_set in enumerate(self.trigger_sets):
+                    f.write(f"# Trigger Set {i+1}\n")
+                    for j, value in enumerate(trigger_set):
+                        f.write(f"{j}\t{value}\n")
+                    f.write("\n")
 
             self.data_tab.add_message(
                 t("ui.osc_tab.data_saved", filename=f"osc_capture_{timestamp}.txt")
@@ -663,8 +536,7 @@ class OscTab:
             self._arm()
 
     def _arm(self):
-        """Arm the oscilloscope for trigger detection."""
-        if not hasattr(self, "frame") or not self.frame.winfo_exists():
+        if not self._is_frame_valid():
             return
 
         self.is_armed = True
@@ -672,33 +544,28 @@ class OscTab:
         trigger_mode = self.trigger_mode.get_value()
         if trigger_mode == "single":
             self.graph_manager.clear()
-            self.trigger_sets.clear()  # Clear previous sets in single shot mode
+            self.trigger_sets.clear()
 
-        if hasattr(self, "arm_button") and self.arm_button.winfo_exists():
+        if self._is_widget_valid("arm_button"):
             self.arm_button.config(text=t("ui.osc_tab.disarm"))
-        if hasattr(self, "status_label") and self.status_label.winfo_exists():
+        if self._is_widget_valid("status_label"):
             self.status_label.config(text=t("ui.osc_tab.armed"), foreground="orange")
             
-        # Start simple monitoring
         self._setup_trigger_monitoring()
 
     def _disarm(self):
-        """Disarm the oscilloscope."""
         self.is_armed = False
         self._stop_refresh_timer()
 
-        if hasattr(self, "arm_button") and self.arm_button.winfo_exists():
+        if self._is_widget_valid("arm_button"):
             self.arm_button.config(text=t("ui.osc_tab.arm"))
-        if hasattr(self, "status_label") and self.status_label.winfo_exists():
+        if self._is_widget_valid("status_label"):
             self.status_label.config(text=t("ui.osc_tab.ready"), foreground="blue")
 
     def _on_trigger_setting_change(self):
-        """Handle trigger setting changes."""
-        if hasattr(self, "trigger_manager") and self.trigger_manager and self.is_armed:
-            self.trigger_manager.reset_trigger_state()
+        pass
 
     def _on_capture_setting_change(self):
-        """Handle capture setting changes."""
         pass
 
     def get_frame(self):
