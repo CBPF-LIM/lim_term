@@ -33,10 +33,10 @@ class ConfigTab:
         self.mode_combobox = ttk.Combobox(
             self.config_frame,
             state="readonly",
-            values=["Hardware", "Synthetic"],
+            values=[t("common.hardware"), t("common.synthetic")],
         )
         self.mode_combobox.grid(column=1, row=0, padx=10, pady=10, sticky="w")
-        self.mode_combobox.set("Hardware")
+        self.mode_combobox.set(t("common.hardware"))
         self.mode_combobox.bind("<<ComboboxSelected>>", self._on_mode_changed)
         self.mode_combobox.bind(
             "<<ComboboxSelected>>", self._on_preference_changed, add="+"
@@ -155,7 +155,7 @@ class ConfigTab:
         )
         self.win_simul_info.insert(
             "1.0",
-            "To simulate a virtual serial port on Windows, install the Null-modem emulator (com0com: https://com0com.sourceforge.net/).\nAfter configuration, select 'Hardware' mode and choose the created COM port.",
+            t("dialogs.windows_virtual_port_info"),
         )
         self.win_simul_info.config(state="disabled")
         self.win_simul_info.grid(
@@ -165,7 +165,7 @@ class ConfigTab:
 
     def _on_mode_changed(self, event=None):
         mode = self.mode_combobox.get()
-        if mode == "Synthetic":
+        if mode == t("common.synthetic"):
             self.port_combobox.config(state="disabled")
             self.baudrate_combobox.config(state="disabled")
             self.refresh_button.config(state="disabled")
@@ -193,7 +193,7 @@ class ConfigTab:
             self._update_ports()
 
     def _update_ports(self):
-        if self.mode_combobox.get() == "Hardware":
+        if self.mode_combobox.get() == t("common.hardware"):
             ports = self.serial_manager.get_available_ports()
             self.port_combobox["values"] = ports
             if ports:
@@ -219,7 +219,7 @@ class ConfigTab:
             self._show_config_interface()
             return
 
-        if mode == "Hardware":
+        if mode == t("common.hardware"):
             port = self.port_combobox.get()
             baudrate = self.baudrate_combobox.get()
 
@@ -230,7 +230,7 @@ class ConfigTab:
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
                 self._show_connection_info(mode, port, baudrate)
 
-        elif mode == "Synthetic":
+        elif mode == t("common.synthetic"):
             try:
                 equations = self._get_equations_from_ui()
                 fps = int(self.fps_pref_combobox.get())

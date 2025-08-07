@@ -12,12 +12,15 @@ import tkinter as tk
 from tkinter import ttk
 import time
 import os
+import logging
 from ..core import GraphManager
 from ..utils import DataParser
 from ..i18n import t, get_config_manager
 from .preference_widgets import PrefEntry, PrefCombobox, PrefCheckbutton
 from .osc_trigger import OscTrigger
 from .osc_plotter import OscPlotter
+
+logger = logging.getLogger(__name__)
 
 
 class OscTab:
@@ -270,7 +273,7 @@ class OscTab:
             self._continue_capture()
                 
         except Exception as e:
-            print(f"Capture start error: {e}")
+            logger.error(f"Capture start error: {e}")
             self._disarm()
     
     def _continue_capture(self):
@@ -299,7 +302,7 @@ class OscTab:
                     self.frame.after(self.osc_refresh_rate_ms, self._continue_capture)
                 
         except Exception as e:
-            print(f"Continue capture error: {e}")
+            logger.error(f"Continue capture error: {e}")
             self._disarm()
     
     def _complete_capture(self):
@@ -381,7 +384,7 @@ class OscTab:
             self.data_tab.add_message(t("ui.osc_tab.png_saved", filename=f"osc_capture_{timestamp}.png"))
             
         except Exception as e:
-            print(f"Save PNG error: {e}")
+            logger.error(f"Save PNG error: {e}")
             self.data_tab.add_message(t("ui.osc_tab.save_error", error=str(e)))
     
     def _save_data(self):
@@ -404,7 +407,7 @@ class OscTab:
             self.data_tab.add_message(t("ui.osc_tab.data_saved", filename=f"osc_capture_{timestamp}.txt"))
             
         except Exception as e:
-            print(f"Save data error: {e}")
+            logger.error(f"Save data error: {e}")
             self.data_tab.add_message(t("ui.osc_tab.save_error", error=str(e)))
     
     def _toggle_arm(self):

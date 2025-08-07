@@ -64,7 +64,7 @@ class MainWindow:
 
         from tkinter import messagebox
 
-        messagebox.showinfo("Language Changed", t("ui.main_window.restart_required"))
+        messagebox.showinfo(t("dialogs.language_changed"), t("ui.main_window.restart_required"))
 
     def _create_tabs(self):
         self.tab_control = ttk.Notebook(self.root)
@@ -79,7 +79,7 @@ class MainWindow:
         )
         self.tab_control.add(self.data_tab.get_frame(), text=t("ui.tabs.data"))
         self.tab_control.add(self.graph_tab.get_frame(), text=t("ui.tabs.graph"))
-        self.tab_control.add(self.osc_tab.get_frame(), text="Oscilloscope")
+        self.tab_control.add(self.osc_tab.get_frame(), text=t("ui.tabs.oscilloscope"))
 
         self.tab_control.bind("<<NotebookTabChanged>>", self._on_tab_changed)
         
@@ -163,7 +163,7 @@ class MainWindow:
             self._running = False
             return
         except Exception as e:
-            print(f"Game loop error: {e}")
+            print(t("errors.main_loop_error", error=str(e)))
 
         if self._running and self.root.winfo_exists():
             self.root.after(16, self._game_loop)

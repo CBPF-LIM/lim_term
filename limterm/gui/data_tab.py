@@ -1,7 +1,10 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog, messagebox
 from ..utils import FileManager
 from ..i18n import t
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class DataTab:
@@ -67,7 +70,7 @@ class DataTab:
                 return
         file_path = filedialog.askopenfilename(
             defaultextension=".txt",
-            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+            filetypes=[(t("dialogs.text_files"), "*.txt"), (t("dialogs.all_files"), "*.*")],
             title=t("ui.graph_tab.load_dialog_title"),
         )
         if file_path:
@@ -105,9 +108,9 @@ class DataTab:
 
             try:
                 self.autosave_file = open(self.autosave_filename, "a", encoding="utf-8")
-                print(f"Autosave enabled: {self.autosave_filename}")
+                logger.info(f"Autosave enabled: {self.autosave_filename}")
             except Exception as e:
-                print(f"Error opening autosave file: {e}")
+                logger.error(f"Error opening autosave file: {e}")
                 self.autosave_var.set(False)
                 self.autosave_file = None
                 self.autosave_filename = None
@@ -115,9 +118,9 @@ class DataTab:
             if self.autosave_file:
                 try:
                     self.autosave_file.close()
-                    print(f"Autosave disabled: {self.autosave_filename}")
+                    logger.info(f"Autosave disabled: {self.autosave_filename}")
                 except Exception as e:
-                    print(f"Error closing autosave file: {e}")
+                    logger.error(f"Error closing autosave file: {e}")
                 finally:
                     self.autosave_file = None
                     self.autosave_filename = None
@@ -142,7 +145,7 @@ class DataTab:
                     self.autosave_file.write(line + "\n")
                     self.autosave_file.flush()
                 except Exception as e:
-                    print(f"Error writing to autosave file: {e}")
+                    logger.error(f"Error writing to autosave file: {e}")
 
         try:
             at_end = self._is_scrolled_to_end()
@@ -188,9 +191,9 @@ class DataTab:
         if self.autosave_file:
             try:
                 self.autosave_file.close()
-                print(f"Autosave file closed during cleanup: {self.autosave_filename}")
+                logger.info(f"Autosave file closed during cleanup: {self.autosave_filename}")
             except Exception as e:
-                print(f"Error closing autosave file during cleanup: {e}")
+                logger.error(f"Error closing autosave file during cleanup: {e}")
             finally:
                 self.autosave_file = None
                 self.autosave_filename = None

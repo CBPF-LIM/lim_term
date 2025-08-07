@@ -1,6 +1,9 @@
 import os
 import yaml
 from typing import Optional, Any, Dict
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigManager:
@@ -14,7 +17,7 @@ class ConfigManager:
             try:
                 os.makedirs(self.config_dir)
             except Exception as e:
-                print(f"Error creating config directory: {e}")
+                logger.error(f"Error creating config directory: {e}")
 
     def _load_config(self) -> dict:
         if not os.path.exists(self.config_file):
@@ -24,7 +27,7 @@ class ConfigManager:
             with open(self.config_file, "r", encoding="utf-8") as file:
                 return yaml.safe_load(file) or {}
         except Exception as e:
-            print(f"Error loading config file: {e}")
+            logger.error(f"Error loading config file: {e}")
             return {}
 
     def _save_config(self, config: dict):
@@ -34,7 +37,7 @@ class ConfigManager:
                     config, file, default_flow_style=False, allow_unicode=True
                 )
         except Exception as e:
-            print(f"Error saving config file: {e}")
+            logger.error(f"Error saving config file: {e}")
 
     def load_language(self) -> Optional[str]:
         config = self._load_config()

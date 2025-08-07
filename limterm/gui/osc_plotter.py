@@ -46,7 +46,7 @@ class OscPlotter:
                                                   t("ui.osc_tab.capture_live_title"))
                 
         except Exception as e:
-            print(f"Real-time plot error: {e}")
+            print(t("errors.realtime_plot_error", error=str(e)))
     
     def plot_final_data(self, trigger_data):
         """Plot final captured data after capture completion."""
@@ -66,7 +66,7 @@ class OscPlotter:
                 return y_data
                 
         except Exception as e:
-            print(f"Final plot error: {e}")
+            print(t("errors.final_plot_error", error=str(e)))
             return None
     
     def _generate_color_palette(self):

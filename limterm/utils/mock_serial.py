@@ -2,6 +2,9 @@ import threading
 import time
 import math
 from asteval import Interpreter
+import logging
+
+logger = logging.getLogger(__name__)
 
 class SyntheticDataGenerator:
     def __init__(self, data_callback=None, equations=None, refresh_rate=15):
@@ -53,7 +56,7 @@ class SyntheticDataGenerator:
                             if value is None:
                                 value = 0
                         except Exception as e:
-                            print(f"Error evaluating equation '{expr}': {e}")
+                            logger.error(f"Error evaluating equation '{expr}': {e}")
                             value = 0
                         aeval.symtable[column_name] = value
                         data_values.append(str(value))

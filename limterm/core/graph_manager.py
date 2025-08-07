@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from ..config import FIGURE_SIZE, FIGURE_DPI
+from ..i18n import t
 
 
 class GraphManager:
@@ -51,7 +52,7 @@ class GraphManager:
     ):
         self.clear()
 
-        graph_type = settings.get("type", "Linha")
+        graph_type = settings.get("type", t("ui.graph_types.line"))
         color = settings.get("color", "blue").lower()
         marker = settings.get("dot_type", "o")
 
@@ -79,9 +80,9 @@ class GraphManager:
         ]:
             color = color.lower()
 
-        if graph_type == "Linha":
+        if graph_type in [t("ui.graph_types.line"), "Line", "line"]:
             self.plot_line(x_data, y_data, color=color, marker=marker)
-        elif graph_type == "Dispersão":
+        elif graph_type in [t("ui.graph_types.scatter"), "Scatter", "scatter"]:
             self.plot_scatter(x_data, y_data, color=color, marker=marker)
 
         min_x = float(settings.get("min_x", "0")) if settings.get("min_x") else None
@@ -91,9 +92,9 @@ class GraphManager:
 
         self.set_limits(min_x, max_x, min_y, max_y)
         self.set_labels(
-            title=title or "Graph",
-            xlabel=xlabel or f"Column {x_col + 1}",
-            ylabel=ylabel or f"Column {y_col + 1}",
+            title=title or t("common.graph"),
+            xlabel=xlabel or t("common.column", column=x_col + 1),
+            ylabel=ylabel or t("common.column", column=y_col + 1),
         )
         self.update()
 
@@ -145,11 +146,11 @@ class GraphManager:
 
             series_label = f"Y{i+1}"
 
-            if graph_type in ["Linha", "Line", "line"]:
+            if graph_type in [t("ui.graph_types.line"), "Line", "line"]:
                 self.ax.plot(
                     x_data, y_data, color=color, marker=marker, label=series_label
                 )
-            elif graph_type in ["Dispersão", "Scatter", "scatter"]:
+            elif graph_type in [t("ui.graph_types.scatter"), "Scatter", "scatter"]:
                 self.ax.scatter(
                     x_data, y_data, color=color, marker=marker, label=series_label
                 )
@@ -174,9 +175,9 @@ class GraphManager:
             self.set_limits(None, None, min_y, max_y)
 
         self.set_labels(
-            title=title or "Graph",
-            xlabel=xlabel or f"Column {x_col + 1}",
-            ylabel=ylabel or "Value",
+            title=title or t("common.graph"),
+            xlabel=xlabel or t("common.column", column=x_col + 1),
+            ylabel=ylabel or t("common.value"),
         )
         self.update()
 
@@ -228,9 +229,9 @@ class GraphManager:
                 [normalized_y_lists[i][j] for i in range(min_length)]
                 for j in range(len(y_lists))
             ]
-            ylabel_text = ylabel or "Percentage (%)"
+            ylabel_text = ylabel or t("common.percentage")
         else:
-            ylabel_text = ylabel or "Value"
+            ylabel_text = ylabel or t("common.value")
 
         self.ax.stackplot(
             x_list, *y_lists, labels=labels, colors=actual_colors, alpha=0.8
@@ -239,7 +240,7 @@ class GraphManager:
         self.ax.legend(loc="upper right")
 
         self.set_labels(
-            title=title or "Stacked Chart", xlabel=xlabel or "X", ylabel=ylabel_text
+            title=title or t("ui.graph_tab.stacked_chart_title"), xlabel=xlabel or "X", ylabel=ylabel_text
         )
 
         self.update()

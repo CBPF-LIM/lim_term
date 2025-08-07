@@ -195,6 +195,18 @@ errors:
   connection_error: "Connection error: {error}"
   data_read_error: "Error reading data: {error}"
   virtual_port_error: "Error creating simulated port: {error}"
+  application_error: "Application error: {error}"
+  application_interrupted: "Application interrupted by user"
+  realtime_plot_error: "Real-time plot error: {error}"
+  final_plot_error: "Final plot error: {error}"
+  main_loop_error: "Main loop error: {error}"
+  config_save_error: "Error saving configuration: {error}"
+  config_load_error: "Error loading configuration: {error}"
+  data_export_error: "Error exporting data: {error}"
+  data_import_error: "Error importing data: {error}"
+  serial_write_error: "Error writing to serial: {error}"
+  mock_serial_error: "Mock serial error: {error}"
+  file_operation_error: "File operation error: {error}"
 
 messages:
   connecting: "Connecting..."
@@ -202,3 +214,24 @@ messages:
   disconnected: "Disconnected"
   data_generation_started: "Data generation started"
   data_generation_stopped: "Data generation stopped"
+
+common:
+  hardware: "Hardware"
+  synthetic: "Synthetic"
+  ok: "OK"
+  cancel: "Cancel"
+  save: "Save"
+  load: "Load"
+  clear: "Clear"
+  apply: "Apply"
+  close: "Close"
+  graph: "Graph"
+  column: "Column {column}"
+  value: "Value"
+  percentage: "Percentage (%)"
+  
+dialogs:
+  text_files: "Text files"
+  all_files: "All files"
+  windows_virtual_port_info: "To simulate a virtual serial port on Windows, install the Null-modem emulator (com0com: https://com0com.sourceforge.net/).\nAfter configuration, select 'Hardware' mode and choose the created COM port."
+  language_changed: "Language Changed"
