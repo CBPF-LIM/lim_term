@@ -33,6 +33,8 @@ class OscTab:
 
         self.is_armed = False
         self.trigger_data = []
+        self.trigger_sets = []  # Store multiple trigger sets for gradient display
+        self.max_sets = 10  # Maximum number of sets to keep
         self.capture_start_time = None
         self.capture_count = 0
         self.last_trigger_time = 0  # Add cooldown tracking
@@ -230,6 +232,11 @@ class OscTab:
         )
         self.save_data_button.pack(side="left", padx=2)
 
+        self.clear_button = ttk.Button(
+            save_controls_frame, text=t("ui.osc_tab.clear"), command=self._clear_display
+        )
+        self.clear_button.pack(side="left", padx=2)
+
         settings_container.columnconfigure(0, weight=1)
 
     def _toggle_settings(self):
@@ -351,13 +358,14 @@ class OscTab:
                     triggered = True
                     
                 if triggered:
-                    # Extract window around trigger point
-                    start_idx = max(0, i - window_size // 4)  # Some pre-trigger
-                    end_idx = min(len(values), i + 3 * window_size // 4)  # Mostly post-trigger
+                    # Extract window starting from trigger point
+                    # This ensures x=0 corresponds to the trigger point where y≈trigger_level
+                    start_idx = i  # Start exactly at trigger point
+                    end_idx = min(len(values), i + window_size)  # Window size after trigger
                     
                     window_data = values[start_idx:end_idx]
                     if len(window_data) >= window_size // 2:
-                        self._process_triggered_data(window_data, i - start_idx)
+                        self._process_triggered_data(window_data, 0)  # Trigger point is at index 0
                         
                         # Pause between triggers to avoid too many
                         self._schedule_after(500, lambda: None)
@@ -367,33 +375,25 @@ class OscTab:
             logger.error(f"Error in simple trigger detection: {e}")
 
     def _process_triggered_data(self, window_data, trigger_point):
-        """Process triggered data and plot it."""
+        """Process triggered data and plot it with color gradient."""
         try:
             # Update last trigger time for cooldown
             self.last_trigger_time = time.time()
             
-            # Clear previous data for single shot mode
+            # Add this set to our collection
+            self.trigger_sets.append(window_data.copy())
+            
+            # Keep only the last max_sets
+            if len(self.trigger_sets) > self.max_sets:
+                self.trigger_sets.pop(0)  # Remove oldest
+            
+            # Clear for single shot mode or when first trigger in continuous mode
             trigger_mode = self.trigger_mode.get_value()
-            if trigger_mode == "single":
-                self.graph_manager.clear()
-            # Clear previous data if single shot
-            if trigger_mode == "single":
+            if trigger_mode == "single" or len(self.trigger_sets) == 1:
                 self.graph_manager.clear()
             
-            # Create x-axis data
-            x_data = list(range(len(window_data)))
-            
-            # Plot the data
-            self.graph_manager.plot_line(x_data, window_data, color='blue')
-            
-            # Add trigger level line
-            trigger_level = float(self.trigger_level.get_value())
-            trigger_x = [0, len(window_data)-1]
-            trigger_y = [trigger_level, trigger_level]
-            self.graph_manager.plot_line(trigger_x, trigger_y, color='red')
-            
-            # Update the display
-            self.graph_manager.update()
+            # Plot all sets with color gradient (oldest to newest)
+            self._plot_all_sets()
             
             # Update status
             self.status_label.config(text=t("ui.osc_tab.triggered"), foreground="red")
@@ -405,6 +405,58 @@ class OscTab:
             
         except Exception as e:
             logger.error(f"Error processing triggered data: {e}")
+
+    def _plot_all_sets(self):
+        """Plot all trigger sets with color gradient from oldest (light) to newest (dark)."""
+        try:
+            if not self.trigger_sets:
+                return
+                
+            # Clear the plot
+            self.graph_manager.clear()
+            
+            # Calculate colors - from light (old) to dark (new)
+            num_sets = len(self.trigger_sets)
+            
+            # Plot sets from oldest to newest so newer ones are drawn on top
+            for i, window_data in enumerate(self.trigger_sets):
+                # Calculate intensity - older sets are lighter
+                intensity = 0.3 + (i / (num_sets - 1)) * 0.7 if num_sets > 1 else 1.0
+                
+                # Create x-axis data starting from 0
+                x_data = list(range(len(window_data)))
+                
+                # Create hex color from light blue (old) to dark blue (new)
+                blue_value = int(255 * intensity)
+                color = f"#{0:02x}{0:02x}{blue_value:02x}"  # RGB in hex format
+                
+                # Remove markers for cleaner look with multiple overlapping lines
+                self.graph_manager.plot_line(x_data, window_data, color=color)
+                # Override the marker setting
+                self.graph_manager.ax.lines[-1].set_marker('')
+            
+            # Add trigger level line on top
+            if self.trigger_sets:
+                trigger_level = float(self.trigger_level.get_value())
+                max_length = max(len(data) for data in self.trigger_sets)
+                trigger_x = [0, max_length - 1]
+                trigger_y = [trigger_level, trigger_level]
+                self.graph_manager.plot_line(trigger_x, trigger_y, color='red')
+                # Remove marker from trigger line too
+                self.graph_manager.ax.lines[-1].set_marker('')
+            
+            # Set proper axis labels and limits
+            self.graph_manager.set_labels(
+                title="Oscilloscope Capture",
+                xlabel="Samples", 
+                ylabel="Value"
+            )
+            
+            # Update the display
+            self.graph_manager.update()
+            
+        except Exception as e:
+            logger.error(f"Error plotting all sets: {e}")
 
     def _trigger_detected(self):
         """Handle trigger detection."""
@@ -543,6 +595,16 @@ class OscTab:
         except Exception as e:
             self.freq_label.config(text=t("ui.osc_tab.frequency_error"))
 
+    def _clear_display(self):
+        """Clear the oscilloscope display and accumulated trigger sets."""
+        try:
+            self.trigger_sets.clear()
+            if hasattr(self, "graph_manager"):
+                self.graph_manager.clear()
+                self.graph_manager.update()
+        except Exception as e:
+            logger.error(f"Clear display error: {e}")
+
     def _save_png(self):
         """Save only the screenshot."""
         if not self.trigger_data or not hasattr(self, "graph_manager"):
@@ -610,6 +672,7 @@ class OscTab:
         trigger_mode = self.trigger_mode.get_value()
         if trigger_mode == "single":
             self.graph_manager.clear()
+            self.trigger_sets.clear()  # Clear previous sets in single shot mode
 
         if hasattr(self, "arm_button") and self.arm_button.winfo_exists():
             self.arm_button.config(text=t("ui.osc_tab.disarm"))
