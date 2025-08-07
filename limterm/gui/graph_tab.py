@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from ..core import GraphManager
-from ..utils import DataParser
+from ..utils import DataParser, FileManager
 from ..config import DEFAULT_X_COLUMN, DEFAULT_Y_COLUMN, MARKER_MAPPING
 from ..i18n import t, get_config_manager
 from .preference_widgets import PrefEntry, PrefCombobox, PrefCheckbutton
@@ -58,6 +58,11 @@ class GraphTab:
             top_row, text=t("ui.graph_tab.save_png"), command=self._save_chart
         )
         self.save_button.pack(side="left", padx=(0, 10))
+
+        self.save_data_button = ttk.Button(
+            top_row, text=t("ui.graph_tab.save_data"), command=self._save_data
+        )
+        self.save_data_button.pack(side="left", padx=(0, 10))
 
         self.y_columns_frame = ttk.LabelFrame(
             self.frame, text=t("ui.graph_tab.y_columns")
@@ -311,6 +316,14 @@ class GraphTab:
                 )
             except Exception as e:
                 self.data_tab.add_message(t("ui.data_tab.error_saving").format(error=e))
+
+    def _save_data(self):
+        """Save the current data to a file using the same logic as data tab"""
+        valid_lines = [item["value"] for item in self.data_tab.data if item["type"] == "data"]
+        if valid_lines:
+            file_path = FileManager.save_data_to_file(valid_lines)
+            if file_path:
+                self.data_tab.add_message(t("ui.data_tab.data_saved").format(path=file_path))
 
     def _on_setting_change(self, event=None):
         pass

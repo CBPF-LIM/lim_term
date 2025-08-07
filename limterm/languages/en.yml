@@ -43,6 +43,20 @@ ui:
     error_saving: "Error saving graph: {error}"
     overwrite_dialog_title: "Overwrite data"
     overwrite_dialog_message: "Current data will be overwritten. Do you want to continue?"
+    data_capture_settings: "Data Capture Settings"
+    capture_enabled: "Enable Data Capture"
+    filename_mode_label: "Filename Mode:"
+    filename_modes:
+      auto: "Auto (timestamp)"
+      fixed: "Fixed name"
+    fixed_filename_label: "Fixed Filename:"
+    file_mode_label: "File Mode:"
+    file_modes:
+      append: "Append"
+      overwrite: "Overwrite"
+    capture_enabled_msg: "Data capture enabled: {filename}"
+    capture_disabled_msg: "Data capture disabled"
+    capture_error: "Data capture error: {error}"
 
   graph_tab:
     column_x: "Column X:"
@@ -59,6 +73,7 @@ ui:
     show_options: "Show Options"
     hide_options: "Hide Options"
     save_png: "Save PNG"
+    save_data: "Save Data"
     save_dialog_title: "Save graph as PNG"
     load_dialog_title: "Load data"
     graph_options_title: "Graph Options"

@@ -1,8 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from ..utils import FileManager
-from ..i18n import t
+from ..i18n import t, get_config_manager
+from .preference_widgets import PrefCheckbutton, PrefCombobox, PrefEntry
 import logging
+import os
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -14,14 +17,103 @@ class DataTab:
     def __init__(self, parent):
         self.frame = ttk.Frame(parent)
         self.data = []
+        self.config_manager = get_config_manager()
+        self.capture_file = None
+        self.capture_filename = None
 
         self._create_widgets()
 
     def _create_widgets(self):
-        text_frame = ttk.Frame(self.frame)
-        text_frame.pack(expand=1, fill="both", padx=10, pady=10)
+        settings_frame = ttk.LabelFrame(
+            self.frame, text=t("ui.data_tab.data_capture_settings")
+        )
+        settings_frame.pack(fill="x", padx=10, pady=10)
 
-        self.data_text = tk.Text(text_frame, wrap="word")
+        self.capture_enabled = PrefCheckbutton(
+            settings_frame,
+            pref_key="data_capture.enabled",
+            default_value=False,
+            text=t("ui.data_tab.capture_enabled"),
+            on_change=self._on_capture_enabled_change,
+        )
+        self.capture_enabled.grid(column=0, row=0, columnspan=3, padx=5, pady=5, sticky="w")
+
+        ttk.Label(settings_frame, text=t("ui.data_tab.filename_mode_label")).grid(
+            column=0, row=1, padx=5, pady=5, sticky="w"
+        )
+        self.filename_mode = PrefCombobox(
+            settings_frame,
+            pref_key="data_capture.filename_mode",
+            default_value="auto",
+            state="readonly",
+            values=[
+                t("ui.data_tab.filename_modes.auto"),
+                t("ui.data_tab.filename_modes.fixed"),
+            ],
+            value_mapping={
+                t("ui.data_tab.filename_modes.auto"): "auto",
+                t("ui.data_tab.filename_modes.fixed"): "fixed",
+            },
+            width=15,
+            on_change=self._on_filename_mode_change,
+        )
+        self.filename_mode.grid(column=1, row=1, padx=5, pady=5, sticky="w")
+
+        ttk.Label(settings_frame, text=t("ui.data_tab.fixed_filename_label")).grid(
+            column=0, row=2, padx=5, pady=5, sticky="w"
+        )
+        self.fixed_filename = PrefEntry(
+            settings_frame,
+            pref_key="data_capture.fixed_filename",
+            default_value="data.txt",
+            width=20,
+            on_change=self._on_capture_setting_change,
+        )
+        self.fixed_filename.grid(column=1, row=2, padx=5, pady=5, sticky="w")
+
+        ttk.Label(settings_frame, text=t("ui.data_tab.file_mode_label")).grid(
+            column=0, row=3, padx=5, pady=5, sticky="w"
+        )
+        self.file_mode = PrefCombobox(
+            settings_frame,
+            pref_key="data_capture.file_mode",
+            default_value="append",
+            state="readonly",
+            values=[
+                t("ui.data_tab.file_modes.append"),
+                t("ui.data_tab.file_modes.overwrite"),
+            ],
+            value_mapping={
+                t("ui.data_tab.file_modes.append"): "append",
+                t("ui.data_tab.file_modes.overwrite"): "overwrite",
+            },
+            width=15,
+            on_change=self._on_capture_setting_change,
+        )
+        self.file_mode.grid(column=1, row=3, padx=5, pady=5, sticky="w")
+
+        button_frame = ttk.Frame(self.frame)
+        button_frame.pack(fill="x", padx=10, pady=5)
+
+        self.save_button = ttk.Button(
+            button_frame, text=t("ui.data_tab.save"), command=self._save_data
+        )
+        self.save_button.pack(side="left", padx=5)
+
+        self.load_button = ttk.Button(
+            button_frame, text=t("ui.data_tab.load"), command=self._load_data
+        )
+        self.load_button.pack(side="left", padx=5)
+
+        self.clear_button = ttk.Button(
+            button_frame, text=t("ui.data_tab.clear"), command=self._clear_data
+        )
+        self.clear_button.pack(side="left", padx=5)
+
+        text_frame = ttk.Frame(self.frame)
+        text_frame.pack(expand=1, fill="both", padx=10, pady=5)
+
+        self.data_text = tk.Text(text_frame, wrap="word", height=15)
         self.data_text.pack(side="left", expand=1, fill="both")
 
         self.scrollbar = ttk.Scrollbar(
@@ -30,32 +122,77 @@ class DataTab:
         self.scrollbar.pack(side="right", fill="y")
         self.data_text.config(yscrollcommand=self.scrollbar.set)
 
-        self.save_button = ttk.Button(
-            self.frame, text=t("ui.data_tab.save"), command=self._save_data
-        )
-        self.save_button.pack(side="left", padx=10, pady=10)
+        self._update_widget_states()
+        self._setup_initial_capture_state()
 
-        self.load_button = ttk.Button(
-            self.frame, text=t("ui.data_tab.load"), command=self._load_data
-        )
-        self.load_button.pack(side="left", padx=10, pady=10)
+    def _update_widget_states(self):
+        filename_mode = self.filename_mode.get_value()
+        if filename_mode == "fixed":
+            self.fixed_filename.config(state="normal")
+            self.file_mode.config(state="readonly")
+        else:
+            self.fixed_filename.config(state="disabled")
+            self.file_mode.config(state="disabled")
 
-        self.clear_button = ttk.Button(
-            self.frame, text=t("ui.data_tab.clear"), command=self._clear_data
-        )
-        self.clear_button.pack(side="left", padx=10, pady=10)
+    def _setup_initial_capture_state(self):
+        if self.capture_enabled.get_value():
+            self._setup_capture_file()
 
-        self.autosave_var = tk.BooleanVar(value=False)
-        self.autosave_checkbox = ttk.Checkbutton(
-            self.frame,
-            text=t("ui.data_tab.autosave"),
-            variable=self.autosave_var,
-            command=self._on_autosave_toggle,
-        )
-        self.autosave_checkbox.pack(side="left", padx=10, pady=10)
+    def _on_capture_enabled_change(self):
+        if self.capture_enabled.get_value():
+            self._setup_capture_file()
+        else:
+            self._close_capture_file()
+        self._update_widget_states()
 
-        self.autosave_file = None
-        self.autosave_filename = None
+    def _on_filename_mode_change(self):
+        self._update_widget_states()
+        if self.capture_enabled.get_value():
+            self._close_capture_file()
+            self._setup_capture_file()
+
+    def _on_capture_setting_change(self):
+        if self.capture_enabled.get_value():
+            self._close_capture_file()
+            self._setup_capture_file()
+
+    def _setup_capture_file(self):
+        try:
+            filename_mode = self.filename_mode.get_value()
+            
+            if filename_mode == "auto":
+                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                self.capture_filename = f"data_capture_{timestamp}.txt"
+            else:
+                self.capture_filename = self.fixed_filename.get_value()
+
+            file_mode = self.file_mode.get_value()
+            mode = "a" if file_mode == "append" else "w"
+
+            self.capture_file = open(self.capture_filename, mode, encoding="utf-8")
+            
+            self.add_message(t("ui.data_tab.capture_enabled_msg").format(filename=self.capture_filename))
+            logger.info(f"Data capture enabled: {self.capture_filename} (mode: {mode})")
+
+        except Exception as e:
+            self.capture_enabled.set_value(False)
+            self.capture_file = None
+            self.capture_filename = None
+            error_msg = t("ui.data_tab.capture_error").format(error=str(e))
+            self.add_message(error_msg)
+            logger.error(f"Error setting up capture file: {e}")
+
+    def _close_capture_file(self):
+        if self.capture_file:
+            try:
+                self.capture_file.close()
+                self.add_message(t("ui.data_tab.capture_disabled_msg"))
+                logger.info(f"Data capture disabled: {self.capture_filename}")
+            except Exception as e:
+                logger.error(f"Error closing capture file: {e}")
+            finally:
+                self.capture_file = None
+                self.capture_filename = None
 
     def _load_data(self):
         from tkinter import filedialog, messagebox
@@ -96,38 +233,6 @@ class DataTab:
         self.data_text.bind("<ButtonRelease-1>", self._on_user_scroll)
         self.data_text.bind("<Configure>", self._on_user_scroll)
 
-    def _on_autosave_toggle(self):
-        import os
-        import datetime
-
-        if self.autosave_var.get():
-            output_dir = "autosave"
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
-            now = datetime.datetime.now()
-            fname = f"data-{now.strftime('%Y-%m-%d-%H%M%S')}.txt"
-            self.autosave_filename = os.path.join(output_dir, fname)
-
-            try:
-                self.autosave_file = open(self.autosave_filename, "a", encoding="utf-8")
-                logger.info(f"Autosave enabled: {self.autosave_filename}")
-            except Exception as e:
-                logger.error(f"Error opening autosave file: {e}")
-                self.autosave_var.set(False)
-                self.autosave_file = None
-                self.autosave_filename = None
-        else:
-            if self.autosave_file:
-                try:
-                    self.autosave_file.close()
-                    logger.info(f"Autosave disabled: {self.autosave_filename}")
-                except Exception as e:
-                    logger.error(f"Error closing autosave file: {e}")
-                finally:
-                    self.autosave_file = None
-                    self.autosave_filename = None
-
     def _clear_data(self):
         self.data.clear()
         self.data_text.delete("1.0", "end")
@@ -143,12 +248,13 @@ class DataTab:
         if save_to_history:
             self.data.append({"type": "data", "value": line})
 
-            if self.autosave_var.get() and self.autosave_file:
+            if self.capture_enabled.get_value() and self.capture_file:
                 try:
-                    self.autosave_file.write(line + "\n")
-                    self.autosave_file.flush()
+                    self.capture_file.write(line + "\n")
+                    self.capture_file.flush()
                 except Exception as e:
-                    logger.error(f"Error writing to autosave file: {e}")
+                    logger.error(f"Error writing to capture file: {e}")
+                    self.add_message(t("ui.data_tab.capture_error").format(error=str(e)))
 
         try:
             at_end = self._is_scrolled_to_end()
@@ -191,14 +297,14 @@ class DataTab:
         return [item["value"] for item in self.data if item["type"] == "data"]
 
     def cleanup(self):
-        if self.autosave_file:
+        if self.capture_file:
             try:
-                self.autosave_file.close()
+                self.capture_file.close()
                 logger.info(
-                    f"Autosave file closed during cleanup: {self.autosave_filename}"
+                    f"Capture file closed during cleanup: {self.capture_filename}"
                 )
             except Exception as e:
-                logger.error(f"Error closing autosave file during cleanup: {e}")
+                logger.error(f"Error closing capture file during cleanup: {e}")
             finally:
-                self.autosave_file = None
-                self.autosave_filename = None
+                self.capture_file = None
+                self.capture_filename = None
