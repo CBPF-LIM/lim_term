@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "limterm"
-version = "0.5.0"
+version = "0.6.0"
 description = "Serial Communication & Data Visualization - Connect to Arduino/ESP32 or other serial devices, collect data, and create dynamic graphs with professional visualization features"
 authors = ["David Vaz Teixeira <david.vaz.teixeira@gmail.com>"]
 readme = "README.md"

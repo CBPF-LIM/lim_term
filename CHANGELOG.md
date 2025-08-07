@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-08-06
+
+### Added
+- **Oscilloscope Mode**: Complete oscilloscope functionality with trigger system
+  - Rising, falling, and both edge trigger modes
+  - Continuous and single capture modes  
+  - Configurable trigger level and source column
+  - Real-time waveform visualization with onion-skin effect
+  - Capture window size control
+  - Auto-save captured waveforms as PNG and TXT
+- **Enhanced Visualization**: N-set ring buffer for overlapping waveform display
+
+### Improved  
+- **Language Loading**: Moved i18n initialization before UI creation for consistent translations
+- **Preference Widgets**: Enhanced PrefCombobox with proper value mapping for language independence
+
+### Technical
+- Added ring buffer architecture with bounds checking and age calculation
+- Implemented comprehensive value mapping system for combo boxes
+- Enhanced preference loading with automatic translation key resolution
+
+## [0.5.0] - 2025-07-29
+
+### Fixed
+- **macOS Compatibility**: Fixed matplotlib backend issues on macOS by setting TkAgg explicitly
+- **Build System**: Updated build configuration text for multi-platform support
+
+### Technical
+- Set matplotlib to use TkAgg backend for better cross-platform compatibility
+- Enhanced build pipeline for consistent behavior across operating systems
+
 ## [0.4.0] - 2025-07-29
 
 ### Added
