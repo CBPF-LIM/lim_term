@@ -88,6 +88,9 @@ ui:
     stacked_chart_title: "Gestapeltes Diagramm"
     stacked_chart_ylabel: "Wert"
     stacked_chart_ylabel_percent: "Prozent (%)"
+    visualization_types:
+      time_series: "Zeitreihen"
+      stacked: "Gestapelt"
     normalize_100_percent: "Auf 100% normalisieren"
 
   graph_types:

@@ -141,13 +141,18 @@ class OscTab:
         self.trigger_edge = PrefCombobox(
             trigger_frame,
             pref_key="osc.trigger.edge",
-            default_value=t("ui.osc_tab.trigger_edges.rising"),
+            default_value="rising",
             state="readonly",
             values=[
                 t("ui.osc_tab.trigger_edges.rising"),
                 t("ui.osc_tab.trigger_edges.falling"),
                 t("ui.osc_tab.trigger_edges.both")
             ],
+            value_mapping={
+                t("ui.osc_tab.trigger_edges.rising"): "rising",
+                t("ui.osc_tab.trigger_edges.falling"): "falling", 
+                t("ui.osc_tab.trigger_edges.both"): "both"
+            },
             width=10,
             on_change=self._on_trigger_setting_change
         )
@@ -157,12 +162,16 @@ class OscTab:
         self.trigger_mode = PrefCombobox(
             trigger_frame,
             pref_key="osc.trigger.mode",
-            default_value=t("ui.osc_tab.trigger_modes.continuous"),
+            default_value="continuous",
             state="readonly",
             values=[
                 t("ui.osc_tab.trigger_modes.continuous"),
                 t("ui.osc_tab.trigger_modes.single")
             ],
+            value_mapping={
+                t("ui.osc_tab.trigger_modes.continuous"): "continuous",
+                t("ui.osc_tab.trigger_modes.single"): "single"
+            },
             width=10,
             on_change=self._on_trigger_setting_change
         )
@@ -327,9 +336,9 @@ class OscTab:
             
             trigger_mode = self.trigger_mode.get_value()
             
-            if trigger_mode == t("ui.osc_tab.trigger_modes.single"):
+            if trigger_mode == "single":
                 self._disarm()
-            elif trigger_mode == t("ui.osc_tab.trigger_modes.continuous"):
+            elif trigger_mode == "continuous":
                 if hasattr(self, 'frame') and self.frame.winfo_exists():
                     self.frame.after(200, self._auto_rearm)
             
@@ -428,7 +437,7 @@ class OscTab:
             self.trigger_manager.arm()
         
         trigger_mode = self.trigger_mode.get_value()
-        if trigger_mode == t("ui.osc_tab.trigger_modes.single"):
+        if trigger_mode == "single":
             if hasattr(self, 'plotter'):
                 self.plotter.clear_all_data()
         

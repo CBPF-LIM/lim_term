@@ -112,9 +112,16 @@ class GraphTab:
         self.group_combobox = PrefCombobox(
             global_frame,
             pref_key="graph.general.visualization_group",
-            default_value="Time Series",
+            default_value="time_series",
             state="readonly",
-            values=["Time Series", "Stacked"],
+            values=[
+                t("ui.graph_tab.visualization_types.time_series"),
+                t("ui.graph_tab.visualization_types.stacked")
+            ],
+            value_mapping={
+                t("ui.graph_tab.visualization_types.time_series"): "time_series",
+                t("ui.graph_tab.visualization_types.stacked"): "stacked"
+            },
             width=15,
             on_change=self._on_group_change,
         )
@@ -347,7 +354,7 @@ class GraphTab:
 
             group = self.group_combobox.get_value()
 
-            if group == "Stacked":
+            if group == "stacked":
                 self._plot_stacked_chart(x_data, data_lines, x_col)
             else:
                 self._plot_time_series_chart(x_data, data_lines, x_col)
@@ -695,9 +702,9 @@ class GraphTab:
 
         group = self.group_combobox.get_value()
 
-        if group == "Time Series":
+        if group == "time_series":
             self._create_time_series_widgets()
-        elif group == "Stacked":
+        elif group == "stacked":
             self._create_stacked_widgets()
 
     def _create_time_series_widgets(self):

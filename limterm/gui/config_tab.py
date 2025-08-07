@@ -30,17 +30,19 @@ class ConfigTab:
             self.config_frame, text=t("ui.config_tab.mode_label")
         )
         self.mode_label.grid(column=0, row=0, padx=10, pady=10, sticky="w")
-        self.mode_combobox = ttk.Combobox(
+        self.mode_combobox = PrefCombobox(
             self.config_frame,
+            pref_key="config.mode",
+            default_value="hardware",
             state="readonly",
             values=[t("common.hardware"), t("common.synthetic")],
+            value_mapping={
+                t("common.hardware"): "hardware",
+                t("common.synthetic"): "synthetic"
+            },
+            on_change=self._on_mode_changed
         )
         self.mode_combobox.grid(column=1, row=0, padx=10, pady=10, sticky="w")
-        self.mode_combobox.set(t("common.hardware"))
-        self.mode_combobox.bind("<<ComboboxSelected>>", self._on_mode_changed)
-        self.mode_combobox.bind(
-            "<<ComboboxSelected>>", self._on_preference_changed, add="+"
-        )
 
         self.port_label = ttk.Label(
             self.config_frame, text=t("ui.config_tab.port_label")
@@ -164,8 +166,8 @@ class ConfigTab:
         self.win_simul_info.grid_remove()
 
     def _on_mode_changed(self, event=None):
-        mode = self.mode_combobox.get()
-        if mode == t("common.synthetic"):
+        mode = self.mode_combobox.get_value()
+        if mode == "synthetic":
             self.port_combobox.config(state="disabled")
             self.baudrate_combobox.config(state="disabled")
             self.refresh_button.config(state="disabled")
@@ -193,7 +195,7 @@ class ConfigTab:
             self._update_ports()
 
     def _update_ports(self):
-        if self.mode_combobox.get() == t("common.hardware"):
+        if self.mode_combobox.get_value() == "hardware":
             ports = self.serial_manager.get_available_ports()
             self.port_combobox["values"] = ports
             if ports:
@@ -207,7 +209,7 @@ class ConfigTab:
                     self.port_combobox.set(ports[0])
 
     def _connect(self):
-        mode = self.mode_combobox.get()
+        mode = self.mode_combobox.get_value()
 
         if self.serial_manager.is_connected or self.synthetic_generator:
             self.serial_manager.disconnect()
@@ -219,7 +221,7 @@ class ConfigTab:
             self._show_config_interface()
             return
 
-        if mode == t("common.hardware"):
+        if mode == "hardware":
             port = self.port_combobox.get()
             baudrate = self.baudrate_combobox.get()
 
@@ -230,7 +232,7 @@ class ConfigTab:
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
                 self._show_connection_info(mode, port, baudrate)
 
-        elif mode == t("common.synthetic"):
+        elif mode == "synthetic":
             try:
                 equations = self._get_equations_from_ui()
                 fps = int(self.fps_pref_combobox.get())
@@ -260,11 +262,11 @@ class ConfigTab:
         self.config_frame.grid_remove()
         self.info_frame.grid()
 
-        if mode == "Hardware":
+        if mode == "hardware":
             info_text = t("ui.config_tab.connection_status").format(
                 mode=t("ui.config_tab.mode_hardware"), port=port, baudrate=baudrate
             )
-        elif mode == "Synthetic":
+        elif mode == "synthetic":
             info_text = t("ui.config_tab.synthetic_connection_status")
         else:
             info_text = t("ui.config_tab.virtual_connection_status").format(
@@ -274,10 +276,8 @@ class ConfigTab:
         self.info_label.config(text=info_text)
 
     def _load_preferences(self):
-        saved_mode = self.config_manager.load_tab_setting("config", "mode")
-        if saved_mode:
-            self.mode_combobox.set(saved_mode)
-
+        # Note: mode is automatically loaded by PrefCombobox, don't override it
+        
         saved_baudrate = self.config_manager.load_tab_setting(
             "config", "baudrate", DEFAULT_BAUDRATE
         )
@@ -297,7 +297,7 @@ class ConfigTab:
         self._on_mode_changed()
 
     def _save_preferences(self):
-        current_mode = self.mode_combobox.get()
+        current_mode = self.mode_combobox.get_value()
 
         self.config_manager.save_tab_setting("config", "mode", current_mode)
         self.config_manager.save_tab_setting("config", "port", self.port_combobox.get())

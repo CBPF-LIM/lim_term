@@ -3,7 +3,7 @@ from tkinter import ttk
 import time
 from ..config import DEFAULT_GEOMETRY
 from ..core import SerialManager
-from ..i18n import t, initialize as init_i18n, get_available_languages, set_language
+from ..i18n import t, get_available_languages, set_language
 from .config_tab import ConfigTab
 from .data_tab import DataTab
 from .graph_tab import GraphTab
@@ -12,7 +12,6 @@ from .osc_tab import OscTab
 
 class MainWindow:
     def __init__(self):
-        init_i18n()
 
         self.root = tk.Tk()
         self.root.title(t("ui.main_window.title"))

@@ -77,11 +77,11 @@ class OscTrigger:
     
     def _check_edge_condition(self, last_value, current_value, trigger_level, trigger_edge):
         """Check if edge condition is met."""
-        if trigger_edge == t("ui.osc_tab.trigger_edges.rising"):
+        if trigger_edge == "rising":
             return (last_value <= trigger_level < current_value)
-        elif trigger_edge == t("ui.osc_tab.trigger_edges.falling"): 
+        elif trigger_edge == "falling": 
             return (last_value >= trigger_level > current_value)
-        elif trigger_edge == t("ui.osc_tab.trigger_edges.both"):
+        elif trigger_edge == "both":
             return ((last_value <= trigger_level < current_value) or 
                    (last_value >= trigger_level > current_value))
         return False

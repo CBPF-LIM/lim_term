@@ -88,6 +88,9 @@ ui:
     stacked_chart_title: "Gráfico Empilhado"
     stacked_chart_ylabel: "Valor"
     stacked_chart_ylabel_percent: "Porcentagem (%)"
+    visualization_types:
+      time_series: "Séries Temporais"
+      stacked: "Empilhado"
     normalize_100_percent: "Normalizar para 100%"
 
   graph_types:

@@ -13,11 +13,13 @@ if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
 from limterm.gui import MainWindow
-from limterm.i18n import t
+from limterm.i18n import t, initialize as init_i18n
 
 
 def main():
     """Main entry point for Lim Terminal application"""
+    init_i18n()
+    
     try:
         app = MainWindow()
         app.run()

@@ -88,6 +88,9 @@ ui:
     stacked_chart_title: "Stacked Chart"
     stacked_chart_ylabel: "Value"
     stacked_chart_ylabel_percent: "Percentage (%)"
+    visualization_types:
+      time_series: "Time Series"
+      stacked: "Stacked"
     normalize_100_percent: "Normalize to 100%"
 
   osc_tab:
