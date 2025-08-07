@@ -106,16 +106,22 @@ class ConfigTab:
 
         self.equation_frame.columnconfigure(1, weight=1)
 
-        self.math_funcs_label = ttk.Label(
-            self.equation_frame, text=t("ui.config_tab.available_math_functions")
+        self.math_funcs_button = ttk.Button(
+            self.equation_frame, 
+            text=t("ui.config_tab.show_math_functions"), 
+            command=self._toggle_math_functions
         )
-        self.math_funcs_label.grid(
+        self.math_funcs_button.grid(
             column=0,
             row=len(self.equation_labels) + 1,
             columnspan=2,
             padx=5,
-            pady=(15, 2),
+            pady=(15, 5),
             sticky="w",
+        )
+
+        self.math_funcs_label = ttk.Label(
+            self.equation_frame, text=t("ui.config_tab.available_math_functions")
         )
 
         math_funcs = [
@@ -129,14 +135,9 @@ class ConfigTab:
         )
         self.math_funcs_text.insert("1.0", math_funcs_text)
         self.math_funcs_text.config(state="disabled")
-        self.math_funcs_text.grid(
-            column=0,
-            row=len(self.equation_labels) + 2,
-            columnspan=2,
-            padx=5,
-            pady=(2, 5),
-            sticky="ew",
-        )
+
+        self.math_funcs_visible = self.config_manager.load_setting("config.math_functions_visible", False)
+        self._update_math_functions_visibility()
 
         self.info_frame = ttk.LabelFrame(
             self.frame, text=t("ui.config_tab.connection_info_frame")
@@ -357,3 +358,32 @@ class ConfigTab:
         for entry in self.equation_entries.values():
             entry.config(state=state)
         self.fps_pref_combobox.config(state=state)
+
+    def _toggle_math_functions(self):
+        self.math_funcs_visible = not self.math_funcs_visible
+        self.config_manager.save_setting("config.math_functions_visible", self.math_funcs_visible)
+        self._update_math_functions_visibility()
+
+    def _update_math_functions_visibility(self):
+        if self.math_funcs_visible:
+            self.math_funcs_label.grid(
+                column=0,
+                row=len(self.equation_labels) + 2,
+                columnspan=2,
+                padx=5,
+                pady=(5, 2),
+                sticky="w",
+            )
+            self.math_funcs_text.grid(
+                column=0,
+                row=len(self.equation_labels) + 3,
+                columnspan=2,
+                padx=5,
+                pady=(2, 5),
+                sticky="ew",
+            )
+            self.math_funcs_button.config(text=t("ui.config_tab.hide_math_functions"))
+        else:
+            self.math_funcs_label.grid_remove()
+            self.math_funcs_text.grid_remove()
+            self.math_funcs_button.config(text=t("ui.config_tab.show_math_functions"))

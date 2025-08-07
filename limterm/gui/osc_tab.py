@@ -35,9 +35,11 @@ class OscTab:
         self.trigger_data = []
         self.capture_start_time = None
         self.capture_count = 0
+        self.last_trigger_time = 0  # Add cooldown tracking
 
         self.osc_refresh_rate_ms = 33
         self.refresh_timer_id = None
+        self.pending_callbacks = []  # Track all pending after callbacks
         self.is_tab_active = False
 
         self.trigger_manager = None
@@ -246,9 +248,13 @@ class OscTab:
         )
 
     def _setup_trigger_monitoring(self):
-        """Set up periodic trigger monitoring with optimized refresh rate."""
-        if hasattr(self, "frame") and self.frame.winfo_exists():
-            self._check_trigger_conditions()
+        """Set up simple trigger monitoring."""
+        if hasattr(self, "frame") and self.frame.winfo_exists() and self.is_armed:
+            # Simple trigger check based on data availability
+            if self.data_tab.get_data():
+                self._check_trigger_conditions()
+            
+            # Continue monitoring while armed
             self.refresh_timer_id = self.frame.after(
                 self.osc_refresh_rate_ms, self._setup_trigger_monitoring
             )
@@ -262,6 +268,21 @@ class OscTab:
                 pass
             self.refresh_timer_id = None
 
+    def _schedule_after(self, delay, callback):
+        """Schedule a callback and track it for cleanup."""
+        callback_id = self.frame.after(delay, callback)
+        self.pending_callbacks.append(callback_id)
+        return callback_id
+
+    def _cancel_all_callbacks(self):
+        """Cancel all pending after callbacks."""
+        for callback_id in self.pending_callbacks[:]:  # Copy the list to avoid modification during iteration
+            try:
+                self.frame.after_cancel(callback_id)
+                self.pending_callbacks.remove(callback_id)
+            except:
+                pass
+
     def set_tab_active(self, is_active):
         """Set whether this tab is currently active (optimization for rendering)."""
         self.is_active = is_active
@@ -272,12 +293,118 @@ class OscTab:
                 self._setup_trigger_monitoring()
 
     def _check_trigger_conditions(self):
-        """Check if trigger conditions are met."""
-        if not hasattr(self, "trigger_manager") or not self.trigger_manager:
+        """Check if trigger conditions are met with simple data processing."""
+        if not self.is_armed:
             return
 
-        if self.trigger_manager.check_trigger_conditions():
-            self._trigger_detected()
+        try:
+            # Add cooldown period to prevent rapid triggers
+            current_time = time.time()
+            if current_time - self.last_trigger_time < 1.0:  # 1 second cooldown
+                return
+                
+            # Get current data buffer
+            data_lines = self.data_tab.get_data()
+            if not data_lines or len(data_lines) < 10:
+                return
+                
+            # Parse trigger settings
+            try:
+                column = int(self.trigger_source.get_value())
+                trigger_level = float(self.trigger_level.get_value())
+                window_size = int(self.window_size.get_value())
+            except (ValueError, AttributeError):
+                return
+            
+            # Parse data values for the trigger column (from end to start - time arrival order)
+            values = []
+            for line in reversed(data_lines[-200:]):  # Check last 200 lines
+                try:
+                    parts = line.strip().split()
+                    if len(parts) > column:
+                        value = float(parts[column])
+                        values.append(value)
+                except (ValueError, IndexError):
+                    continue
+            
+            if len(values) < window_size:
+                return
+            
+            # Reverse back to correct time order for processing
+            values.reverse()
+            
+            # Simple rising edge detection on recent data
+            trigger_edge = self.trigger_edge.get_value()
+            for i in range(len(values) - window_size, len(values) - 1):
+                if i <= 0:
+                    continue
+                    
+                triggered = False
+                if trigger_edge == "rising" and values[i-1] <= trigger_level < values[i]:
+                    triggered = True
+                elif trigger_edge == "falling" and values[i-1] >= trigger_level > values[i]:
+                    triggered = True
+                elif trigger_edge == "both" and (
+                    (values[i-1] <= trigger_level < values[i]) or 
+                    (values[i-1] >= trigger_level > values[i])
+                ):
+                    triggered = True
+                    
+                if triggered:
+                    # Extract window around trigger point
+                    start_idx = max(0, i - window_size // 4)  # Some pre-trigger
+                    end_idx = min(len(values), i + 3 * window_size // 4)  # Mostly post-trigger
+                    
+                    window_data = values[start_idx:end_idx]
+                    if len(window_data) >= window_size // 2:
+                        self._process_triggered_data(window_data, i - start_idx)
+                        
+                        # Pause between triggers to avoid too many
+                        self._schedule_after(500, lambda: None)
+                        break
+                        
+        except Exception as e:
+            logger.error(f"Error in simple trigger detection: {e}")
+
+    def _process_triggered_data(self, window_data, trigger_point):
+        """Process triggered data and plot it."""
+        try:
+            # Update last trigger time for cooldown
+            self.last_trigger_time = time.time()
+            
+            # Clear previous data for single shot mode
+            trigger_mode = self.trigger_mode.get_value()
+            if trigger_mode == "single":
+                self.graph_manager.clear()
+            # Clear previous data if single shot
+            if trigger_mode == "single":
+                self.graph_manager.clear()
+            
+            # Create x-axis data
+            x_data = list(range(len(window_data)))
+            
+            # Plot the data
+            self.graph_manager.plot_line(x_data, window_data, color='blue')
+            
+            # Add trigger level line
+            trigger_level = float(self.trigger_level.get_value())
+            trigger_x = [0, len(window_data)-1]
+            trigger_y = [trigger_level, trigger_level]
+            self.graph_manager.plot_line(trigger_x, trigger_y, color='red')
+            
+            # Update the display
+            self.graph_manager.update()
+            
+            # Update status
+            self.status_label.config(text=t("ui.osc_tab.triggered"), foreground="red")
+            
+            # Brief status update
+            self._schedule_after(300, lambda: self.status_label.config(
+                text=t("ui.osc_tab.armed"), foreground="orange"
+            ) if self.is_armed else None)
+            
+        except Exception as e:
+            logger.error(f"Error processing triggered data: {e}")
 
     def _trigger_detected(self):
         """Handle trigger detection."""
@@ -343,7 +470,7 @@ class OscTab:
                 progress = (len(new_data_after_trigger) / window_size) * 100
 
                 if hasattr(self, "frame") and self.frame.winfo_exists():
-                    self.frame.after(self.osc_refresh_rate_ms, self._continue_capture)
+                    self._schedule_after(self.osc_refresh_rate_ms, self._continue_capture)
 
         except Exception as e:
             logger.error(f"Continue capture error: {e}")
@@ -377,7 +504,7 @@ class OscTab:
                 self._disarm()
             elif trigger_mode == "continuous":
                 if hasattr(self, "frame") and self.frame.winfo_exists():
-                    self.frame.after(200, self._auto_rearm)
+                    self._schedule_after(200, self._auto_rearm)
 
         except Exception as e:
             print(t("ui.osc_tab.capture_completion_error", error=str(e)))
@@ -480,25 +607,22 @@ class OscTab:
 
         self.is_armed = True
 
-        if hasattr(self, "trigger_manager"):
-            self.trigger_manager.arm()
-
         trigger_mode = self.trigger_mode.get_value()
         if trigger_mode == "single":
-            if hasattr(self, "plotter"):
-                self.plotter.clear_all_data()
+            self.graph_manager.clear()
 
         if hasattr(self, "arm_button") and self.arm_button.winfo_exists():
             self.arm_button.config(text=t("ui.osc_tab.disarm"))
         if hasattr(self, "status_label") and self.status_label.winfo_exists():
             self.status_label.config(text=t("ui.osc_tab.armed"), foreground="orange")
+            
+        # Start simple monitoring
+        self._setup_trigger_monitoring()
 
     def _disarm(self):
         """Disarm the oscilloscope."""
         self.is_armed = False
-
-        if hasattr(self, "trigger_manager"):
-            self.trigger_manager.disarm()
+        self._stop_refresh_timer()
 
         if hasattr(self, "arm_button") and self.arm_button.winfo_exists():
             self.arm_button.config(text=t("ui.osc_tab.arm"))
@@ -521,4 +645,5 @@ class OscTab:
     def cleanup(self):
         """Clean up resources."""
         self._stop_refresh_timer()
+        self._cancel_all_callbacks()
         self._disarm()
