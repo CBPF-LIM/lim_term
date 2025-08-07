@@ -1,7 +1,7 @@
 # Technical configuration values only
 
 # Window configuration
-DEFAULT_GEOMETRY = "800x600"
+DEFAULT_GEOMETRY = "1024x768"
 
 # Serial configuration
 DEFAULT_BAUDRATES = [
