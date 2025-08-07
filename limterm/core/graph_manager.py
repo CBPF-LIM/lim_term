@@ -1,5 +1,6 @@
 import matplotlib
-matplotlib.use('TkAgg')
+
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -240,7 +241,9 @@ class GraphManager:
         self.ax.legend(loc="upper right")
 
         self.set_labels(
-            title=title or t("ui.graph_tab.stacked_chart_title"), xlabel=xlabel or "X", ylabel=ylabel_text
+            title=title or t("ui.graph_tab.stacked_chart_title"),
+            xlabel=xlabel or "X",
+            ylabel=ylabel_text,
         )
 
         self.update()

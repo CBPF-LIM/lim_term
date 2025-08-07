@@ -116,11 +116,11 @@ class GraphTab:
             state="readonly",
             values=[
                 t("ui.graph_tab.visualization_types.time_series"),
-                t("ui.graph_tab.visualization_types.stacked")
+                t("ui.graph_tab.visualization_types.stacked"),
             ],
             value_mapping={
                 t("ui.graph_tab.visualization_types.time_series"): "time_series",
-                t("ui.graph_tab.visualization_types.stacked"): "stacked"
+                t("ui.graph_tab.visualization_types.stacked"): "stacked",
             },
             width=15,
             on_change=self._on_group_change,
@@ -857,11 +857,11 @@ class GraphTab:
         if not is_active:
             self._stop_refresh_timer()
         else:
-            if hasattr(self, 'frame') and self.frame.winfo_exists():
+            if hasattr(self, "frame") and self.frame.winfo_exists():
                 self._start_refresh_timer()
 
     def should_render_now(self, current_time):
-        if self.is_paused or not getattr(self, 'is_tab_active', True):
+        if self.is_paused or not getattr(self, "is_tab_active", True):
             return False
 
         refresh_interval = self.refresh_rate_ms / 1000.0

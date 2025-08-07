@@ -286,17 +286,19 @@ class PreferenceWidget:
         self._set_widget_value(converted_value)
         self._save_to_preferences()
 
-    def refresh_language_mapping(self, new_value_mapping: Optional[Dict[str, str]] = None):
+    def refresh_language_mapping(
+        self, new_value_mapping: Optional[Dict[str, str]] = None
+    ):
         """Update the value mapping when language changes and reload the current value."""
         if new_value_mapping is not None:
             self.value_mapping = new_value_mapping
             self.reverse_mapping = {v: k for k, v in self.value_mapping.items()}
-            
+
             widget_type = type(self.widget).__name__
-            if widget_type in ["Combobox"] and hasattr(self.widget, 'configure'):
+            if widget_type in ["Combobox"] and hasattr(self.widget, "configure"):
                 new_values = list(self.value_mapping.keys())
                 self.widget.configure(values=new_values)
-                
+
                 self._load_from_preferences()
 
     def __getattr__(self, name):

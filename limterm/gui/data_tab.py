@@ -70,7 +70,10 @@ class DataTab:
                 return
         file_path = filedialog.askopenfilename(
             defaultextension=".txt",
-            filetypes=[(t("dialogs.text_files"), "*.txt"), (t("dialogs.all_files"), "*.*")],
+            filetypes=[
+                (t("dialogs.text_files"), "*.txt"),
+                (t("dialogs.all_files"), "*.*"),
+            ],
             title=t("ui.graph_tab.load_dialog_title"),
         )
         if file_path:
@@ -191,7 +194,9 @@ class DataTab:
         if self.autosave_file:
             try:
                 self.autosave_file.close()
-                logger.info(f"Autosave file closed during cleanup: {self.autosave_filename}")
+                logger.info(
+                    f"Autosave file closed during cleanup: {self.autosave_filename}"
+                )
             except Exception as e:
                 logger.error(f"Error closing autosave file during cleanup: {e}")
             finally:

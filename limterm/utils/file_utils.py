@@ -6,7 +6,8 @@ class FileManager:
     @staticmethod
     def save_data_to_file(data, default_extension=".txt"):
         file_path = filedialog.asksaveasfilename(
-            defaultextension=default_extension, filetypes=[(t("dialogs.text_files"), "*.txt")]
+            defaultextension=default_extension,
+            filetypes=[(t("dialogs.text_files"), "*.txt")],
         )
 
         if file_path:

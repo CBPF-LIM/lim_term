@@ -63,7 +63,9 @@ class MainWindow:
 
         from tkinter import messagebox
 
-        messagebox.showinfo(t("dialogs.language_changed"), t("ui.main_window.restart_required"))
+        messagebox.showinfo(
+            t("dialogs.language_changed"), t("ui.main_window.restart_required")
+        )
 
     def _create_tabs(self):
         self.tab_control = ttk.Notebook(self.root)
@@ -81,32 +83,32 @@ class MainWindow:
         self.tab_control.add(self.osc_tab.get_frame(), text=t("ui.tabs.oscilloscope"))
 
         self.tab_control.bind("<<NotebookTabChanged>>", self._on_tab_changed)
-        
+
         self.tab_control.pack(expand=1, fill="both")
-        
+
         self._update_active_tab()
-    
+
     def _on_tab_changed(self, event):
         """Handle tab change for rendering optimization."""
         self._update_active_tab()
-    
+
     def _update_active_tab(self):
         """Update which tab is active for rendering optimization."""
         try:
             active_tab_index = self.tab_control.index("current")
-            
-            if hasattr(self.graph_tab, 'set_tab_active'):
+
+            if hasattr(self.graph_tab, "set_tab_active"):
                 self.graph_tab.set_tab_active(False)
-            if hasattr(self.osc_tab, 'set_tab_active'):
+            if hasattr(self.osc_tab, "set_tab_active"):
                 self.osc_tab.set_tab_active(False)
-            
+
             if active_tab_index == 2:
-                if hasattr(self.graph_tab, 'set_tab_active'):
+                if hasattr(self.graph_tab, "set_tab_active"):
                     self.graph_tab.set_tab_active(True)
             elif active_tab_index == 3:
-                if hasattr(self.osc_tab, 'set_tab_active'):
+                if hasattr(self.osc_tab, "set_tab_active"):
                     self.osc_tab.set_tab_active(True)
-                    
+
         except:
             pass
 
@@ -132,7 +134,7 @@ class MainWindow:
 
             if hasattr(self, "data_tab"):
                 self.data_tab.cleanup()
-            
+
             if hasattr(self, "osc_tab"):
                 self.osc_tab.cleanup()
 
@@ -146,15 +148,16 @@ class MainWindow:
             self.root.update()
 
             current_time = time.time()
-            
+
             try:
                 active_tab_index = self.tab_control.index("current")
-                
-                if active_tab_index == 2 and hasattr(self.graph_tab, "should_render_now"):
+
+                if active_tab_index == 2 and hasattr(
+                    self.graph_tab, "should_render_now"
+                ):
                     if self.graph_tab.should_render_now(current_time):
                         self.graph_tab.render_frame()
-                
-                        
+
             except:
                 pass
 

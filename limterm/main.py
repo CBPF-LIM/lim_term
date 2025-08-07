@@ -19,14 +19,14 @@ from limterm.i18n import t, initialize as init_i18n
 def main():
     """Main entry point for Lim Terminal application"""
     init_i18n()
-    
+
     try:
         app = MainWindow()
         app.run()
     except KeyboardInterrupt:
         print(f"\n{t('errors.application_interrupted')}")
     except Exception as e:
-        print(t('errors.application_error', error=str(e)))
+        print(t("errors.application_error", error=str(e)))
         sys.exit(1)
 
 

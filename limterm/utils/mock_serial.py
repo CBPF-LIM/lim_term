@@ -6,6 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class SyntheticDataGenerator:
     def __init__(self, data_callback=None, equations=None, refresh_rate=15):
         self.data_callback = data_callback
@@ -44,7 +45,7 @@ class SyntheticDataGenerator:
 
                 if self.equations:
                     aeval = Interpreter()
-                    aeval.symtable['n'] = n
+                    aeval.symtable["n"] = n
                     for column_name in sorted(self.equations.keys()):
                         expr = self.equations[column_name]
                         if not expr.strip():

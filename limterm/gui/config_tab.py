@@ -38,9 +38,9 @@ class ConfigTab:
             values=[t("common.hardware"), t("common.synthetic")],
             value_mapping={
                 t("common.hardware"): "hardware",
-                t("common.synthetic"): "synthetic"
+                t("common.synthetic"): "synthetic",
             },
-            on_change=self._on_mode_changed
+            on_change=self._on_mode_changed,
         )
         self.mode_combobox.grid(column=1, row=0, padx=10, pady=10, sticky="w")
 
@@ -83,9 +83,7 @@ class ConfigTab:
         self.equation_frame.grid_remove()
 
         self.fps_label = ttk.Label(self.equation_frame, text="FPS:")
-        self.fps_label.grid(
-            column=0, row=0, padx=5, pady=5, sticky="w"
-        )
+        self.fps_label.grid(column=0, row=0, padx=5, pady=5, sticky="w")
         self.fps_pref_combobox = PrefCombobox(
             self.equation_frame,
             pref_key="graph.general.refresh_rate",
@@ -94,31 +92,51 @@ class ConfigTab:
             values=[str(i) for i in range(1, 31)],
             width=8,
         )
-        self.fps_pref_combobox.grid(
-            column=1, row=0, padx=5, pady=5, sticky="w"
-        )
+        self.fps_pref_combobox.grid(column=1, row=0, padx=5, pady=5, sticky="w")
 
         self.equation_labels = ["a", "b", "c", "d", "e"]
         for i, label in enumerate(self.equation_labels):
             col_label = ttk.Label(self.equation_frame, text=f"{label}:")
-            col_label.grid(column=0, row=i+1, padx=5, pady=5, sticky="w")
+            col_label.grid(column=0, row=i + 1, padx=5, pady=5, sticky="w")
 
             equation_entry = ttk.Entry(self.equation_frame, width=40)
-            equation_entry.grid(column=1, row=i+1, padx=5, pady=5, sticky="ew")
+            equation_entry.grid(column=1, row=i + 1, padx=5, pady=5, sticky="ew")
             equation_entry.bind("<KeyRelease>", self._on_equation_changed)
             self.equation_entries[label] = equation_entry
 
         self.equation_frame.columnconfigure(1, weight=1)
 
-        self.math_funcs_label = ttk.Label(self.equation_frame, text=t("ui.config_tab.available_math_functions"))
-        self.math_funcs_label.grid(column=0, row=len(self.equation_labels)+1, columnspan=2, padx=5, pady=(15,2), sticky="w")
+        self.math_funcs_label = ttk.Label(
+            self.equation_frame, text=t("ui.config_tab.available_math_functions")
+        )
+        self.math_funcs_label.grid(
+            column=0,
+            row=len(self.equation_labels) + 1,
+            columnspan=2,
+            padx=5,
+            pady=(15, 2),
+            sticky="w",
+        )
 
-        math_funcs = [name for name in dir(math) if not name.startswith("_") and callable(getattr(math, name))]
+        math_funcs = [
+            name
+            for name in dir(math)
+            if not name.startswith("_") and callable(getattr(math, name))
+        ]
         math_funcs_text = ", ".join(math_funcs)
-        self.math_funcs_text = tk.Text(self.equation_frame, height=6, width=120, wrap="word")
+        self.math_funcs_text = tk.Text(
+            self.equation_frame, height=6, width=120, wrap="word"
+        )
         self.math_funcs_text.insert("1.0", math_funcs_text)
         self.math_funcs_text.config(state="disabled")
-        self.math_funcs_text.grid(column=0, row=len(self.equation_labels)+2, columnspan=2, padx=5, pady=(2,5), sticky="ew")
+        self.math_funcs_text.grid(
+            column=0,
+            row=len(self.equation_labels) + 2,
+            columnspan=2,
+            padx=5,
+            pady=(2, 5),
+            sticky="ew",
+        )
 
         self.info_frame = ttk.LabelFrame(
             self.frame, text=t("ui.config_tab.connection_info_frame")
@@ -277,7 +295,7 @@ class ConfigTab:
 
     def _load_preferences(self):
         # Note: mode is automatically loaded by PrefCombobox, don't override it
-        
+
         saved_baudrate = self.config_manager.load_tab_setting(
             "config", "baudrate", DEFAULT_BAUDRATE
         )
