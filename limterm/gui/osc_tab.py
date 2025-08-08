@@ -325,6 +325,15 @@ class OscTab:
                 if self.most_recent_trigger_idx is not None and self.current_values:
                     # Get incomplete data from most recent trigger to current point
                     incomplete_data = self.current_values[self.most_recent_trigger_idx:]
+                    
+                    # Limit incomplete set to window size
+                    try:
+                        window_size = int(self.window_size.get_value())
+                        if len(incomplete_data) > window_size:
+                            incomplete_data = incomplete_data[:window_size]
+                    except (ValueError, AttributeError):
+                        pass  # Use full data if can't get window size
+                    
                     if len(incomplete_data) > 1:  # Only plot if we have meaningful data
                         x_data = list(range(len(incomplete_data)))
                         # Plot in cyan to distinguish from complete sets
@@ -338,6 +347,14 @@ class OscTab:
                 all_lengths = [len(data) for data in self.trigger_sets]
                 if hasattr(self, 'current_values') and hasattr(self, 'most_recent_trigger_idx') and self.most_recent_trigger_idx:
                     incomplete_len = len(self.current_values) - self.most_recent_trigger_idx
+                    
+                    # Limit incomplete length to window size
+                    try:
+                        window_size = int(self.window_size.get_value())
+                        incomplete_len = min(incomplete_len, window_size)
+                    except (ValueError, AttributeError):
+                        pass
+                        
                     if incomplete_len > 0:
                         all_lengths.append(incomplete_len)
                 
