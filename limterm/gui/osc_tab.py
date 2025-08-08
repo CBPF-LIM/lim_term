@@ -26,10 +26,10 @@ class OscTab:
         self.is_armed = False
         self.trigger_sets = []
         self.max_sets = 4  # Keep only up to 4 sets as requested
-        
+
         self.update_interval_ms = 33  # 1/30 seconds = ~33ms for direct updates
         self.update_timer_id = None
-        
+
         # For tracking incomplete (most recent) set
         self.most_recent_trigger_idx = None
         self.current_values = []
@@ -218,13 +218,13 @@ class OscTab:
         """Start the simple, direct update loop: every 1/30s read buffer, find triggers, select sets, plot."""
         if not self._is_frame_valid():
             return
-            
+
         try:
             # Always process and plot every 1/30s when armed
             if self.is_armed:
                 self._process_data_directly()
                 self._plot_sets()  # Always plot after processing
-                
+
             # Schedule next update
             self.update_timer_id = self.frame.after(self.update_interval_ms, self._start_update_loop)
         except tk.TclError:
@@ -257,16 +257,16 @@ class OscTab:
                         values.append(value)
                 except (ValueError, IndexError):
                     continue
-                    
+
             if len(values) < window_size + 5:  # Need enough data for trigger detection
                 return
-                
+
             values.reverse()  # Back to chronological order
 
             # Find triggers and separate complete/incomplete sets
             complete_sets = []
             most_recent_trigger_idx = None
-            
+
             i = 1
             while i < len(values) - 1:  # Look through all data
                 # Check for trigger condition
@@ -283,7 +283,7 @@ class OscTab:
 
                 if triggered:
                     most_recent_trigger_idx = i  # Track the most recent trigger
-                    
+
                     # Check if we can create a complete set
                     if i + window_size <= len(values):
                         # Complete set available
@@ -325,7 +325,7 @@ class OscTab:
                 if self.most_recent_trigger_idx is not None and self.current_values:
                     # Get incomplete data from most recent trigger to current point
                     incomplete_data = self.current_values[self.most_recent_trigger_idx:]
-                    
+
                     # Limit incomplete set to window size
                     try:
                         window_size = int(self.window_size.get_value())
@@ -333,31 +333,31 @@ class OscTab:
                             incomplete_data = incomplete_data[:window_size]
                     except (ValueError, AttributeError):
                         pass  # Use full data if can't get window size
-                    
+
                     if len(incomplete_data) > 1:  # Only plot if we have meaningful data
                         x_data = list(range(len(incomplete_data)))
                         # Plot in cyan to distinguish from complete sets
-                        self.graph_manager.plot_line(x_data, incomplete_data, color="cyan")
+                        self.graph_manager.plot_line(x_data, incomplete_data, color="#1760ff")
 
             # Add trigger level line
             if self.trigger_sets or (hasattr(self, 'most_recent_trigger_idx') and self.most_recent_trigger_idx):
                 trigger_level = float(self.trigger_level.get_value())
-                
+
                 # Calculate max length across all data
                 all_lengths = [len(data) for data in self.trigger_sets]
                 if hasattr(self, 'current_values') and hasattr(self, 'most_recent_trigger_idx') and self.most_recent_trigger_idx:
                     incomplete_len = len(self.current_values) - self.most_recent_trigger_idx
-                    
+
                     # Limit incomplete length to window size
                     try:
                         window_size = int(self.window_size.get_value())
                         incomplete_len = min(incomplete_len, window_size)
                     except (ValueError, AttributeError):
                         pass
-                        
+
                     if incomplete_len > 0:
                         all_lengths.append(incomplete_len)
-                
+
                 if all_lengths:
                     max_length = max(all_lengths)
                     if max_length > 0:
@@ -514,7 +514,6 @@ class OscTab:
         """Clean up resources."""
         self._stop_update_loop()
         self.is_armed = False
-        
+
         if hasattr(self, "trigger_sets"):
             self.trigger_sets.clear()
-
