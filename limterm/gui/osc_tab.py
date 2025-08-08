@@ -226,7 +226,9 @@ class OscTab:
                 self._plot_sets()  # Always plot after processing
 
             # Schedule next update
-            self.update_timer_id = self.frame.after(self.update_interval_ms, self._start_update_loop)
+            self.update_timer_id = self.frame.after(
+                self.update_interval_ms, self._start_update_loop
+            )
         except tk.TclError:
             self.is_armed = False
 
@@ -271,13 +273,19 @@ class OscTab:
             while i < len(values) - 1:  # Look through all data
                 # Check for trigger condition
                 triggered = False
-                if trigger_edge == "rising" and values[i - 1] <= trigger_level < values[i]:
+                if (
+                    trigger_edge == "rising"
+                    and values[i - 1] <= trigger_level < values[i]
+                ):
                     triggered = True
-                elif trigger_edge == "falling" and values[i - 1] >= trigger_level > values[i]:
+                elif (
+                    trigger_edge == "falling"
+                    and values[i - 1] >= trigger_level > values[i]
+                ):
                     triggered = True
                 elif trigger_edge == "both" and (
-                    (values[i - 1] <= trigger_level < values[i]) or
-                    (values[i - 1] >= trigger_level > values[i])
+                    (values[i - 1] <= trigger_level < values[i])
+                    or (values[i - 1] >= trigger_level > values[i])
                 ):
                     triggered = True
 
@@ -287,9 +295,11 @@ class OscTab:
                     # Check if we can create a complete set
                     if i + window_size <= len(values):
                         # Complete set available
-                        window_data = values[i:i + window_size]
+                        window_data = values[i : i + window_size]
                         complete_sets.append(window_data)
-                        i += window_size // 2  # Skip ahead to avoid overlapping triggers
+                        i += (
+                            window_size // 2
+                        )  # Skip ahead to avoid overlapping triggers
                     else:
                         # This trigger is too close to the end - it will be the incomplete set
                         break
@@ -301,7 +311,7 @@ class OscTab:
                 self.trigger_sets.extend(complete_sets)
                 # Keep only most recent complete sets (leave room for incomplete set)
                 if len(self.trigger_sets) > self.max_sets - 1:
-                    self.trigger_sets = self.trigger_sets[-(self.max_sets - 1):]
+                    self.trigger_sets = self.trigger_sets[-(self.max_sets - 1) :]
 
             # Store the incomplete set info for plotting
             self.most_recent_trigger_idx = most_recent_trigger_idx
@@ -321,10 +331,14 @@ class OscTab:
                 self.graph_manager.plot_line(x_data, window_data, color="blue")
 
             # Plot the most recent incomplete set for real-time visualization
-            if hasattr(self, 'most_recent_trigger_idx') and hasattr(self, 'current_values'):
+            if hasattr(self, "most_recent_trigger_idx") and hasattr(
+                self, "current_values"
+            ):
                 if self.most_recent_trigger_idx is not None and self.current_values:
                     # Get incomplete data from most recent trigger to current point
-                    incomplete_data = self.current_values[self.most_recent_trigger_idx:]
+                    incomplete_data = self.current_values[
+                        self.most_recent_trigger_idx :
+                    ]
 
                     # Limit incomplete set to window size
                     try:
@@ -337,16 +351,27 @@ class OscTab:
                     if len(incomplete_data) > 1:  # Only plot if we have meaningful data
                         x_data = list(range(len(incomplete_data)))
                         # Plot in cyan to distinguish from complete sets
-                        self.graph_manager.plot_line(x_data, incomplete_data, color="#1760ff")
+                        self.graph_manager.plot_line(
+                            x_data, incomplete_data, color="#1760ff"
+                        )
 
             # Add trigger level line
-            if self.trigger_sets or (hasattr(self, 'most_recent_trigger_idx') and self.most_recent_trigger_idx):
+            if self.trigger_sets or (
+                hasattr(self, "most_recent_trigger_idx")
+                and self.most_recent_trigger_idx
+            ):
                 trigger_level = float(self.trigger_level.get_value())
 
                 # Calculate max length across all data
                 all_lengths = [len(data) for data in self.trigger_sets]
-                if hasattr(self, 'current_values') and hasattr(self, 'most_recent_trigger_idx') and self.most_recent_trigger_idx:
-                    incomplete_len = len(self.current_values) - self.most_recent_trigger_idx
+                if (
+                    hasattr(self, "current_values")
+                    and hasattr(self, "most_recent_trigger_idx")
+                    and self.most_recent_trigger_idx
+                ):
+                    incomplete_len = (
+                        len(self.current_values) - self.most_recent_trigger_idx
+                    )
 
                     # Limit incomplete length to window size
                     try:
