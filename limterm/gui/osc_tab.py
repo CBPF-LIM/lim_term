@@ -24,20 +24,18 @@ class OscTab:
         self.config_manager = get_config_manager()
 
         self.is_armed = False
-        self.trigger_data = []
         self.trigger_sets = []
-        self.max_sets = 10
-        self.capture_start_time = None
-        self.capture_count = 0
-        self.last_trigger_time = 0
-
-        self.osc_refresh_rate_ms = 33
-        self.refresh_timer_id = None
-        self.pending_callbacks = []
-        self.is_tab_active = False
+        self.max_sets = 4  # Keep only up to 4 sets as requested
+        
+        self.update_interval_ms = 33  # 1/30 seconds = ~33ms for direct updates
+        self.update_timer_id = None
+        
+        # For tracking incomplete (most recent) set
+        self.most_recent_trigger_idx = None
+        self.current_values = []
 
         self._create_widgets()
-        self._setup_trigger_monitoring()
+        self._start_update_loop()
 
     def _create_widgets(self):
         """Create the oscilloscope interface."""
@@ -216,46 +214,160 @@ class OscTab:
             "osc.ui.settings_visible", self.settings_visible
         )
 
-    def _setup_trigger_monitoring(self):
-        if not self._is_frame_valid() or not self.is_armed:
+    def _start_update_loop(self):
+        """Start the simple, direct update loop: every 1/30s read buffer, find triggers, select sets, plot."""
+        if not self._is_frame_valid():
             return
-
+            
         try:
-            if self.data_tab.get_data():
-                self._check_trigger_conditions()
-
-            if self._is_frame_valid() and self.is_armed:
-                self.refresh_timer_id = self.frame.after(
-                    self.osc_refresh_rate_ms, self._setup_trigger_monitoring
-                )
+            # Always process and plot every 1/30s when armed
+            if self.is_armed:
+                self._process_data_directly()
+                self._plot_sets()  # Always plot after processing
+                
+            # Schedule next update
+            self.update_timer_id = self.frame.after(self.update_interval_ms, self._start_update_loop)
         except tk.TclError:
             self.is_armed = False
 
-    def _stop_refresh_timer(self):
-        """Stop the refresh timer."""
-        if self.refresh_timer_id:
+    def _process_data_directly(self):
+        """Simple direct processing: read buffer, find triggers, manage complete and incomplete sets."""
+        try:
+            # Read buffer
+            data_lines = self.data_tab.get_data()
+            if not data_lines or len(data_lines) < 10:
+                return
+
+            # Get settings
+            try:
+                column = int(self.trigger_source.get_value())
+                trigger_level = float(self.trigger_level.get_value())
+                window_size = int(self.window_size.get_value())
+                trigger_edge = self.trigger_edge.get_value()
+            except (ValueError, AttributeError):
+                return
+
+            # Extract values from recent data
+            values = []
+            for line in reversed(data_lines[-200:]):  # Look at recent data only
+                try:
+                    parts = line.strip().split()
+                    if len(parts) > column:
+                        value = float(parts[column])
+                        values.append(value)
+                except (ValueError, IndexError):
+                    continue
+                    
+            if len(values) < window_size + 5:  # Need enough data for trigger detection
+                return
+                
+            values.reverse()  # Back to chronological order
+
+            # Find triggers and separate complete/incomplete sets
+            complete_sets = []
+            most_recent_trigger_idx = None
+            
+            i = 1
+            while i < len(values) - 1:  # Look through all data
+                # Check for trigger condition
+                triggered = False
+                if trigger_edge == "rising" and values[i - 1] <= trigger_level < values[i]:
+                    triggered = True
+                elif trigger_edge == "falling" and values[i - 1] >= trigger_level > values[i]:
+                    triggered = True
+                elif trigger_edge == "both" and (
+                    (values[i - 1] <= trigger_level < values[i]) or
+                    (values[i - 1] >= trigger_level > values[i])
+                ):
+                    triggered = True
+
+                if triggered:
+                    most_recent_trigger_idx = i  # Track the most recent trigger
+                    
+                    # Check if we can create a complete set
+                    if i + window_size <= len(values):
+                        # Complete set available
+                        window_data = values[i:i + window_size]
+                        complete_sets.append(window_data)
+                        i += window_size // 2  # Skip ahead to avoid overlapping triggers
+                    else:
+                        # This trigger is too close to the end - it will be the incomplete set
+                        break
+                else:
+                    i += 1
+
+            # Update complete sets (keep only most recent ones)
+            if complete_sets:
+                self.trigger_sets.extend(complete_sets)
+                # Keep only most recent complete sets (leave room for incomplete set)
+                if len(self.trigger_sets) > self.max_sets - 1:
+                    self.trigger_sets = self.trigger_sets[-(self.max_sets - 1):]
+
+            # Store the incomplete set info for plotting
+            self.most_recent_trigger_idx = most_recent_trigger_idx
+            self.current_values = values
+
+        except Exception as e:
+            logger.error(f"Error in direct data processing: {e}")
+
+    def _plot_sets(self):
+        """Plot all current trigger sets simply and directly: complete sets + incomplete set for real-time."""
+        try:
+            self.graph_manager.clear()
+
+            # Plot complete sets in blue
+            for window_data in self.trigger_sets:
+                x_data = list(range(len(window_data)))
+                self.graph_manager.plot_line(x_data, window_data, color="blue")
+
+            # Plot the most recent incomplete set for real-time visualization
+            if hasattr(self, 'most_recent_trigger_idx') and hasattr(self, 'current_values'):
+                if self.most_recent_trigger_idx is not None and self.current_values:
+                    # Get incomplete data from most recent trigger to current point
+                    incomplete_data = self.current_values[self.most_recent_trigger_idx:]
+                    if len(incomplete_data) > 1:  # Only plot if we have meaningful data
+                        x_data = list(range(len(incomplete_data)))
+                        # Plot in cyan to distinguish from complete sets
+                        self.graph_manager.plot_line(x_data, incomplete_data, color="cyan")
+
+            # Add trigger level line
+            if self.trigger_sets or (hasattr(self, 'most_recent_trigger_idx') and self.most_recent_trigger_idx):
+                trigger_level = float(self.trigger_level.get_value())
+                
+                # Calculate max length across all data
+                all_lengths = [len(data) for data in self.trigger_sets]
+                if hasattr(self, 'current_values') and hasattr(self, 'most_recent_trigger_idx') and self.most_recent_trigger_idx:
+                    incomplete_len = len(self.current_values) - self.most_recent_trigger_idx
+                    if incomplete_len > 0:
+                        all_lengths.append(incomplete_len)
+                
+                if all_lengths:
+                    max_length = max(all_lengths)
+                    if max_length > 0:
+                        trigger_x = [0, max_length - 1]
+                        trigger_y = [trigger_level, trigger_level]
+                        self.graph_manager.plot_line(trigger_x, trigger_y, color="red")
+
+            self.graph_manager.set_labels(
+                title=t("ui.osc_tab.oscilloscope_capture_title"),
+                xlabel=t("ui.osc_tab.samples_label"),
+                ylabel=t("ui.osc_tab.value_label"),
+            )
+
+            self.graph_manager.update()
+
+        except Exception as e:
+            logger.error(f"Error plotting sets: {e}")
+
+    def _stop_update_loop(self):
+        """Stop the update loop."""
+        if self.update_timer_id:
             try:
                 if self._is_frame_valid():
-                    self.frame.after_cancel(self.refresh_timer_id)
+                    self.frame.after_cancel(self.update_timer_id)
             except (tk.TclError, AttributeError):
                 pass
-            self.refresh_timer_id = None
-
-    def _schedule_after(self, delay, callback):
-        """Schedule a callback and track it for cleanup."""
-        callback_id = self.frame.after(delay, callback)
-        self.pending_callbacks.append(callback_id)
-        return callback_id
-
-    def _cancel_all_callbacks(self):
-        for callback_id in self.pending_callbacks[:]:
-            try:
-                if self._is_frame_valid():
-                    self.frame.after_cancel(callback_id)
-                self.pending_callbacks.remove(callback_id)
-            except (tk.TclError, AttributeError, ValueError):
-                pass
-        self.pending_callbacks.clear()
+            self.update_timer_id = None
 
     def _is_widget_valid(self, widget_name):
         try:
@@ -272,156 +384,19 @@ class OscTab:
             return False
 
     def set_tab_active(self, is_active):
+        """Handle tab activation/deactivation."""
         self.is_active = is_active
         if not is_active:
-            self._stop_refresh_timer()
+            self._stop_update_loop()
         elif self._is_frame_valid():
-            self._setup_trigger_monitoring()
-
-    def _check_trigger_conditions(self):
-        """Check if trigger conditions are met with simple data processing."""
-        if not self.is_armed:
-            return
-
-        try:
-
-            current_time = time.time()
-            if current_time - self.last_trigger_time < 1.0:
-                return
-
-            data_lines = self.data_tab.get_data()
-            if not data_lines or len(data_lines) < 10:
-                return
-
-            try:
-                column = int(self.trigger_source.get_value())
-                trigger_level = float(self.trigger_level.get_value())
-                window_size = int(self.window_size.get_value())
-            except (ValueError, AttributeError):
-                return
-
-            values = []
-            for line in reversed(data_lines[-200:]):
-                try:
-                    parts = line.strip().split()
-                    if len(parts) > column:
-                        value = float(parts[column])
-                        values.append(value)
-                except (ValueError, IndexError):
-                    continue
-
-            if len(values) < window_size:
-                return
-
-            values.reverse()
-
-            trigger_edge = self.trigger_edge.get_value()
-            for i in range(len(values) - window_size, len(values) - 1):
-                if i <= 0:
-                    continue
-
-                triggered = False
-                if (
-                    trigger_edge == "rising"
-                    and values[i - 1] <= trigger_level < values[i]
-                ):
-                    triggered = True
-                elif (
-                    trigger_edge == "falling"
-                    and values[i - 1] >= trigger_level > values[i]
-                ):
-                    triggered = True
-                elif trigger_edge == "both" and (
-                    (values[i - 1] <= trigger_level < values[i])
-                    or (values[i - 1] >= trigger_level > values[i])
-                ):
-                    triggered = True
-
-                if triggered:
-
-                    start_idx = i
-                    end_idx = min(len(values), i + window_size)
-
-                    window_data = values[start_idx:end_idx]
-                    if len(window_data) >= window_size // 2:
-                        self._process_triggered_data(window_data, 0)
-
-                        self._schedule_after(500, lambda: None)
-                        break
-
-        except Exception as e:
-            logger.error(f"Error in simple trigger detection: {e}")
-
-    def _process_triggered_data(self, window_data, trigger_point):
-        """Process triggered data and plot it with color gradient."""
-        try:
-
-            self.last_trigger_time = time.time()
-
-            self.trigger_sets.append(window_data.copy())
-
-            if len(self.trigger_sets) > self.max_sets:
-                self.trigger_sets.pop(0)
-
-            trigger_mode = self.trigger_mode.get_value()
-            if trigger_mode == "single" or len(self.trigger_sets) == 1:
-                self.graph_manager.clear()
-
-            self._plot_all_sets()
-
-            if self._is_widget_valid("status_label"):
-                self.status_label.config(
-                    text=t("ui.osc_tab.triggered"), foreground="red"
-                )
-
-            self._schedule_after(300, self._update_status_to_armed)
-
-        except Exception as e:
-            logger.error(f"Error processing triggered data: {e}")
-
-    def _update_status_to_armed(self):
-        if self.is_armed and self._is_widget_valid("status_label"):
-            self.status_label.config(text=t("ui.osc_tab.armed"), foreground="orange")
-
-    def _plot_all_sets(self):
-        """Plot all trigger sets with simple blue color."""
-        try:
-            if not self.trigger_sets:
-                return
-
-            self.graph_manager.clear()
-
-            for i, window_data in enumerate(self.trigger_sets):
-                x_data = list(range(len(window_data)))
-
-                self.graph_manager.plot_line(x_data, window_data, color="blue")
-
-                self.graph_manager.ax.lines[-1].set_marker("")
-
-            if self.trigger_sets:
-                trigger_level = float(self.trigger_level.get_value())
-                max_length = max(len(data) for data in self.trigger_sets)
-                trigger_x = [0, max_length - 1]
-                trigger_y = [trigger_level, trigger_level]
-                self.graph_manager.plot_line(trigger_x, trigger_y, color="red")
-
-                self.graph_manager.ax.lines[-1].set_marker("")
-
-            self.graph_manager.set_labels(
-                title=t("ui.osc_tab.oscilloscope_capture_title"),
-                xlabel=t("ui.osc_tab.samples_label"),
-                ylabel=t("ui.osc_tab.value_label"),
-            )
-
-            self.graph_manager.update()
-
-        except Exception as e:
-            logger.error(f"Error plotting all sets: {e}")
+            self._start_update_loop()
 
     def _clear_display(self):
         """Clear the oscilloscope display and accumulated trigger sets."""
         try:
             self.trigger_sets.clear()
+            self.most_recent_trigger_idx = None
+            self.current_values = []
             if hasattr(self, "graph_manager"):
                 self.graph_manager.clear()
                 self.graph_manager.update()
@@ -487,6 +462,7 @@ class OscTab:
             self._arm()
 
     def _arm(self):
+        """Arm the oscilloscope for trigger detection."""
         if not self._is_frame_valid():
             return
 
@@ -496,17 +472,17 @@ class OscTab:
         if trigger_mode == "single":
             self.graph_manager.clear()
             self.trigger_sets.clear()
+            self.most_recent_trigger_idx = None
+            self.current_values = []
 
         if self._is_widget_valid("arm_button"):
             self.arm_button.config(text=t("ui.osc_tab.disarm"))
         if self._is_widget_valid("status_label"):
             self.status_label.config(text=t("ui.osc_tab.armed"), foreground="orange")
 
-        self._setup_trigger_monitoring()
-
     def _disarm(self):
+        """Disarm the oscilloscope."""
         self.is_armed = False
-        self._stop_refresh_timer()
 
         if self._is_widget_valid("arm_button"):
             self.arm_button.config(text=t("ui.osc_tab.arm"))
@@ -519,8 +495,9 @@ class OscTab:
 
     def cleanup(self):
         """Clean up resources."""
-        self._stop_refresh_timer()
-        self._cancel_all_callbacks()
+        self._stop_update_loop()
         self.is_armed = False
+        
         if hasattr(self, "trigger_sets"):
             self.trigger_sets.clear()
+
