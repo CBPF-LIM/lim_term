@@ -17,7 +17,7 @@ lang-sync:
 lang-format:
 	poetry run python dev-tools/format_yaml_files.py
 
-requirements:
+setup:
 	poetry install
 
 install:
