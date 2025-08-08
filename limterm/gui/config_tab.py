@@ -9,9 +9,10 @@ import math
 
 
 class ConfigTab:
-    def __init__(self, parent, serial_manager):
+    def __init__(self, parent, serial_manager, signal_handler=None):
         self.frame = ttk.Frame(parent)
         self.serial_manager = serial_manager
+        self.signal_handler = signal_handler
         self.synthetic_generator = None
         self.config_manager = get_config_manager()
         self.equation_entries = {}
@@ -21,17 +22,51 @@ class ConfigTab:
         self._load_preferences()
 
     def _create_widgets(self):
-        self.config_frame = ttk.LabelFrame(
-            self.frame, text=t("ui.config_tab.configuration_frame")
-        )
-        self.config_frame.grid(column=0, row=0, padx=10, pady=10, sticky="ew")
+        toggle_frame = ttk.Frame(self.frame)
+        toggle_frame.grid(column=0, row=0, padx=10, pady=5, sticky="ew")
+        toggle_frame.columnconfigure(0, weight=1)
 
-        self.mode_label = ttk.Label(
-            self.config_frame, text=t("ui.config_tab.mode_label")
+        button_container = ttk.Frame(toggle_frame)
+        button_container.grid(column=0, row=0, sticky="w")
+
+        self.connect_button = ttk.Button(
+            button_container, text=t("ui.config_tab.connect"), command=self._connect
         )
+        self.connect_button.pack(side="left")
+
+        self.settings_button = ttk.Button(
+            toggle_frame,
+            text=t("ui.config_tab.show_settings"),
+            command=self._toggle_settings,
+        )
+        self.settings_button.grid(column=1, row=0, sticky="e")
+
+        self.info_frame = ttk.LabelFrame(self.frame, text=t("ui.config_tab.status"))
+        self.info_frame.grid(column=0, row=1, padx=10, pady=5, sticky="ew")
+
+        self.status_label = ttk.Label(
+            self.info_frame, text=t("ui.config_tab.not_connected"), foreground="red"
+        )
+        self.status_label.pack(padx=10, pady=5)
+
+        self.settings_frame = ttk.Frame(self.frame)
+        self.settings_frame.grid(column=0, row=2, padx=10, pady=5, sticky="ew")
+
+        connection_settings_frame = ttk.LabelFrame(
+            self.settings_frame, text=t("ui.config_tab.connection_settings")
+        )
+        connection_settings_frame.grid(column=0, row=0, sticky="ew", padx=5, pady=5)
+
+        main_container = ttk.Frame(connection_settings_frame)
+        main_container.grid(column=0, row=0, sticky="ew", padx=5, pady=5)
+
+        self.mode_frame = ttk.LabelFrame(main_container, text=t("ui.config_tab.mode"))
+        self.mode_frame.grid(column=0, row=0, padx=(0, 5), pady=5, sticky="nsew")
+
+        self.mode_label = ttk.Label(self.mode_frame, text=t("ui.config_tab.mode_label"))
         self.mode_label.grid(column=0, row=0, padx=10, pady=10, sticky="w")
         self.mode_combobox = PrefCombobox(
-            self.config_frame,
+            self.mode_frame,
             pref_key="config.mode",
             default_value="hardware",
             state="readonly",
@@ -44,12 +79,10 @@ class ConfigTab:
         )
         self.mode_combobox.grid(column=1, row=0, padx=10, pady=10, sticky="w")
 
-        self.port_label = ttk.Label(
-            self.config_frame, text=t("ui.config_tab.port_label")
-        )
+        self.port_label = ttk.Label(self.mode_frame, text=t("ui.config_tab.port_label"))
         self.port_label.grid(column=0, row=1, padx=10, pady=10, sticky="w")
 
-        port_frame = ttk.Frame(self.config_frame)
+        port_frame = ttk.Frame(self.mode_frame)
         port_frame.grid(column=1, row=1, padx=10, pady=10, sticky="w")
 
         self.port_combobox = ttk.Combobox(port_frame, state="readonly")
@@ -64,107 +97,102 @@ class ConfigTab:
         port_frame.columnconfigure(0, weight=1)
 
         self.baudrate_label = ttk.Label(
-            self.config_frame, text=t("ui.config_tab.baudrate_label")
+            self.mode_frame, text=t("ui.config_tab.baudrate_label")
         )
         self.baudrate_label.grid(column=0, row=2, padx=10, pady=10, sticky="w")
         self.baudrate_combobox = ttk.Combobox(
-            self.config_frame, state="readonly", values=DEFAULT_BAUDRATES
+            self.mode_frame, state="readonly", values=DEFAULT_BAUDRATES
         )
         self.baudrate_combobox.grid(column=1, row=2, padx=10, pady=10, sticky="w")
         self.baudrate_combobox.set(DEFAULT_BAUDRATE)
         self.baudrate_combobox.bind("<<ComboboxSelected>>", self._on_preference_changed)
 
-        self.config_frame.columnconfigure(1, weight=1)
+        self.mode_frame.columnconfigure(1, weight=1)
 
-        self.equation_frame = ttk.LabelFrame(
-            self.frame, text=t("ui.config_tab.mode_synthetic_data_equations")
+        self.synthetic_frame = ttk.LabelFrame(
+            main_container, text=t("ui.config_tab.synthetic_settings")
         )
-        self.equation_frame.grid(column=0, row=2, padx=10, pady=10, sticky="ew")
-        self.equation_frame.grid_remove()
+        self.synthetic_frame.grid(column=1, row=0, padx=(5, 0), pady=5, sticky="nsew")
 
-        self.fps_label = ttk.Label(self.equation_frame, text="FPS:")
+        self.fps_label = ttk.Label(self.synthetic_frame, text="FPS:")
         self.fps_label.grid(column=0, row=0, padx=5, pady=5, sticky="w")
+
+        fps_frame = ttk.Frame(self.synthetic_frame)
+        fps_frame.grid(column=1, row=0, padx=5, pady=5, sticky="ew")
+
         self.fps_pref_combobox = PrefCombobox(
-            self.equation_frame,
+            fps_frame,
             pref_key="graph.general.refresh_rate",
             default_value="10",
             state="readonly",
             values=[str(i) for i in range(1, 31)],
             width=8,
         )
-        self.fps_pref_combobox.grid(column=1, row=0, padx=5, pady=5, sticky="w")
+        self.fps_pref_combobox.pack(side="left")
+
+        self.math_funcs_button = ttk.Button(
+            fps_frame,
+            text=t("ui.config_tab.show_math_functions"),
+            command=self._toggle_math_functions,
+        )
+        self.math_funcs_button.pack(side="right")
 
         self.equation_labels = ["a", "b", "c", "d", "e"]
         for i, label in enumerate(self.equation_labels):
-            col_label = ttk.Label(self.equation_frame, text=f"{label}:")
+            col_label = ttk.Label(self.synthetic_frame, text=f"{label}:")
             col_label.grid(column=0, row=i + 1, padx=5, pady=5, sticky="w")
 
-            equation_entry = ttk.Entry(self.equation_frame, width=40)
+            equation_entry = ttk.Entry(self.synthetic_frame, width=40)
             equation_entry.grid(column=1, row=i + 1, padx=5, pady=5, sticky="ew")
             equation_entry.bind("<KeyRelease>", self._on_equation_changed)
             self.equation_entries[label] = equation_entry
 
-        self.equation_frame.columnconfigure(1, weight=1)
+        self.synthetic_frame.columnconfigure(1, weight=1)
+        fps_frame.columnconfigure(0, weight=1)
 
-        self.math_funcs_label = ttk.Label(
-            self.equation_frame, text=t("ui.config_tab.available_math_functions")
-        )
-        self.math_funcs_label.grid(
-            column=0,
-            row=len(self.equation_labels) + 1,
-            columnspan=2,
-            padx=5,
-            pady=(15, 2),
-            sticky="w",
+        self.math_functions_frame = ttk.LabelFrame(
+            connection_settings_frame, text=t("ui.config_tab.available_math_functions")
         )
 
+        self.math_funcs_text = tk.Text(
+            self.math_functions_frame, height=4, width=80, wrap="word"
+        )
         math_funcs = [
             name
             for name in dir(math)
             if not name.startswith("_") and callable(getattr(math, name))
         ]
         math_funcs_text = ", ".join(math_funcs)
-        self.math_funcs_text = tk.Text(
-            self.equation_frame, height=6, width=120, wrap="word"
-        )
         self.math_funcs_text.insert("1.0", math_funcs_text)
         self.math_funcs_text.config(state="disabled")
-        self.math_funcs_text.grid(
-            column=0,
-            row=len(self.equation_labels) + 2,
-            columnspan=2,
-            padx=5,
-            pady=(2, 5),
-            sticky="ew",
+        self.math_funcs_text.pack(fill="both", expand=True, padx=5, pady=5)
+
+        self.math_funcs_visible = self.config_manager.load_setting(
+            "config.math_functions_visible", False
+        )
+        self._update_math_functions_visibility()
+
+        main_container.columnconfigure(0, weight=1)
+        main_container.columnconfigure(1, weight=1)
+        connection_settings_frame.columnconfigure(0, weight=1)
+        self.settings_frame.columnconfigure(0, weight=1)
+
+        self.settings_visible = self.config_manager.load_setting(
+            "config.ui.settings_visible", False
         )
 
-        self.info_frame = ttk.LabelFrame(
-            self.frame, text=t("ui.config_tab.connection_info_frame")
-        )
-        self.info_frame.grid(column=0, row=1, padx=10, pady=10, sticky="ew")
-
-        self.info_label = ttk.Label(
-            self.info_frame,
-            text="",
-            justify="left",
-            font=("TkDefaultFont", 9),
-            foreground="darkgreen",
-        )
-        self.info_label.grid(column=0, row=0, padx=15, pady=15, sticky="w")
-
-        self.info_frame.grid_remove()
-
-        self.connect_button = ttk.Button(
-            self.frame, text=t("ui.config_tab.connect"), command=self._connect
-        )
-        self.connect_button.grid(column=0, row=2, padx=10, pady=10, sticky="w")
+        if not self.settings_visible:
+            self.settings_frame.grid_remove()
+            self.settings_button.config(text=t("ui.config_tab.show_settings"))
+        else:
+            self.settings_button.config(text=t("ui.config_tab.hide_settings"))
 
         self.frame.columnconfigure(0, weight=1)
 
         style = ttk.Style()
         frame_bg = style.lookup("TLabelframe", "background")
         self.win_simul_info = tk.Text(
-            self.config_frame,
+            self.mode_frame,
             height=3,
             width=120,
             wrap="word",
@@ -191,9 +219,13 @@ class ConfigTab:
             self.refresh_button.config(state="disabled")
             self.port_combobox.set("")
             self.baudrate_combobox.set("")
-            self.equation_frame.grid(
-                column=0, row=6, columnspan=2, padx=10, pady=10, sticky="ew"
+
+            self.synthetic_frame.grid(
+                column=1, row=0, padx=(5, 0), pady=5, sticky="nsew"
             )
+
+            self.synthetic_frame.master.columnconfigure(0, weight=1)
+            self.synthetic_frame.master.columnconfigure(1, weight=1)
             self.win_simul_info.grid_remove()
             self.connect_button.config(
                 text=t("ui.config_tab.start_synthetic"), state="normal"
@@ -203,7 +235,11 @@ class ConfigTab:
             self.baudrate_combobox.config(state="readonly")
             self.refresh_button.config(state="normal")
             self.win_simul_info.grid_remove()
-            self.equation_frame.grid_remove()
+
+            self.synthetic_frame.grid_remove()
+
+            self.mode_frame.master.columnconfigure(0, weight=1)
+            self.mode_frame.master.columnconfigure(1, weight=0)
             self.connect_button.config(text=t("ui.config_tab.connect"), state="normal")
             self.connect_button.config(state="normal")
 
@@ -230,11 +266,18 @@ class ConfigTab:
         mode = self.mode_combobox.get_value()
 
         if self.serial_manager.is_connected or self.synthetic_generator:
+
+            if self.signal_handler:
+                self.signal_handler.set_busy(False)
+
             self.serial_manager.disconnect()
             if self.synthetic_generator:
                 self.synthetic_generator.stop_data_generation()
                 self.synthetic_generator = None
             self.connect_button.config(text=t("ui.config_tab.connect"))
+            self.status_label.config(
+                text=f"🔴 {t('ui.config_tab.not_connected')}", foreground="red"
+            )
             self._set_equation_widgets_state("normal")
             self._show_config_interface()
             return
@@ -247,7 +290,17 @@ class ConfigTab:
                 return
 
             if self.serial_manager.connect(port, baudrate):
+
+                if self.signal_handler:
+                    self.signal_handler.set_busy(True)
+
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
+                status_text = t(
+                    "ui.config_tab.connected_hardware_status",
+                    port=port,
+                    baudrate=baudrate,
+                )
+                self.status_label.config(text=status_text, foreground="black")
                 self._show_connection_info(mode, port, baudrate)
 
         elif mode == "synthetic":
@@ -261,7 +314,14 @@ class ConfigTab:
                 )
 
                 self.synthetic_generator.start_data_generation()
+
+                if self.signal_handler:
+                    self.signal_handler.set_busy(True)
+
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
+
+                status_text = t("ui.config_tab.connected_synthetic_status", fps=fps)
+                self.status_label.config(text=status_text, foreground="black")
                 self._set_equation_widgets_state("disabled")
                 self._show_connection_info(mode, "SYNTHETIC_MODE", "N/A")
             except Exception as e:
@@ -270,31 +330,38 @@ class ConfigTab:
         else:
             print(t("ui.config_tab.mode_unknown_error").format(mode=mode))
 
+    def _set_connection_widgets_state(self, state):
+        """Enable or disable connection-related widgets"""
+        try:
+
+            combo_state = "readonly" if state == "normal" else "disabled"
+
+            if hasattr(self, "mode_combobox"):
+                self.mode_combobox.config(state=combo_state)
+
+            if hasattr(self, "port_combobox"):
+                self.port_combobox.config(state=combo_state)
+
+            if hasattr(self, "baudrate_combobox"):
+                self.baudrate_combobox.config(state=combo_state)
+
+            if hasattr(self, "refresh_button"):
+                self.refresh_button.config(state=state)
+
+        except Exception as e:
+            print(f"Error setting widget state: {e}")
+
     def _show_config_interface(self):
-        self.config_frame.grid()
-        self.info_frame.grid_remove()
-        self.equation_frame.grid_remove
+
+        self.mode_frame.grid(column=0, row=0, padx=(0, 5), pady=5, sticky="nsew")
+        self._set_connection_widgets_state("normal")
         self._on_mode_changed()
 
     def _show_connection_info(self, mode, port, baudrate):
-        self.config_frame.grid_remove()
-        self.info_frame.grid()
 
-        if mode == "hardware":
-            info_text = t("ui.config_tab.connection_status").format(
-                mode=t("ui.config_tab.mode_hardware"), port=port, baudrate=baudrate
-            )
-        elif mode == "synthetic":
-            info_text = t("ui.config_tab.synthetic_connection_status")
-        else:
-            info_text = t("ui.config_tab.virtual_connection_status").format(
-                mode=mode, port=port, baudrate=baudrate
-            )
-
-        self.info_label.config(text=info_text)
+        self._set_connection_widgets_state("disabled")
 
     def _load_preferences(self):
-        # Note: mode is automatically loaded by PrefCombobox, don't override it
 
         saved_baudrate = self.config_manager.load_tab_setting(
             "config", "baudrate", DEFAULT_BAUDRATE
@@ -357,3 +424,33 @@ class ConfigTab:
         for entry in self.equation_entries.values():
             entry.config(state=state)
         self.fps_pref_combobox.config(state=state)
+
+    def _toggle_math_functions(self):
+        self.math_funcs_visible = not self.math_funcs_visible
+        self.config_manager.save_setting(
+            "config.math_functions_visible", self.math_funcs_visible
+        )
+        self._update_math_functions_visibility()
+
+    def _toggle_settings(self):
+        """Toggle the visibility of the settings frame."""
+        if self.settings_visible:
+            self.settings_frame.grid_remove()
+            self.settings_button.config(text=t("ui.config_tab.show_settings"))
+            self.settings_visible = False
+        else:
+            self.settings_frame.grid()
+            self.settings_button.config(text=t("ui.config_tab.hide_settings"))
+            self.settings_visible = True
+
+        self.config_manager.save_setting(
+            "config.ui.settings_visible", self.settings_visible
+        )
+
+    def _update_math_functions_visibility(self):
+        if self.math_funcs_visible:
+            self.math_functions_frame.grid(column=0, row=1, padx=5, pady=5, sticky="ew")
+            self.math_funcs_button.config(text=t("ui.config_tab.hide_math_functions"))
+        else:
+            self.math_functions_frame.grid_remove()
+            self.math_funcs_button.config(text=t("ui.config_tab.show_math_functions"))

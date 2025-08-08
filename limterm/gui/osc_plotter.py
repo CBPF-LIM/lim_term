@@ -5,10 +5,8 @@ This module provides plotting functionality for the oscilloscope tab.
 """
 
 from ..i18n import t
-import matplotlib
-matplotlib.use("TkAgg")
+from ..matplotlib_optimizations import get_optimized_figure_params
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 class OscPlotter:
@@ -32,7 +30,6 @@ class OscPlotter:
         self.set_buffer_size = 4
         self.capture_sets = []
         self.current_set_index = 0
-        self.set_colors = self._generate_color_palette()
 
     def plot_realtime_data(self, trigger_data):
         """Plot captured data during real-time capture using optimized blitting."""
@@ -75,16 +72,6 @@ class OscPlotter:
             print(t("errors.final_plot_error", error=str(e)))
             return None
 
-    def _generate_color_palette(self):
-        """Generate color palette: newest = red, oldest = black using RGB formula."""
-        colors = []
-        N = self.set_buffer_size
-        for n in range(N):
-            intensity = n / (N - 1) if N > 1 else 0
-            color = (1, intensity, intensity)
-            colors.append(color)
-        return colors
-
     def _add_to_buffer(self, x_data, y_data):
         """Add completed capture to N-set ring buffer."""
         while len(self.capture_sets) < self.set_buffer_size:
@@ -98,17 +85,15 @@ class OscPlotter:
         """Plot current incomplete capture plus buffered complete captures."""
         self.graph_manager.clear()
 
-        plot_order = self._get_plot_order()
-
-        for buffer_index, age in plot_order:
-            if self.capture_sets[buffer_index] is not None:
-                x_data, y_data = self.capture_sets[buffer_index]
-                safe_age = min(age, len(self.set_colors) - 1)
-                color = self.set_colors[safe_age]
-                self.graph_manager.ax.plot(x_data, y_data, color=color, linewidth=1.0)
+        for capture_set in self.capture_sets:
+            if capture_set is not None:
+                x_data, y_data = capture_set
+                self.graph_manager.ax.plot(x_data, y_data, color="blue", linewidth=0.8)
 
         if current_x and current_y:
-            self.graph_manager.ax.plot(current_x, current_y, color="red", linewidth=1.5)
+            self.graph_manager.ax.plot(
+                current_x, current_y, color="blue", linewidth=1.0
+            )
 
         self._add_static_elements(trigger_col, title)
 
@@ -117,51 +102,19 @@ class OscPlotter:
         self.graph_manager.canvas.draw_idle()
 
     def _plot_buffer_sets(self, trigger_col, title):
-        """Plot all buffered complete captures with onion skin effect."""
+        """Plot all buffered complete captures."""
         self.graph_manager.clear()
 
-        plot_order = self._get_plot_order()
-
-        for buffer_index, age in plot_order:
-            if self.capture_sets[buffer_index] is not None:
-                x_data, y_data = self.capture_sets[buffer_index]
-                safe_age = min(age, len(self.set_colors) - 1)
-                color = self.set_colors[safe_age]
-                self.graph_manager.ax.plot(x_data, y_data, color=color, linewidth=1.0)
+        for capture_set in self.capture_sets:
+            if capture_set is not None:
+                x_data, y_data = capture_set
+                self.graph_manager.ax.plot(x_data, y_data, color="blue", linewidth=0.8)
 
         self._add_static_elements(trigger_col, title)
 
         self._update_axis_limits()
 
-        self.graph_manager.canvas.draw()
-
-    def _get_plot_order(self):
-        """Get plotting order: oldest first (background), newest last (top).
-        Returns list of (buffer_index, age) tuples where age 0=newest."""
-        plot_order = []
-
-        while len(self.capture_sets) < self.set_buffer_size:
-            self.capture_sets.append(None)
-
-        for i in range(len(self.capture_sets)):
-            if i >= self.set_buffer_size:
-                break
-
-            if self.capture_sets[i] is not None:
-                if i == self.current_set_index:
-                    continue
-
-                steps_back = (self.current_set_index - i) % self.set_buffer_size
-                if steps_back == 0:
-                    steps_back = self.set_buffer_size
-
-                age = steps_back - 1
-                age = max(0, min(age, self.set_buffer_size - 1))
-
-                plot_order.append((i, age))
-
-        plot_order.sort(key=lambda x: x[1], reverse=True)
-        return plot_order
+        self.graph_manager.canvas.draw_idle()
 
     def _add_static_elements(self, trigger_col, title):
         """Add static elements like trigger level line and labels."""
@@ -183,7 +136,6 @@ class OscPlotter:
             [trigger_level, trigger_level],
             color="red",
             linestyle="--",
-            alpha=0.8,
             label=t("ui.osc_tab.trigger_level_line"),
         )
 
@@ -192,10 +144,10 @@ class OscPlotter:
             t("ui.osc_tab.column_label", column=trigger_col + 1)
         )
         self.graph_manager.ax.set_title(title)
-        self.graph_manager.ax.grid(True, alpha=0.3)
+        self.graph_manager.ax.grid(True, alpha=1.0, linewidth=0.5, color="lightgray")
 
     def _update_axis_limits(self):
-        """Update axis limits to fit all buffered data automatically."""
+        """Update axis limits to fit all buffered data automatically with optimized calculations."""
         all_x = []
         all_y = []
 
@@ -209,11 +161,17 @@ class OscPlotter:
             self.graph_manager.ax.set_xlim(0, int(self.window_size.get_value()))
             return
 
-        x_margin = (max(all_x) - min(all_x)) * 0.05
-        y_margin = (max(all_y) - min(all_y)) * 0.1
+        min_x, max_x = min(all_x), max(all_x)
+        min_y, max_y = min(all_y), max(all_y)
 
-        self.graph_manager.ax.set_xlim(min(all_x) - x_margin, max(all_x) + x_margin)
-        self.graph_manager.ax.set_ylim(min(all_y) - y_margin, max(all_y) + y_margin)
+        x_range = max_x - min_x
+        y_range = max_y - min_y
+
+        x_margin = max(1, x_range * 0.05)
+        y_margin = max(0.1, y_range * 0.1)
+
+        self.graph_manager.ax.set_xlim(min_x - x_margin, max_x + x_margin)
+        self.graph_manager.ax.set_ylim(min_y - y_margin, max_y + y_margin)
 
     def clear_all_data(self):
         """Clear all plotting data and reset for new session."""
