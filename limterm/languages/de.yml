@@ -1,280 +1,265 @@
 language:
-  name: "Deutsch"
-  code: "de"
-
+  name: Deutsch
+  code: de
 ui:
   main_window:
-    title: "Lim Terminal"
-    restart_required: "Um die Sprache zu aktualisieren, schließen und öffnen Sie die Anwendung erneut."
-
+    title: Lim Terminal
+    restart_required: Um die Sprache zu aktualisieren, schließen Sie die Anwendung und öffnen Sie sie erneut.
+    view_menu_label: Ansicht
+    config_tab_shortcut: Konfigurations-Tab (Ctrl+1)
+    data_tab_shortcut: Daten-Tab (Ctrl+2)
+    graph_tab_shortcut: Grafik-Tab (Ctrl+3)
+    osc_tab_shortcut: Oszilloskop-Tab (Ctrl+4)
   tabs:
-    configuration: "Konfiguration"
-    data: "Daten"
-    graph: "Diagramm"
-    oscilloscope: "Oszilloskop"
-
+    configuration: Konfiguration
+    data: Daten
+    graph: Grafik
+    oscilloscope: Oszilloskop
   config_tab:
-    configuration_frame: "Konfiguration"
-    connection_info_frame: "Verbindungsinformationen"
-    mode_label: "Modus:"
-    mode_hardware: "Hardware"
-    mode_synthetic: "Synthetisch"
-    mode_unknown_error: "Unbekannt"
-    mode_synthetic_data_equations: "Synthetische Datengleichungen"
-    mode_synthetic_start_error: "Fehler beim Starten der synthetischen Datengenerierung: {error}"
-    mode_synthetic_generation_error: "Fehler beim Generieren synthetischer Daten: {error}"
-    port_label: "Port:"
-    baudrate_label: "Baudrate:"
-    connect: "Verbinden"
-    disconnect: "Trennen"
-    start_synthetic: "Generierung Starten"
-    connection_status: "🔗 Modus: {mode}\n📡 Port: {port}\n⚡ Baudrate: {baudrate} bps"
-    synthetic_connection_status: "🔗 Modus: Synthetisch\n🧮 Datengenerierung mit Gleichungen"
-    available_math_functions: "Verfügbare mathematische Funktionen"
-
+    configuration_frame: Konfiguration
+    connection_settings: Verbindungseinstellungen
+    connection_info_frame: Verbindungsinformationen
+    mode: Modus
+    mode_label: 'Modus:'
+    mode_hardware: Hardware
+    mode_synthetic: Synthetisch
+    mode_unknown_error: Unbekannt
+    mode_synthetic_data_equations: Synthetische Datengleichungen
+    synthetic_settings: Synthetische Einstellungen
+    mode_synthetic_start_error: 'Fehler starting synthetic data generation: {error}'
+    mode_synthetic_generation_error: 'Fehler generating synthetic data: {error}'
+    port_label: 'Port:'
+    baudrate_label: 'Baudrate:'
+    connect: Verbinden
+    disconnect: Trennen
+    start_synthetic: Simulieren
+    connection_status: '🔗 Modus: {mode}\n      📡 Port: {port}\n      ⚡ Baudrate: {baudrate} bps'
+    synthetic_connection_status: '🔗 Modus: Synthetisch\n      🧮 Generating data using equations'
+    available_math_functions: Available Math Functions
+    show_math_functions: Mathematische Funktionen anzeigen
+    hide_math_functions: Mathematische Funktionen ausblenden
+    show_settings: Einstellungen anzeigen
+    hide_settings: Einstellungen ausblenden
+    status: Status
+    not_connected: Nicht verbunden
+    connected: Verbunden
+    connected_hardware_status: '🟢 Verbindened | Modus: Hardware | Port: {port} | Baudrate: {baudrate} bps'
+    connected_synthetic_status: '🟢 Verbindened | Modus: Synthetisch | FPS: {fps}'
   data_tab:
-    save: "Speichern"
-    load: "Laden"
-    clear: "Löschen"
-    autosave: "Automatisches Speichern"
-    data_saved: "Daten gespeichert in: {path}"
-    data_loaded: "Daten geladen von: {path}"
-    error_loading: "Fehler beim Laden der Daten: {error}"
-    error_saving: "Fehler beim Speichern des Diagramms: {error}"
-    overwrite_dialog_title: "Daten überschreiben"
-    overwrite_dialog_message: "Die aktuellen Daten werden überschrieben. Möchten Sie fortfahren?"
-
+    save: Speichern
+    load: Laden
+    clear: Löschen
+    autosave: Autosave
+    data_saved: 'Daten saved to: {path}'
+    data_loaded: 'Daten loaded from: {path}'
+    error_loading: 'Fehler loading data: {error}'
+    error_saving: 'Fehler saving graph: {error}'
+    overwrite_dialog_title: OverSchreiben data
+    overwrite_dialog_message: Current data will be overwritten. Do you want to continue?
+    data_settings: Daten Einstellungen
+    capture: Erfassung
+    preview: Vorschau
+    show_settings: Anzeigen Einstellungen
+    hide_settings: Ausblenden Einstellungen
+    capture_enabled: Enable Daten Erfassung
+    filename_mode_label: 'Dateiname Modus:'
+    filename_modes:
+      auto: Auto (timestamp)
+      fixed: Fixed name
+    fixed_filename_label: 'Fixed Dateiname:'
+    file_mode_label: 'Datei Modus:'
+    file_modes:
+      append: Append
+      overwrite: OverSchreiben
+    capture_enabled_msg: 'Daten capture enabled: {filename}'
+    capture_disabled_msg: Daten capture disabled
+    capture_error: 'Daten capture error: {error}'
+    enable_preview: Enable Daten Vorschau
+    preview_limit_label: 'Vorschau Limit:'
+    pause_preview: Pause Vorschau
+    resume_preview: Resume Vorschau
+    enable_timestamp: Add Zeitstamp
+    reset_timestamp: Reset Zeitstamp
   graph_tab:
-    column_x: "Spalte X:"
-    column_y: "Spalte Y:"
-    column_y1: "Y1:"
-    column_y2: "Y2:"
-    column_y3: "Y3:"
-    column_y4: "Y4:"
-    column_y5: "Y5:"
-    y_columns: "Y-Spalten"
-    update_graph: "Diagramm Aktualisieren"
-    pause: "Pausieren"
-    resume: "Fortsetzen"
-    show_options: "Optionen Anzeigen"
-    hide_options: "Optionen Ausblenden"
-    save_png: "PNG Speichern"
-    save_dialog_title: "Diagramm als PNG speichern"
-    load_dialog_title: "Daten laden"
-    graph_options_title: "Diagrammoptionen"
-    apply_button: "Anwenden"
-    options_frame: "Diagrammoptionen"
-    type_label: "Typ:"
-    color_label: "Farbe:"
-    window_label: "Fenster:"
-    point_label: "Punkt:"
-    min_y_label: "Min Y:"
-    max_y_label: "Max Y:"
-    refresh_rate_label: "Aktualisierungsrate (FPS):"
-    visualization_group_label: "Visualisierungsgruppe:"
-    global_settings: "Globale Einstellungen"
-    series_settings: "Serieneinstellungen"
-    time_series_settings: "Zeitreiheneinstellungen"
-    stacked_settings: "Stapeleinstellungen"
-    series_label: "Serien"
-    graph_saved: "Diagramm gespeichert in: {path}"
-    could_not_extract_data: "Daten aus den angegebenen Spalten konnten nicht extrahiert werden"
-    parameter_error: "Parameterfehler: {error}"
-    graph_error: "Fehler beim Generieren des Diagramms: {error}"
-    positive_numbers: "Spaltennummern müssen positiv sein"
-    chart_title: "Diagramm"
-    chart_xlabel: "Spalte {column}"
-    chart_ylabel: "Spalte {column}"
-    stacked_chart_title: "Gestapeltes Diagramm"
-    stacked_chart_ylabel: "Wert"
-    stacked_chart_ylabel_percent: "Prozent (%)"
+    column_x: 'X:'
+    column_y: 'Spalte Y:'
+    column_y1: 'Y1:'
+    column_y2: 'Y2:'
+    column_y3: 'Y3:'
+    column_y4: 'Y4:'
+    column_y5: 'Y5:'
+    y_columns: Y Spaltes
+    axis_and_columns: Achse and Spaltes
+    update_graph: Update Grafik
+    pause: Pause
+    resume: Resume
+    show_options: Anzeigen Options
+    hide_options: Ausblenden Options
+    show_settings: Anzeigen Einstellungen
+    hide_settings: Ausblenden Einstellungen
+    save_png: Speichern PNG
+    save_data: Speichern Daten
+    save_dialog_title: Speichern graph as PNG
+    load_dialog_title: Laden data
+    graph_options_title: Grafik Options
+    apply_button: Apply
+    options_frame: Grafik Einstellungen
+    graph_settings: Grafik Einstellungen
+    global_settings: Global
+    colors_settings: Farben
+    type_label: 'Type:'
+    color_label: 'Color:'
+    window_label: 'Window:'
+    point_label: 'Point:'
+    min_y_label: 'Min Y:'
+    max_y_label: 'Max Y:'
+    y_limits_label: 'Y Grenzen:'
+    refresh_rate_label: 'Frequency:'
+    visualization_group_label: 'Visualization:'
+    series_settings: Series Einstellungen
+    time_series_settings: Zeit Series
+    stacked_settings: Stacked
+    series_label: Series
+    graph_saved: 'Grafik saved to: {path}'
+    could_not_extract_data: Could not extract data from specified columns
+    parameter_error: 'Parameter error: {error}'
+    graph_error: 'Fehler generating graph: {error}'
+    positive_numbers: Spalte numbers must be positive
+    chart_title: Grafik
+    chart_xlabel: Spalte {column}
+    chart_ylabel: Spalte {column}
+    stacked_chart_title: Stacked Chart
+    stacked_chart_ylabel: Wert
+    stacked_chart_ylabel_percent: Percentage (%)
     visualization_types:
-      time_series: "Zeitreihen"
-      stacked: "Gestapelt"
-    normalize_100_percent: "Auf 100% normalisieren"
-
-  graph_types:
-    line: "Linie"
-    scatter: "Streuung"
-
-  visualization_groups:
-    time_series: "Zeitreihen"
-    stacked: "Gestapelt"
-
-  colors:
-    blue: "Blau"
-    cyan: "Cyan"
-    teal: "Türkis"
-    green: "Grün"
-    lime: "Limette"
-    yellow: "Gelb"
-    amber: "Bernstein"
-    orange: "Orange"
-    red: "Rot"
-    magenta: "Magenta"
-    indigo: "Indigo"
-    violet: "Violett"
-    turquoise: "Türkis"
-    aquamarine: "Aquamarin"
-    springgreen: "Frühlingsgrün"
-    chartreuse: "Chartreuse"
-    gold: "Gold"
-    coral: "Koralle"
-    crimson: "Karmesinrot"
-    pink: "Rosa"
-
-  markers:
-    circle: "Kreis (o)"
-    square: "Quadrat (s)"
-    triangle: "Dreieck (^)"
-    diamond: "Diamant (D)"
-    star: "Stern (*)"
-    plus: "Plus (+)"
-    x: "X (x)"
-    vline: "Vertikaler Balken (|)"
-    hline: "Horizontaler Balken (_)"
-    hexagon: "Sechseck (h)"
-
+      time_series: Zeit Series
+      stacked: Stacked
+    normalize_100_percent: Normalize to 100%
   osc_tab:
-    oscilloscope_controls: "Oszilloskop-Steuerung"
-    oscilloscope_settings: "Oszilloskop-Einstellungen"
-    trigger: "Trigger"
-    capture: "Erfassung"
-    trigger_source: "Trigger-Quelle:"
-    trigger_level: "Trigger-Pegel:"
-    trigger_edge: "Trigger-Flanke:"
-    trigger_mode: "Trigger-Modus:"
-    window_size: "Fenstergröße:"
-    save_png: "PNG Speichern"
-    save_data: "Daten Speichern"
-    status: "Status"
-    arm: "SCHARF"
-    disarm: "ENTSCHÄRFEN"
-    show_settings: "Einstellungen Zeigen"
-    hide_settings: "Einstellungen Verbergen"
-    ready: "Bereit"
-    armed: "SCHARF"
-    triggered: "GETRIGGERT"
-    capturing: "ERFASSUNG..."
-    captured: "ERFASST"
-    samples: "Samples:"
-    frequency: "Frequenz:"
-    captures: "Erfassungen:"
-    samples_after_trigger: "Samples Nach Trigger"
-    channel: "Kanal"
-    trigger_level_line: "Trigger-Pegel-Linie"
-    trigger_point_line: "Trigger-Punkt-Linie"
-    expected_window: "Erwartetes Fenster"
-    capture_complete_title: "Oszilloskop-Erfassung - Vollständig"
-    capture_live_title: "Oszilloskop-Erfassung (Live)"
-    frequency_cycles: "~{cycles} Zyklen"
-    frequency_error: "Frequenz: Fehler"
-    frequency_unknown: "Frequenz: --"
-    capture_saved: "Oszilloskop-Erfassung gespeichert: {filename}"
-    save_error: "Fehler beim Speichern: {error}"
-    column_label: "Spalte {column}"
-    capture_completion_error: "Erfassungsabschlussfehler: {error}"
-    trigger_monitoring_error: "Trigger-Überwachungsfehler: {error}"
-    png_saved: "PNG gespeichert: {filename}"
-    data_saved: "Daten gespeichert: {filename}"
-
+    oscilloscope_controls: Oscilloscope Controls
+    trigger_settings: Trigger Einstellungen
+    trigger_column: 'Spalte:'
+    trigger_level: 'Pegel:'
+    trigger_source: 'Trigger Source:'
+    trigger_edge: 'Trigger Flanke:'
+    trigger_mode: 'Trigger Modus:'
+    window_size: 'Window Size:'
+    trigger: Trigger
+    capture: Erfassung
+    status: Status
+    oscilloscope_settings: Oscilloscope Einstellungen
+    show_settings: Anzeigen Einstellungen
+    hide_settings: Ausblenden Einstellungen
+    save_png: Speichern PNG
+    save_data: Speichern Daten
+    arm: Arm
+    disarm: Disarm
+    clear: Löschen
+    ready: Ready
+    armed: Armed - Waiting for trigger
+    triggered: Triggered - Capturing
+    complete: Erfassung Vollständig
+    frequency_unknown: 'Frequency: --'
+    triggered_data: Triggered Daten
+    time_samples: Zeit (samples)
+    amplitude: Amplitude
+    samples_after_trigger: Proben After Trigger
+    column_label: Spalte {column}
+    capture_completion_error: 'Erfassung completion error: {error}'
+    trigger_monitoring_error: 'Trigger monitoring error: {error}'
+    png_saved: 'PNG saved: {filename}'
+    data_saved: 'Daten saved: {filename}'
+    oscilloscope_capture_title: Oscilloscope Erfassung
+    samples_label: Proben
+    value_label: Wert
+    save_error: 'Speichern error: {error}'
+    frequency_cycles: 'Frequency: {cycles} cycles'
+    frequency_error: 'Frequency: Fehler'
+    capturing: Capturing
+    captured: Erfassungd
     trigger_edges:
-      rising: "Steigend"
-      falling: "Fallend"
-      both: "Beide"
-
+      rising: Rising
+      falling: Falling
+      both: Both
     trigger_modes:
-      continuous: "Kontinuierlich"
-      single: "Einzelschuss"
-
+      continuous: Continuous
+      single: Single Shot
   graph_types:
-    line: "Linie"
-    scatter: "Streudiagramm"
-
+    line: Line
+    scatter: Scatter
   visualization_groups:
-    time_series: "Zeitreihe"
-    stacked: "Gestapelt"
-
+    time_series: Zeit Series
+    stacked: Stacked
   colors:
-    blue: "Blau"
-    cyan: "Cyan"
-    teal: "Blaugrün"
-    green: "Grün"
-    lime: "Limette"
-    yellow: "Gelb"
-    amber: "Bernstein"
-    orange: "Orange"
-    red: "Rot"
-    magenta: "Magenta"
-    indigo: "Indigo"
-    violet: "Violett"
-    turquoise: "Türkis"
-    aquamarine: "Aquamarin"
-    springgreen: "Frühlingsgrün"
-    chartreuse: "Chartreuse"
-    gold: "Gold"
-    coral: "Koralle"
-    crimson: "Karmesin"
-    pink: "Rosa"
-
+    blue: Blue
+    cyan: Cyan
+    teal: Teal
+    green: Green
+    lime: Lime
+    yellow: Yellow
+    amber: Amber
+    orange: Orange
+    red: Red
+    magenta: Magenta
+    indigo: Indigo
+    violet: Violet
+    turquoise: Turquoise
+    aquamarine: Aquamarine
+    springgreen: SpringGreen
+    chartreuse: Chartreuse
+    gold: Gold
+    coral: Coral
+    crimson: Crimson
+    pink: Pink
   markers:
-    circle: "Kreis (o)"
-    square: "Quadrat (s)"
-    triangle: "Dreieck (^)"
-    diamond: "Diamant (D)"
-    star: "Stern (*)"
-    plus: "Plus (+)"
-    x: "X (x)"
-    vline: "Vertikale Linie (|)"
-    hline: "Horizontale Linie (_)"
-    hexagon: "Sechseck (h)"
-
+    circle: Circle (o)
+    square: Square (s)
+    triangle: Triangle (^)
+    diamond: Diamond (D)
+    star: Star (*)
+    plus: Plus (+)
+    x: X (x)
+    vline: Vertical Bar (|)
+    hline: Horizontal Bar (_)
+    hexagon: Hexagon (h)
 errors:
-  connection_error: "Verbindungsfehler: {error}"
-  data_read_error: "Fehler beim Lesen der Daten: {error}"
-  virtual_port_error: "Fehler beim Erstellen des simulierten Ports: {error}"
-  application_error: "Anwendungsfehler: {error}"
-  application_interrupted: "Anwendung vom Benutzer unterbrochen"
-  realtime_plot_error: "Echtzeit-Diagrammfehler: {error}"
-  final_plot_error: "Finaler Diagrammfehler: {error}"
-  main_loop_error: "Hauptschleifen-Fehler: {error}"
-  config_save_error: "Konfigurationsspeicherfehler: {error}"
-  config_load_error: "Konfigurationsladefehler: {error}"
-  data_export_error: "Datenexportfehler: {error}"
-  data_import_error: "Datenimportfehler: {error}"
-  serial_write_error: "Serieller Schreibfehler: {error}"
-  mock_serial_error: "Mock-Serienfehler: {error}"
-  file_operation_error: "Dateioperation-Fehler: {error}"
-
-common:
-  hardware: "Hardware"
-  synthetic: "Synthetisch"
-  ok: "OK"
-  cancel: "Abbrechen"
-  save: "Speichern"
-  load: "Laden"
-  clear: "Löschen"
-  apply: "Anwenden"
-  close: "Schließen"
-  graph: "Diagramm"
-  column: "Spalte {column}"
-  value: "Wert"
-  percentage: "Prozent (%)"
-
-dialogs:
-  text_files: "Textdateien"
-  all_files: "Alle Dateien"
-  windows_virtual_port_info: "Um einen virtuellen seriellen Port unter Windows zu simulieren, installieren Sie den Null-Modem-Emulator (com0com: https://com0com.sourceforge.net/).\nNach der Konfiguration wählen Sie den 'Hardware'-Modus und wählen Sie den erstellten COM-Port."
-  language_changed: "Sprache Geändert"
-
-errors:
-  connection_error: "Verbindungsfehler: {error}"
-  data_read_error: "Fehler beim Lesen der Daten: {error}"
-  virtual_port_error: "Fehler beim Erstellen des simulierten Ports: {error}"
-
+  connection_error: 'Verbindenion error: {error}'
+  data_read_error: 'Fehler reading data: {error}'
+  virtual_port_error: 'Fehler creating simulated port: {error}'
+  application_error: 'Anwendung error: {error}'
+  application_interrupted: Anwendung unterbrochen by user
+  realtime_plot_error: 'Real-time Diagramm error: {error}'
+  final_plot_error: 'Final Diagramm error: {error}'
+  main_loop_error: 'Main loop error: {error}'
+  config_save_error: 'Fehler saving configuration: {error}'
+  config_load_error: 'Fehler loading configuration: {error}'
+  data_export_error: 'Fehler Exporting data: {error}'
+  data_import_error: 'Fehler Importing data: {error}'
+  serial_write_error: 'Fehler writing to serial: {error}'
+  mock_serial_error: 'Mock serial error: {error}'
+  file_operation_error: 'Datei Operation error: {error}'
 messages:
-  connecting: "Verbinde..."
-  connected: "Verbunden"
-  disconnected: "Getrennt"
-  data_generation_started: "Datengenerierung gestartet"
-  data_generation_stopped: "Datengenerierung gestoppt"
+  connecting: Verbindening...
+  connected: Verbindened
+  disconnected: Trennened
+  data_generation_started: Daten generation started
+  data_generation_stopped: Daten generation stopped
+common:
+  hardware: Hardware
+  synthetic: Synthetisch
+  ok: OK
+  cancel: Cancel
+  save: Speichern
+  load: Laden
+  clear: Löschen
+  apply: Apply
+  close: Close
+  graph: Grafik
+  column: Spalte {column}
+  value: Wert
+  percentage: Percentage (%)
+dialogs:
+  text_files: Text files
+  all_files: All files
+  windows_virtual_port_info: 'To simulate a virtual serial port on Windows, install the Null-modem emulator (com0com: https://com0com.sourceforge.net/).\n    After configuration, select ''Hardware'' mode and choose the created COM port.'
+  language_changed: Language Changed
