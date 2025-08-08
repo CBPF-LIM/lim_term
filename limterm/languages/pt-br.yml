@@ -177,6 +177,7 @@ ui:
     frequency_error: 'Frequência: Erro'
     capturing: CAPTURANDO...
     captured: CAPTURADO
+    capturing_realtime_title: Capturing (Real-time)
     trigger_edges:
       rising: Subida
       falling: Descida
