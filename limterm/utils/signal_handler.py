@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
 """
 Simple signal handler for graceful shutdown confirmation
 """
+
 import signal
 import sys
 from tkinter import messagebox
@@ -13,7 +13,7 @@ class SignalHandler:
     def __init__(self, app_instance=None):
         self.app_instance = app_instance
         self.shutdown_requested = False
-        self.is_busy = False  # Lock state to control confirmation
+        self.is_busy = False
 
     def setup_signal_handlers(self):
         """Set up signal handlers for graceful shutdown"""
@@ -23,12 +23,11 @@ class SignalHandler:
     def _handle_signal(self, signum, frame):
         """Handle received signal"""
         if self.shutdown_requested:
-            # Force exit if already requested
+
             sys.exit(1)
 
         self.shutdown_requested = True
 
-        # Show confirmation dialog in main thread
         if self.app_instance and hasattr(self.app_instance, "root"):
             try:
                 self.app_instance.root.after_idle(self._show_exit_confirmation)
@@ -40,25 +39,24 @@ class SignalHandler:
     def _show_exit_confirmation(self):
         """Show exit confirmation dialog only if app is busy"""
         try:
-            # Simple check: if not busy, exit immediately
+
             if not self.is_busy:
                 if self.app_instance and hasattr(self.app_instance, "root"):
                     self.app_instance.root.quit()
                 sys.exit(0)
                 return
 
-            # App is busy, show confirmation
             result = messagebox.askokcancel(
                 "Exit Confirmation", "Are you sure you want to exit?", icon="warning"
             )
 
             if result:
-                # User clicked "OK" - exit
+
                 if self.app_instance and hasattr(self.app_instance, "root"):
                     self.app_instance.root.quit()
                 sys.exit(0)
             else:
-                # User clicked "Cancel" - continue running
+
                 self.shutdown_requested = False
 
         except Exception as e:

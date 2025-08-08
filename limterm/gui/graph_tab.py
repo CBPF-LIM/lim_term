@@ -62,15 +62,25 @@ class GraphTab:
         )
         self.options_button.grid(column=1, row=0, sticky="e")
 
-        self.axis_columns_frame = ttk.LabelFrame(
-            self.frame, text=t("ui.graph_tab.axis_and_columns")
+        self.graph_settings_frame = ttk.LabelFrame(
+            self.frame, text=t("ui.graph_tab.graph_settings")
         )
-        self.axis_columns_frame.grid(
+        self.graph_settings_frame.grid(
             column=0, row=1, columnspan=4, padx=10, pady=5, sticky="ew"
         )
 
+        self.axis_columns_frame = ttk.Frame(self.graph_settings_frame)
+        self.axis_columns_frame.grid(column=0, row=0, padx=5, pady=5, sticky="ew")
+
+        axis_label = ttk.Label(
+            self.axis_columns_frame,
+            text=t("ui.graph_tab.axis_and_columns"),
+            font=("TkDefaultFont", 9, "bold"),
+        )
+        axis_label.grid(column=0, row=0, columnspan=7, padx=5, pady=(5, 2), sticky="w")
+
         x_frame = ttk.Frame(self.axis_columns_frame)
-        x_frame.grid(column=0, row=0, padx=5, pady=5, sticky="w")
+        x_frame.grid(column=0, row=1, padx=5, pady=5, sticky="w")
 
         self.x_label = ttk.Label(x_frame, text=t("ui.graph_tab.column_x"))
         self.x_label.pack(side="top")
@@ -84,14 +94,13 @@ class GraphTab:
         )
         self.x_column_entry.pack(side="top")
 
-        # Add vertical separator between X and Y columns
         separator = ttk.Separator(self.axis_columns_frame, orient="vertical")
-        separator.grid(column=1, row=0, sticky="ns", padx=10)
+        separator.grid(column=1, row=1, sticky="ns", padx=10)
 
         self.y_entries = []
         for i in range(1, 6):
             y_frame = ttk.Frame(self.axis_columns_frame)
-            y_frame.grid(column=i + 1, row=0, padx=5, pady=5, sticky="w")
+            y_frame.grid(column=i + 1, row=1, padx=5, pady=5, sticky="w")
 
             y_label = ttk.Label(y_frame, text=t(f"ui.graph_tab.column_y{i}"))
             y_label.pack(side="top")
@@ -106,23 +115,19 @@ class GraphTab:
             y_entry.pack(side="top")
             self.y_entries.append(y_entry)
 
-        self.options_frame = ttk.LabelFrame(
-            self.frame, text=t("ui.graph_tab.options_frame")
-        )
-        self.options_frame.grid(column=0, row=2, sticky="ew", padx=10, pady=5)
+        self.options_frame = ttk.Frame(self.graph_settings_frame)
+        self.options_frame.grid(column=0, row=1, sticky="ew", padx=5, pady=5)
         self._create_options_widgets()
 
-        # Set initial options visibility and button text
         self.options_visible = self.config_manager.load_setting(
             "graph.ui.options_visible", False
         )
         if not self.options_visible:
-            self.options_frame.grid_remove()
+            self.graph_settings_frame.grid_remove()
             self.options_button.config(text=t("ui.graph_tab.show_settings"))
         else:
             self.options_button.config(text=t("ui.graph_tab.hide_settings"))
 
-        # Chart frame - separate container for proper layout
         chart_frame = ttk.Frame(self.frame)
         chart_frame.grid(column=0, row=3, columnspan=4, padx=10, pady=10, sticky="nsew")
 
@@ -133,11 +138,10 @@ class GraphTab:
         self.frame.columnconfigure(0, weight=1)
 
     def _create_options_widgets(self):
-        # Create main container for side-by-side layout
+
         main_container = ttk.Frame(self.options_frame)
         main_container.pack(fill="both", expand=True, padx=5, pady=5)
 
-        # Global settings frame
         global_frame = ttk.LabelFrame(
             main_container, text=t("ui.graph_tab.global_settings")
         )
@@ -229,7 +233,6 @@ class GraphTab:
         )
         self.max_y_entry.pack(side="left")
 
-        # Colors settings frame
         colors_frame = ttk.LabelFrame(
             main_container, text=t("ui.graph_tab.colors_settings")
         )
@@ -319,12 +322,12 @@ class GraphTab:
 
     def _toggle_options(self):
         if self.options_visible:
-            self.options_frame.grid_remove()
+            self.graph_settings_frame.grid_remove()
             self.options_button.config(text=t("ui.graph_tab.show_settings"))
             self.options_visible = False
         else:
-            self.options_frame.grid(
-                column=0, row=2, columnspan=4, padx=10, pady=5, sticky="ew"
+            self.graph_settings_frame.grid(
+                column=0, row=1, columnspan=4, padx=10, pady=5, sticky="ew"
             )
             self.options_button.config(text=t("ui.graph_tab.hide_settings"))
             self.options_visible = True

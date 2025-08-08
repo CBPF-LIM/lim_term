@@ -102,6 +102,7 @@ ui:
     graph_options_title: "Graph Options"
     apply_button: "Apply"
     options_frame: "Graph Settings"
+    graph_settings: "Graph Settings"
     global_settings: "Global"
     colors_settings: "Colors"
     type_label: "Type:"

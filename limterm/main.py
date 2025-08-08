@@ -6,7 +6,6 @@ Entry point for the application
 import sys
 import os
 
-# Add the current directory to Python path for development
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:

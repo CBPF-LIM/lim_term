@@ -25,11 +25,11 @@ class OscTab:
 
         self.is_armed = False
         self.trigger_data = []
-        self.trigger_sets = []  # Store multiple trigger sets for gradient display
-        self.max_sets = 10  # Maximum number of sets to keep
+        self.trigger_sets = []
+        self.max_sets = 10
         self.capture_start_time = None
         self.capture_count = 0
-        self.last_trigger_time = 0  # Add cooldown tracking
+        self.last_trigger_time = 0
 
         self.osc_refresh_rate_ms = 33
         self.refresh_timer_id = None
@@ -73,7 +73,7 @@ class OscTab:
         self.settings_frame.grid(column=0, row=1, padx=10, pady=5, sticky="ew")
 
         self.settings_visible = self.config_manager.load_setting(
-            "osc.ui.settings_visible", True
+            "osc.ui.settings_visible", False
         )
 
         self._create_settings_widgets()
@@ -81,6 +81,8 @@ class OscTab:
         if not self.settings_visible:
             self.settings_frame.grid_remove()
             self.settings_button.config(text=t("ui.osc_tab.show_settings"))
+        else:
+            self.settings_button.config(text=t("ui.osc_tab.hide_settings"))
 
         self.graph_manager = GraphManager(self.frame)
         self.graph_manager.get_widget().grid(
@@ -282,17 +284,15 @@ class OscTab:
             return
 
         try:
-            # Add cooldown period to prevent rapid triggers
+
             current_time = time.time()
-            if current_time - self.last_trigger_time < 1.0:  # 1 second cooldown
+            if current_time - self.last_trigger_time < 1.0:
                 return
 
-            # Get current data buffer
             data_lines = self.data_tab.get_data()
             if not data_lines or len(data_lines) < 10:
                 return
 
-            # Parse trigger settings
             try:
                 column = int(self.trigger_source.get_value())
                 trigger_level = float(self.trigger_level.get_value())
@@ -300,9 +300,8 @@ class OscTab:
             except (ValueError, AttributeError):
                 return
 
-            # Parse data values for the trigger column (from end to start - time arrival order)
             values = []
-            for line in reversed(data_lines[-200:]):  # Check last 200 lines
+            for line in reversed(data_lines[-200:]):
                 try:
                     parts = line.strip().split()
                     if len(parts) > column:
@@ -314,10 +313,8 @@ class OscTab:
             if len(values) < window_size:
                 return
 
-            # Reverse back to correct time order for processing
             values.reverse()
 
-            # Simple rising edge detection on recent data
             trigger_edge = self.trigger_edge.get_value()
             for i in range(len(values) - window_size, len(values) - 1):
                 if i <= 0:
@@ -341,12 +338,9 @@ class OscTab:
                     triggered = True
 
                 if triggered:
-                    # Extract window starting from trigger point
-                    # This ensures x=0 corresponds to the trigger point where y≈trigger_level
-                    start_idx = i  # Start exactly at trigger point
-                    end_idx = min(
-                        len(values), i + window_size
-                    )  # Window size after trigger
+
+                    start_idx = i
+                    end_idx = min(len(values), i + window_size)
 
                     window_data = values[start_idx:end_idx]
                     if len(window_data) >= window_size // 2:
@@ -361,22 +355,18 @@ class OscTab:
     def _process_triggered_data(self, window_data, trigger_point):
         """Process triggered data and plot it with color gradient."""
         try:
-            # Update last trigger time for cooldown
+
             self.last_trigger_time = time.time()
 
-            # Add this set to our collection
             self.trigger_sets.append(window_data.copy())
 
-            # Keep only the last max_sets
             if len(self.trigger_sets) > self.max_sets:
-                self.trigger_sets.pop(0)  # Remove oldest
+                self.trigger_sets.pop(0)
 
-            # Clear for single shot mode or when first trigger in continuous mode
             trigger_mode = self.trigger_mode.get_value()
             if trigger_mode == "single" or len(self.trigger_sets) == 1:
                 self.graph_manager.clear()
 
-            # Plot all sets with color gradient (oldest to newest)
             self._plot_all_sets()
 
             if self._is_widget_valid("status_label"):
@@ -399,47 +389,38 @@ class OscTab:
             if not self.trigger_sets:
                 return
 
-            # Clear the plot
             self.graph_manager.clear()
 
-            # Calculate colors - from light (old) to dark (new)
             num_sets = len(self.trigger_sets)
 
-            # Plot sets from oldest to newest so newer ones are drawn on top
             for i, window_data in enumerate(self.trigger_sets):
-                # Calculate intensity - older sets are lighter
+
                 intensity = 0.3 + (i / (num_sets - 1)) * 0.7 if num_sets > 1 else 1.0
 
-                # Create x-axis data starting from 0
                 x_data = list(range(len(window_data)))
 
-                # Create hex color from light blue (old) to dark blue (new)
                 blue_value = int(255 * intensity)
-                color = f"#{0:02x}{0:02x}{blue_value:02x}"  # RGB in hex format
+                color = f"#{0:02x}{0:02x}{blue_value:02x}"
 
-                # Remove markers for cleaner look with multiple overlapping lines
                 self.graph_manager.plot_line(x_data, window_data, color=color)
-                # Override the marker setting
+
                 self.graph_manager.ax.lines[-1].set_marker("")
 
-            # Add trigger level line on top
             if self.trigger_sets:
                 trigger_level = float(self.trigger_level.get_value())
                 max_length = max(len(data) for data in self.trigger_sets)
                 trigger_x = [0, max_length - 1]
                 trigger_y = [trigger_level, trigger_level]
                 self.graph_manager.plot_line(trigger_x, trigger_y, color="red")
-                # Remove marker from trigger line too
+
                 self.graph_manager.ax.lines[-1].set_marker("")
 
-            # Set proper axis labels and limits
             self.graph_manager.set_labels(
                 title=t("ui.osc_tab.oscilloscope_capture_title"),
                 xlabel=t("ui.osc_tab.samples_label"),
                 ylabel=t("ui.osc_tab.value_label"),
             )
 
-            # Update the display
             self.graph_manager.update()
 
         except Exception as e:

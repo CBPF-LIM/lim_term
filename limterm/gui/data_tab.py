@@ -27,7 +27,7 @@ class DataTab:
         self._create_widgets()
 
     def _create_widgets(self):
-        # Button toolbar with toggle on the right
+
         toolbar_frame = ttk.Frame(self.frame)
         toolbar_frame.pack(fill="x", padx=10, pady=(5, 0))
 
@@ -49,7 +49,6 @@ class DataTab:
         )
         self.clear_button.pack(side="left", padx=(0, 10))
 
-        # Preview control buttons in the same toolbar
         self.pause_button = ttk.Button(
             button_container,
             text=t("ui.data_tab.pause_preview"),
@@ -66,21 +65,18 @@ class DataTab:
 
         self.toggle_settings_button = ttk.Button(
             toolbar_frame,
-            text=t("ui.data_tab.hide_settings"),
+            text=t("ui.data_tab.show_settings"),
             command=self._toggle_settings,
         )
         self.toggle_settings_button.pack(side="right")
 
-        # Main data settings container
         self.data_settings_frame = ttk.LabelFrame(
             self.frame, text=t("ui.data_tab.data_settings")
         )
-        self.data_settings_frame.pack(fill="x", padx=10, pady=5)
 
         settings_container = ttk.Frame(self.data_settings_frame)
         settings_container.pack(fill="x", padx=5, pady=5)
 
-        # Capture settings frame
         capture_frame = ttk.LabelFrame(
             settings_container, text=t("ui.data_tab.capture")
         )
@@ -151,7 +147,6 @@ class DataTab:
         )
         self.file_mode.grid(column=1, row=3, padx=5, pady=2, sticky="w")
 
-        # Preview settings frame
         preview_frame = ttk.LabelFrame(
             settings_container, text=t("ui.data_tab.preview")
         )
@@ -196,7 +191,6 @@ class DataTab:
         self.text_frame = ttk.Frame(self.frame)
         self.text_frame.pack(expand=1, fill="both", padx=10, pady=5)
 
-        # Text widget for data display
         self.text_widget = tk.Text(self.text_frame, wrap="word", height=15)
         self.scrollbar = tk.Scrollbar(
             self.text_frame, orient="vertical", command=self.text_widget.yview
@@ -404,10 +398,10 @@ class DataTab:
                 self._add_message(t("ui.data_tab.error_loading").format(error=e))
 
     def _on_timestamp_enabled_change(self, *args):
-        # Reset timestamp when enabling/disabling
+
         if self.timestamp_enabled.get_value():
             self._reset_timestamp()
-        # Refresh preview to show/hide timestamps
+
         if self.preview_enabled.get_value():
             self._refresh_preview()
 
@@ -472,7 +466,7 @@ class DataTab:
             return False
 
         try:
-            # Create content with optional timestamp
+
             lines = []
             current_time = time.time()
             for line in self.data_buffer:
@@ -480,7 +474,7 @@ class DataTab:
                     self.timestamp_enabled.get_value()
                     and self.timestamp_start is not None
                 ):
-                    # Calculate relative time
+
                     elapsed = current_time - self.timestamp_start
                     hours = int(elapsed // 3600)
                     minutes = int((elapsed % 3600) // 60)
@@ -500,13 +494,12 @@ class DataTab:
     def add_data(self, line):
         self.data_buffer.append(line)
 
-        # Initialize timestamp on first data if enabled
         if self.timestamp_enabled.get_value() and self.timestamp_start is None:
             self.timestamp_start = time.time()
 
         if self.capture_enabled.get_value() and self.capture_file:
             try:
-                # Write to capture file with timestamp if enabled
+
                 if (
                     self.timestamp_enabled.get_value()
                     and self.timestamp_start is not None
@@ -524,7 +517,6 @@ class DataTab:
                 logger.error(f"Error writing to capture file: {e}")
                 self._add_message(t("ui.data_tab.capture_error").format(error=str(e)))
 
-        # Update preview only if enabled and not paused
         preview_enabled = self.preview_enabled.get_value()
         has_widget = hasattr(self, "text_widget")
 
@@ -542,13 +534,11 @@ class DataTab:
         try:
             limit = int(self.preview_limit.get_value())
 
-            # Get the last N lines from buffer with optional timestamps
             buffer_lines = list(self.data_buffer)
             lines_to_show = (
                 buffer_lines[-limit:] if len(buffer_lines) > limit else buffer_lines
             )
 
-            # Apply timestamps if enabled
             formatted_lines = []
             for line in lines_to_show:
                 if (
@@ -564,7 +554,6 @@ class DataTab:
                 else:
                     formatted_lines.append(line)
 
-            # Simple update: replace all content
             self.text_widget.delete("1.0", "end")
             if formatted_lines:
                 content = "\n".join(formatted_lines)

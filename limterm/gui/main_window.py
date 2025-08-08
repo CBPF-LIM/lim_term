@@ -18,11 +18,9 @@ class MainWindow:
         self.root.title(t("ui.main_window.title"))
         self.root.geometry(DEFAULT_GEOMETRY)
 
-        # Set up signal handler for graceful shutdown
         self.signal_handler = SignalHandler(self)
         self.signal_handler.setup_signal_handlers()
 
-        # Handle window close button (X)
         self.root.protocol("WM_DELETE_WINDOW", self._on_window_close)
 
         self._setup_serial_manager()
