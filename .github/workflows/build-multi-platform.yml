@@ -19,18 +19,18 @@ jobs:
           - os: macos-latest
             executable: LimTerm
             artifact_name: LimTerm-macOS
-    
+
     runs-on: ${{ matrix.os }}
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-        
+
     - name: Install Poetry (Windows)
       if: matrix.os == 'windows-latest'
       run: |
@@ -38,43 +38,43 @@ jobs:
         $env:PATH += ";$env:APPDATA\Python\Scripts"
         echo "$env:APPDATA\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       shell: powershell
-      
+
     - name: Install Poetry (macOS)
       if: matrix.os == 'macos-latest'
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
         echo "$HOME/.local/bin" >> $GITHUB_PATH
-        
+
     - name: Configure Poetry (Windows)
       if: matrix.os == 'windows-latest'
       run: |
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
       shell: powershell
-      
+
     - name: Configure Poetry (macOS)
       if: matrix.os == 'macos-latest'
       run: |
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
-        
+
     - name: Load cached venv
       id: cached-poetry-dependencies
       uses: actions/cache@v4
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-        
+
     - name: Install dependencies
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: poetry install --no-interaction --no-root --with dev
-      
+
     - name: Install root project
       run: poetry install --no-interaction
-        
+
     - name: Build with PyInstaller
       run: poetry run pyinstaller limterm.spec
-        
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
@@ -85,29 +85,29 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Download Windows artifact
       uses: actions/download-artifact@v4
       with:
         name: LimTerm-Windows.exe
         path: ./artifacts/windows/
-        
+
     - name: Download macOS artifact
       uses: actions/download-artifact@v4
       with:
         name: LimTerm-macOS
         path: ./artifacts/macos/
-        
+
     - name: Rename executables
       run: |
         mv ./artifacts/windows/LimTerm.exe ./LimTerm-Windows.exe
         mv ./artifacts/macos/LimTerm ./LimTerm-macOS
         chmod +x ./LimTerm-macOS
-        
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
@@ -116,24 +116,37 @@ jobs:
           LimTerm-macOS
         body: |
           ## LimTerm ${{ github.ref_name }}
-          
+
           🚀 **Cross-Platform Release**
-          
+
           ### Download:
           - **`LimTerm-Windows.exe`** - Windows executable
           - **`LimTerm-macOS`** - macOS executable
           - **Source code** - Available as zip/tar.gz below
-          
+
           ### Installation:
+
+          **Windows & macOS:**
           1. Download the appropriate executable for your OS
           2. Run directly - no installation required
           3. First run creates `lim_config/` folder for settings
-          
+
+          **Linux:**
+          1. Install dependencies: `make`, `python3`, and `poetry`
+          2. Clone or download source code
+          3. Run `make setup` to install dependencies
+          4. Run `make` to start the application
+
+
           ### Requirements:
           - **Windows**: Windows 10/11 (64-bit)
           - **macOS**: macOS 11+ (Apple Silicon or Intel)
-          - No Python installation needed
-          
+          - **Linux**: Python 3.9+ with make and poetry
+          - No additional Python installation needed for Windows/macOS
+
+          ### What's New:
+          See the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for detailed release notes.
+
           For help, see the [README](https://github.com/${{ github.repository }}/blob/main/README.md).
         draft: false
         prerelease: false
