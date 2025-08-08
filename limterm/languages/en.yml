@@ -263,7 +263,7 @@ common:
   column: "Column {column}"
   value: "Value"
   percentage: "Percentage (%)"
-  
+
 dialogs:
   text_files: "Text files"
   all_files: "All files"

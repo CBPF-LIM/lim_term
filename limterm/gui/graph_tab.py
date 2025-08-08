@@ -34,7 +34,9 @@ class GraphTab:
         button_container.grid(column=0, row=0, sticky="w")
 
         self.plot_button = ttk.Button(
-            button_container, text=t("ui.graph_tab.update_graph"), command=self.plot_graph
+            button_container,
+            text=t("ui.graph_tab.update_graph"),
+            command=self.plot_graph,
         )
         self.plot_button.pack(side="left", padx=(0, 10))
 
@@ -54,7 +56,9 @@ class GraphTab:
         self.save_data_button.pack(side="left", padx=(0, 10))
 
         self.options_button = ttk.Button(
-            toolbar_frame, text=t("ui.graph_tab.show_settings"), command=self._toggle_options
+            toolbar_frame,
+            text=t("ui.graph_tab.show_settings"),
+            command=self._toggle_options,
         )
         self.options_button.grid(column=1, row=0, sticky="e")
 
@@ -87,7 +91,7 @@ class GraphTab:
         self.y_entries = []
         for i in range(1, 6):
             y_frame = ttk.Frame(self.axis_columns_frame)
-            y_frame.grid(column=i+1, row=0, padx=5, pady=5, sticky="w")
+            y_frame.grid(column=i + 1, row=0, padx=5, pady=5, sticky="w")
 
             y_label = ttk.Label(y_frame, text=t(f"ui.graph_tab.column_y{i}"))
             y_label.pack(side="top")
@@ -109,7 +113,9 @@ class GraphTab:
         self._create_options_widgets()
 
         # Set initial options visibility and button text
-        self.options_visible = self.config_manager.load_setting("graph.ui.options_visible", False)
+        self.options_visible = self.config_manager.load_setting(
+            "graph.ui.options_visible", False
+        )
         if not self.options_visible:
             self.options_frame.grid_remove()
             self.options_button.config(text=t("ui.graph_tab.show_settings"))
@@ -130,7 +136,7 @@ class GraphTab:
         # Create main container for side-by-side layout
         main_container = ttk.Frame(self.options_frame)
         main_container.pack(fill="both", expand=True, padx=5, pady=5)
-        
+
         # Global settings frame
         global_frame = ttk.LabelFrame(
             main_container, text=t("ui.graph_tab.global_settings")
@@ -195,12 +201,14 @@ class GraphTab:
         )
         self.fps_debug_label.pack(side="left", padx=(5, 0))
 
-        self.y_limits_label = ttk.Label(global_frame, text=t("ui.graph_tab.y_limits_label"))
+        self.y_limits_label = ttk.Label(
+            global_frame, text=t("ui.graph_tab.y_limits_label")
+        )
         self.y_limits_label.grid(column=0, row=3, padx=5, pady=5, sticky="w")
-        
+
         y_limits_frame = ttk.Frame(global_frame)
         y_limits_frame.grid(column=1, row=3, padx=5, pady=5, sticky="w")
-        
+
         self.min_y_entry = PrefEntry(
             y_limits_frame,
             pref_key="graph.general.min_y",
@@ -233,7 +241,7 @@ class GraphTab:
         for i in range(5):
             color_label = ttk.Label(colors_frame, text=f"Y{i+1}:")
             color_label.grid(column=0, row=i, padx=5, pady=2, sticky="w")
-            
+
             color_combo = PrefCombobox(
                 colors_frame,
                 pref_key=f"graph.general.y{i+1}_color",
@@ -354,11 +362,15 @@ class GraphTab:
 
     def _save_data(self):
         """Save the current data to a file using the same logic as data tab"""
-        valid_lines = [item["value"] for item in self.data_tab.data if item["type"] == "data"]
+        valid_lines = [
+            item["value"] for item in self.data_tab.data if item["type"] == "data"
+        ]
         if valid_lines:
             file_path = FileManager.save_data_to_file(valid_lines)
             if file_path:
-                self.data_tab.add_message(t("ui.data_tab.data_saved").format(path=file_path))
+                self.data_tab.add_message(
+                    t("ui.data_tab.data_saved").format(path=file_path)
+                )
 
     def _on_setting_change(self, event=None):
         pass

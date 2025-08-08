@@ -9,9 +9,10 @@ import math
 
 
 class ConfigTab:
-    def __init__(self, parent, serial_manager):
+    def __init__(self, parent, serial_manager, signal_handler=None):
         self.frame = ttk.Frame(parent)
         self.serial_manager = serial_manager
+        self.signal_handler = signal_handler
         self.synthetic_generator = None
         self.config_manager = get_config_manager()
         self.equation_entries = {}
@@ -34,7 +35,9 @@ class ConfigTab:
         self.connect_button.pack(side="left")
 
         self.settings_button = ttk.Button(
-            toggle_frame, text=t("ui.config_tab.show_settings"), command=self._toggle_settings
+            toggle_frame,
+            text=t("ui.config_tab.show_settings"),
+            command=self._toggle_settings,
         )
         self.settings_button.grid(column=1, row=0, sticky="e")
 
@@ -50,7 +53,9 @@ class ConfigTab:
         self.settings_frame.grid(column=0, row=2, padx=10, pady=5, sticky="ew")
 
         # Connection Settings parent frame
-        connection_settings_frame = ttk.LabelFrame(self.settings_frame, text=t("ui.config_tab.connection_settings"))
+        connection_settings_frame = ttk.LabelFrame(
+            self.settings_frame, text=t("ui.config_tab.connection_settings")
+        )
         connection_settings_frame.grid(column=0, row=0, sticky="ew", padx=5, pady=5)
 
         # Main container for side-by-side layout (line 1: Mode | Synthetic)
@@ -61,9 +66,7 @@ class ConfigTab:
         self.mode_frame = ttk.LabelFrame(main_container, text=t("ui.config_tab.mode"))
         self.mode_frame.grid(column=0, row=0, padx=(0, 5), pady=5, sticky="nsew")
 
-        self.mode_label = ttk.Label(
-            self.mode_frame, text=t("ui.config_tab.mode_label")
-        )
+        self.mode_label = ttk.Label(self.mode_frame, text=t("ui.config_tab.mode_label"))
         self.mode_label.grid(column=0, row=0, padx=10, pady=10, sticky="w")
         self.mode_combobox = PrefCombobox(
             self.mode_frame,
@@ -79,9 +82,7 @@ class ConfigTab:
         )
         self.mode_combobox.grid(column=1, row=0, padx=10, pady=10, sticky="w")
 
-        self.port_label = ttk.Label(
-            self.mode_frame, text=t("ui.config_tab.port_label")
-        )
+        self.port_label = ttk.Label(self.mode_frame, text=t("ui.config_tab.port_label"))
         self.port_label.grid(column=0, row=1, padx=10, pady=10, sticky="w")
 
         port_frame = ttk.Frame(self.mode_frame)
@@ -119,10 +120,10 @@ class ConfigTab:
 
         self.fps_label = ttk.Label(self.synthetic_frame, text="FPS:")
         self.fps_label.grid(column=0, row=0, padx=5, pady=5, sticky="w")
-        
+
         fps_frame = ttk.Frame(self.synthetic_frame)
         fps_frame.grid(column=1, row=0, padx=5, pady=5, sticky="ew")
-        
+
         self.fps_pref_combobox = PrefCombobox(
             fps_frame,
             pref_key="graph.general.refresh_rate",
@@ -132,10 +133,12 @@ class ConfigTab:
             width=8,
         )
         self.fps_pref_combobox.pack(side="left")
-        
+
         # Add math functions toggle button next to FPS
         self.math_funcs_button = ttk.Button(
-            fps_frame, text=t("ui.config_tab.show_math_functions"), command=self._toggle_math_functions
+            fps_frame,
+            text=t("ui.config_tab.show_math_functions"),
+            command=self._toggle_math_functions,
         )
         self.math_funcs_button.pack(side="right")
 
@@ -153,7 +156,9 @@ class ConfigTab:
         fps_frame.columnconfigure(0, weight=1)
 
         # Math functions frame at the bottom (line 2: Functions) - simplified
-        self.math_functions_frame = ttk.LabelFrame(connection_settings_frame, text=t("ui.config_tab.available_math_functions"))
+        self.math_functions_frame = ttk.LabelFrame(
+            connection_settings_frame, text=t("ui.config_tab.available_math_functions")
+        )
         # Don't grid it initially - let _update_math_functions_visibility handle it
 
         self.math_funcs_text = tk.Text(
@@ -170,7 +175,9 @@ class ConfigTab:
         self.math_funcs_text.pack(fill="both", expand=True, padx=5, pady=5)
 
         # Initialize math functions visibility
-        self.math_funcs_visible = self.config_manager.load_setting("config.math_functions_visible", False)
+        self.math_funcs_visible = self.config_manager.load_setting(
+            "config.math_functions_visible", False
+        )
         self._update_math_functions_visibility()
 
         main_container.columnconfigure(0, weight=1)
@@ -178,8 +185,10 @@ class ConfigTab:
         connection_settings_frame.columnconfigure(0, weight=1)
         self.settings_frame.columnconfigure(0, weight=1)
 
-        self.settings_visible = self.config_manager.load_setting("config.ui.settings_visible", False)
-        
+        self.settings_visible = self.config_manager.load_setting(
+            "config.ui.settings_visible", False
+        )
+
         if not self.settings_visible:
             self.settings_frame.grid_remove()
             self.settings_button.config(text=t("ui.config_tab.show_settings"))
@@ -219,7 +228,9 @@ class ConfigTab:
             self.port_combobox.set("")
             self.baudrate_combobox.set("")
             # Show synthetic frame when in synthetic mode (50/50 split)
-            self.synthetic_frame.grid(column=1, row=0, padx=(5, 0), pady=5, sticky="nsew")
+            self.synthetic_frame.grid(
+                column=1, row=0, padx=(5, 0), pady=5, sticky="nsew"
+            )
             # Reset column weights to 50/50
             self.synthetic_frame.master.columnconfigure(0, weight=1)
             self.synthetic_frame.master.columnconfigure(1, weight=1)
@@ -263,12 +274,18 @@ class ConfigTab:
         mode = self.mode_combobox.get_value()
 
         if self.serial_manager.is_connected or self.synthetic_generator:
+            # Disconnecting - set not busy
+            if self.signal_handler:
+                self.signal_handler.set_busy(False)
+
             self.serial_manager.disconnect()
             if self.synthetic_generator:
                 self.synthetic_generator.stop_data_generation()
                 self.synthetic_generator = None
             self.connect_button.config(text=t("ui.config_tab.connect"))
-            self.status_label.config(text=t("ui.config_tab.not_connected"), foreground="red")
+            self.status_label.config(
+                text=t("ui.config_tab.not_connected"), foreground="red"
+            )
             self._set_equation_widgets_state("normal")
             self._show_config_interface()
             return
@@ -281,8 +298,14 @@ class ConfigTab:
                 return
 
             if self.serial_manager.connect(port, baudrate):
+                # Connected - set busy
+                if self.signal_handler:
+                    self.signal_handler.set_busy(True)
+
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
-                self.status_label.config(text=t("ui.config_tab.connected"), foreground="green")
+                self.status_label.config(
+                    text=t("ui.config_tab.connected"), foreground="green"
+                )
                 self._show_connection_info(mode, port, baudrate)
 
         elif mode == "synthetic":
@@ -296,8 +319,15 @@ class ConfigTab:
                 )
 
                 self.synthetic_generator.start_data_generation()
+
+                # Synthetic mode started - set busy
+                if self.signal_handler:
+                    self.signal_handler.set_busy(True)
+
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
-                self.status_label.config(text=t("ui.config_tab.connected"), foreground="green")
+                self.status_label.config(
+                    text=t("ui.config_tab.connected"), foreground="green"
+                )
                 self._set_equation_widgets_state("disabled")
                 self._show_connection_info(mode, "SYNTHETIC_MODE", "N/A")
             except Exception as e:
@@ -380,7 +410,9 @@ class ConfigTab:
 
     def _toggle_math_functions(self):
         self.math_funcs_visible = not self.math_funcs_visible
-        self.config_manager.save_setting("config.math_functions_visible", self.math_funcs_visible)
+        self.config_manager.save_setting(
+            "config.math_functions_visible", self.math_funcs_visible
+        )
         self._update_math_functions_visibility()
 
     def _toggle_settings(self):
@@ -394,7 +426,9 @@ class ConfigTab:
             self.settings_button.config(text=t("ui.config_tab.hide_settings"))
             self.settings_visible = True
 
-        self.config_manager.save_setting("config.ui.settings_visible", self.settings_visible)
+        self.config_manager.save_setting(
+            "config.ui.settings_visible", self.settings_visible
+        )
 
     def _update_math_functions_visibility(self):
         if self.math_funcs_visible:

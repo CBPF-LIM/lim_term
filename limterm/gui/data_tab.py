@@ -16,24 +16,24 @@ class DataTab:
     def __init__(self, parent):
         self.frame = ttk.Frame(parent)
         self.config_manager = get_config_manager()
-        
+
         self.data_buffer = deque(maxlen=10000)
         self.capture_file = None
         self.capture_filename = None
         self.preview_offset = 0
         self.preview_paused = False
         self.timestamp_start = None
-        
+
         self._create_widgets()
 
     def _create_widgets(self):
         # Button toolbar with toggle on the right
         toolbar_frame = ttk.Frame(self.frame)
         toolbar_frame.pack(fill="x", padx=10, pady=(5, 0))
-        
+
         button_container = ttk.Frame(toolbar_frame)
         button_container.pack(side="left", fill="x", expand=True)
-        
+
         self.save_button = ttk.Button(
             button_container, text=t("ui.data_tab.save"), command=self._save_data
         )
@@ -53,30 +53,30 @@ class DataTab:
         self.pause_button = ttk.Button(
             button_container,
             text=t("ui.data_tab.pause_preview"),
-            command=self._toggle_preview_pause
+            command=self._toggle_preview_pause,
         )
         self.pause_button.pack(side="left", padx=(0, 10))
 
         self.reset_timestamp_button = ttk.Button(
             button_container,
             text=t("ui.data_tab.reset_timestamp"),
-            command=self._reset_timestamp
+            command=self._reset_timestamp,
         )
         self.reset_timestamp_button.pack(side="left", padx=(0, 10))
-        
+
         self.toggle_settings_button = ttk.Button(
-            toolbar_frame, 
-            text=t("ui.data_tab.hide_settings"), 
-            command=self._toggle_settings
+            toolbar_frame,
+            text=t("ui.data_tab.hide_settings"),
+            command=self._toggle_settings,
         )
         self.toggle_settings_button.pack(side="right")
-        
+
         # Main data settings container
         self.data_settings_frame = ttk.LabelFrame(
             self.frame, text=t("ui.data_tab.data_settings")
         )
         self.data_settings_frame.pack(fill="x", padx=10, pady=5)
-        
+
         settings_container = ttk.Frame(self.data_settings_frame)
         settings_container.pack(fill="x", padx=5, pady=5)
 
@@ -93,7 +93,9 @@ class DataTab:
             text=t("ui.data_tab.capture_enabled"),
             on_change=self._on_capture_enabled_change,
         )
-        self.capture_enabled.grid(column=0, row=0, columnspan=2, padx=5, pady=2, sticky="w")
+        self.capture_enabled.grid(
+            column=0, row=0, columnspan=2, padx=5, pady=2, sticky="w"
+        )
 
         ttk.Label(capture_frame, text=t("ui.data_tab.filename_mode_label")).grid(
             column=0, row=1, padx=5, pady=2, sticky="w"
@@ -162,7 +164,9 @@ class DataTab:
             text=t("ui.data_tab.enable_preview"),
             on_change=self._on_preview_enabled_change,
         )
-        self.preview_enabled.grid(column=0, row=0, columnspan=2, padx=5, pady=2, sticky="w")
+        self.preview_enabled.grid(
+            column=0, row=0, columnspan=2, padx=5, pady=2, sticky="w"
+        )
 
         ttk.Label(preview_frame, text=t("ui.data_tab.preview_limit_label")).grid(
             column=0, row=1, padx=5, pady=2, sticky="w"
@@ -185,7 +189,9 @@ class DataTab:
             text=t("ui.data_tab.enable_timestamp"),
             on_change=self._on_timestamp_enabled_change,
         )
-        self.timestamp_enabled.grid(column=0, row=2, columnspan=2, padx=5, pady=2, sticky="w")
+        self.timestamp_enabled.grid(
+            column=0, row=2, columnspan=2, padx=5, pady=2, sticky="w"
+        )
 
         self.text_frame = ttk.Frame(self.frame)
         self.text_frame.pack(expand=1, fill="both", padx=10, pady=5)
@@ -244,7 +250,9 @@ class DataTab:
             self.data_settings_frame.pack_forget()
             self.toggle_settings_button.config(text=t("ui.data_tab.show_settings"))
         else:
-            self.data_settings_frame.pack(fill="x", padx=10, pady=5, before=self.text_frame)
+            self.data_settings_frame.pack(
+                fill="x", padx=10, pady=5, before=self.text_frame
+            )
             self.toggle_settings_button.config(text=t("ui.data_tab.hide_settings"))
 
     def _on_capture_enabled_change(self):
@@ -282,10 +290,12 @@ class DataTab:
                 os.makedirs(capture_dir)
 
             filename_mode = self.filename_mode.get_value()
-            
+
             if filename_mode == "auto":
                 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-                self.capture_filename = os.path.join(capture_dir, f"data_capture_{timestamp}.txt")
+                self.capture_filename = os.path.join(
+                    capture_dir, f"data_capture_{timestamp}.txt"
+                )
             else:
                 filename = self.fixed_filename.get_value()
                 self.capture_filename = os.path.join(capture_dir, filename)
@@ -294,8 +304,12 @@ class DataTab:
             mode = "a" if file_mode == "append" else "w"
 
             self.capture_file = open(self.capture_filename, mode, encoding="utf-8")
-            
-            self._add_message(t("ui.data_tab.capture_enabled_msg").format(filename=os.path.basename(self.capture_filename)))
+
+            self._add_message(
+                t("ui.data_tab.capture_enabled_msg").format(
+                    filename=os.path.basename(self.capture_filename)
+                )
+            )
             logger.info(f"Data capture enabled: {self.capture_filename} (mode: {mode})")
 
         except Exception as e:
@@ -322,17 +336,20 @@ class DataTab:
         """Refresh the entire preview with timestamps if enabled."""
         if not self.preview_enabled.get_value():
             return
-            
+
         try:
             limit = int(self.preview_limit.get_value())
             self.text_widget.delete("1.0", "end")
-            
+
             buffer_list = list(self.data_buffer)
             start_idx = max(0, len(buffer_list) - limit + self.preview_offset)
             end_idx = min(len(buffer_list), start_idx + limit)
-            
+
             for line in buffer_list[start_idx:end_idx]:
-                if self.timestamp_enabled.get_value() and self.timestamp_start is not None:
+                if (
+                    self.timestamp_enabled.get_value()
+                    and self.timestamp_start is not None
+                ):
                     elapsed = time.time() - self.timestamp_start
                     hours = int(elapsed // 3600)
                     minutes = int((elapsed % 3600) // 60)
@@ -341,13 +358,13 @@ class DataTab:
                     self.text_widget.insert("end", timestamp + line + "\n")
                 else:
                     self.text_widget.insert("end", line + "\n")
-            
+
             self.text_widget.see("end")
         except tk.TclError:
             pass
 
     def _add_message(self, message):
-        if self.preview_enabled.get_value() and hasattr(self, 'text_widget'):
+        if self.preview_enabled.get_value() and hasattr(self, "text_widget"):
             try:
                 self.text_widget.insert("end", f"[MSG] {message}\n")
                 self.text_widget.see("end")
@@ -363,7 +380,7 @@ class DataTab:
             )
             if result != "yes":
                 return
-        
+
         file_path = filedialog.askopenfilename(
             defaultextension=".txt",
             filetypes=[
@@ -372,7 +389,7 @@ class DataTab:
             ],
             title=t("ui.graph_tab.load_dialog_title"),
         )
-        
+
         if file_path:
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
@@ -380,7 +397,7 @@ class DataTab:
                 self._clear_data()
                 for line in lines:
                     self.data_buffer.append(line)
-                
+
                 self._update_preview()
                 self._add_message(t("ui.data_tab.data_loaded").format(path=file_path))
             except Exception as e:
@@ -405,7 +422,7 @@ class DataTab:
 
     def _clear_data(self):
         """Clear only the preview, not the data buffer."""
-        if hasattr(self, 'text_widget'):
+        if hasattr(self, "text_widget"):
             self.text_widget.delete(1.0, "end")
 
     def _save_data(self):
@@ -414,31 +431,38 @@ class DataTab:
             capture_dir = "lim_captures"
             if not os.path.exists(capture_dir):
                 os.makedirs(capture_dir)
-            
+
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             default_filename = f"manual_save_{timestamp}.txt"
-            
+
             file_path = filedialog.asksaveasfilename(
                 defaultextension=".txt",
                 filetypes=[(t("dialogs.text_files"), "*.txt")],
                 initialdir=capture_dir,
                 initialfile=default_filename,
             )
-            
+
             if file_path:
                 try:
                     with open(file_path, "w", encoding="utf-8") as f:
                         for line in buffer_lines:
-                            if self.timestamp_enabled.get_value() and self.timestamp_start is not None:
+                            if (
+                                self.timestamp_enabled.get_value()
+                                and self.timestamp_start is not None
+                            ):
                                 elapsed = time.time() - self.timestamp_start
                                 hours = int(elapsed // 3600)
                                 minutes = int((elapsed % 3600) // 60)
                                 seconds = elapsed % 60
-                                timestamp_str = f"{hours:02d}:{minutes:02d}:{seconds:06.3f} "
+                                timestamp_str = (
+                                    f"{hours:02d}:{minutes:02d}:{seconds:06.3f} "
+                                )
                                 f.write(timestamp_str + line + "\n")
                             else:
                                 f.write(line + "\n")
-                    self._add_message(t("ui.data_tab.data_saved").format(path=file_path))
+                    self._add_message(
+                        t("ui.data_tab.data_saved").format(path=file_path)
+                    )
                 except Exception as e:
                     self._add_message(t("ui.data_tab.error_saving").format(error=e))
 
@@ -452,7 +476,10 @@ class DataTab:
             lines = []
             current_time = time.time()
             for line in self.data_buffer:
-                if self.timestamp_enabled.get_value() and self.timestamp_start is not None:
+                if (
+                    self.timestamp_enabled.get_value()
+                    and self.timestamp_start is not None
+                ):
                     # Calculate relative time
                     elapsed = current_time - self.timestamp_start
                     hours = int(elapsed // 3600)
@@ -472,15 +499,18 @@ class DataTab:
 
     def add_data(self, line):
         self.data_buffer.append(line)
-        
+
         # Initialize timestamp on first data if enabled
         if self.timestamp_enabled.get_value() and self.timestamp_start is None:
             self.timestamp_start = time.time()
-        
+
         if self.capture_enabled.get_value() and self.capture_file:
             try:
                 # Write to capture file with timestamp if enabled
-                if self.timestamp_enabled.get_value() and self.timestamp_start is not None:
+                if (
+                    self.timestamp_enabled.get_value()
+                    and self.timestamp_start is not None
+                ):
                     elapsed = time.time() - self.timestamp_start
                     hours = int(elapsed // 3600)
                     minutes = int((elapsed % 3600) // 60)
@@ -496,8 +526,8 @@ class DataTab:
 
         # Update preview only if enabled and not paused
         preview_enabled = self.preview_enabled.get_value()
-        has_widget = hasattr(self, 'text_widget')
-        
+        has_widget = hasattr(self, "text_widget")
+
         if preview_enabled and not self.preview_paused and has_widget:
             try:
                 self._update_preview()
@@ -506,20 +536,25 @@ class DataTab:
 
     def _update_preview(self):
         """Update the preview widget with current buffer data."""
-        if not hasattr(self, 'text_widget') or not self.preview_enabled.get_value():
+        if not hasattr(self, "text_widget") or not self.preview_enabled.get_value():
             return
-            
+
         try:
             limit = int(self.preview_limit.get_value())
-            
+
             # Get the last N lines from buffer with optional timestamps
             buffer_lines = list(self.data_buffer)
-            lines_to_show = buffer_lines[-limit:] if len(buffer_lines) > limit else buffer_lines
-            
+            lines_to_show = (
+                buffer_lines[-limit:] if len(buffer_lines) > limit else buffer_lines
+            )
+
             # Apply timestamps if enabled
             formatted_lines = []
             for line in lines_to_show:
-                if self.timestamp_enabled.get_value() and self.timestamp_start is not None:
+                if (
+                    self.timestamp_enabled.get_value()
+                    and self.timestamp_start is not None
+                ):
                     elapsed = time.time() - self.timestamp_start
                     hours = int(elapsed // 3600)
                     minutes = int((elapsed % 3600) // 60)
@@ -528,14 +563,14 @@ class DataTab:
                     formatted_lines.append(timestamp + line)
                 else:
                     formatted_lines.append(line)
-            
+
             # Simple update: replace all content
             self.text_widget.delete("1.0", "end")
             if formatted_lines:
                 content = "\n".join(formatted_lines)
                 self.text_widget.insert("1.0", content)
             self.text_widget.see("end")
-                
+
         except Exception as e:
             logger.error(f"Error updating preview: {e}")
 
@@ -552,7 +587,9 @@ class DataTab:
         if self.capture_file:
             try:
                 self.capture_file.close()
-                logger.info(f"Capture file closed during cleanup: {self.capture_filename}")
+                logger.info(
+                    f"Capture file closed during cleanup: {self.capture_filename}"
+                )
             except Exception as e:
                 logger.error(f"Error closing capture file during cleanup: {e}")
             finally:

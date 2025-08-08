@@ -177,12 +177,12 @@ ui:
     trigger_monitoring_error: "Error en el monitoreo del trigger: {error}"
     png_saved: "PNG guardado: {filename}"
     data_saved: "Datos guardados: {filename}"
-    
+
     trigger_edges:
       rising: "Subida"
       falling: "Bajada"
       both: "Ambas"
-      
+
     trigger_modes:
       continuous: "Continuo"
       single: "Disparo Único"
@@ -260,7 +260,7 @@ common:
   column: "Columna {column}"
   value: "Valor"
   percentage: "Porcentaje (%)"
-  
+
 dialogs:
   text_files: "Archivos de texto"
   all_files: "Todos los archivos"

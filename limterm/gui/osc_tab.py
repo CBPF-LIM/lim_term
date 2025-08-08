@@ -61,7 +61,9 @@ class OscTab:
         self.status_label.pack(side="left")
 
         self.settings_button = ttk.Button(
-            controls_right, text=t("ui.osc_tab.show_settings"), command=self._toggle_settings
+            controls_right,
+            text=t("ui.osc_tab.show_settings"),
+            command=self._toggle_settings,
         )
         self.settings_button.pack(side="right")
 
@@ -215,11 +217,11 @@ class OscTab:
     def _setup_trigger_monitoring(self):
         if not self._is_frame_valid() or not self.is_armed:
             return
-            
+
         try:
             if self.data_tab.get_data():
                 self._check_trigger_conditions()
-            
+
             if self._is_frame_valid() and self.is_armed:
                 self.refresh_timer_id = self.frame.after(
                     self.osc_refresh_rate_ms, self._setup_trigger_monitoring
@@ -255,7 +257,9 @@ class OscTab:
 
     def _is_widget_valid(self, widget_name):
         try:
-            return hasattr(self, widget_name) and getattr(self, widget_name).winfo_exists()
+            return (
+                hasattr(self, widget_name) and getattr(self, widget_name).winfo_exists()
+            )
         except tk.TclError:
             return False
 
@@ -282,12 +286,12 @@ class OscTab:
             current_time = time.time()
             if current_time - self.last_trigger_time < 1.0:  # 1 second cooldown
                 return
-                
+
             # Get current data buffer
             data_lines = self.data_tab.get_data()
             if not data_lines or len(data_lines) < 10:
                 return
-                
+
             # Parse trigger settings
             try:
                 column = int(self.trigger_source.get_value())
@@ -295,7 +299,7 @@ class OscTab:
                 window_size = int(self.window_size.get_value())
             except (ValueError, AttributeError):
                 return
-            
+
             # Parse data values for the trigger column (from end to start - time arrival order)
             values = []
             for line in reversed(data_lines[-200:]):  # Check last 200 lines
@@ -306,43 +310,51 @@ class OscTab:
                         values.append(value)
                 except (ValueError, IndexError):
                     continue
-            
+
             if len(values) < window_size:
                 return
-            
+
             # Reverse back to correct time order for processing
             values.reverse()
-            
+
             # Simple rising edge detection on recent data
             trigger_edge = self.trigger_edge.get_value()
             for i in range(len(values) - window_size, len(values) - 1):
                 if i <= 0:
                     continue
-                    
+
                 triggered = False
-                if trigger_edge == "rising" and values[i-1] <= trigger_level < values[i]:
-                    triggered = True
-                elif trigger_edge == "falling" and values[i-1] >= trigger_level > values[i]:
-                    triggered = True
-                elif trigger_edge == "both" and (
-                    (values[i-1] <= trigger_level < values[i]) or 
-                    (values[i-1] >= trigger_level > values[i])
+                if (
+                    trigger_edge == "rising"
+                    and values[i - 1] <= trigger_level < values[i]
                 ):
                     triggered = True
-                    
+                elif (
+                    trigger_edge == "falling"
+                    and values[i - 1] >= trigger_level > values[i]
+                ):
+                    triggered = True
+                elif trigger_edge == "both" and (
+                    (values[i - 1] <= trigger_level < values[i])
+                    or (values[i - 1] >= trigger_level > values[i])
+                ):
+                    triggered = True
+
                 if triggered:
                     # Extract window starting from trigger point
                     # This ensures x=0 corresponds to the trigger point where y≈trigger_level
                     start_idx = i  # Start exactly at trigger point
-                    end_idx = min(len(values), i + window_size)  # Window size after trigger
-                    
+                    end_idx = min(
+                        len(values), i + window_size
+                    )  # Window size after trigger
+
                     window_data = values[start_idx:end_idx]
                     if len(window_data) >= window_size // 2:
                         self._process_triggered_data(window_data, 0)
-                        
+
                         self._schedule_after(500, lambda: None)
                         break
-                        
+
         except Exception as e:
             logger.error(f"Error in simple trigger detection: {e}")
 
@@ -351,27 +363,29 @@ class OscTab:
         try:
             # Update last trigger time for cooldown
             self.last_trigger_time = time.time()
-            
+
             # Add this set to our collection
             self.trigger_sets.append(window_data.copy())
-            
+
             # Keep only the last max_sets
             if len(self.trigger_sets) > self.max_sets:
                 self.trigger_sets.pop(0)  # Remove oldest
-            
+
             # Clear for single shot mode or when first trigger in continuous mode
             trigger_mode = self.trigger_mode.get_value()
             if trigger_mode == "single" or len(self.trigger_sets) == 1:
                 self.graph_manager.clear()
-            
+
             # Plot all sets with color gradient (oldest to newest)
             self._plot_all_sets()
-            
+
             if self._is_widget_valid("status_label"):
-                self.status_label.config(text=t("ui.osc_tab.triggered"), foreground="red")
-            
+                self.status_label.config(
+                    text=t("ui.osc_tab.triggered"), foreground="red"
+                )
+
             self._schedule_after(300, self._update_status_to_armed)
-            
+
         except Exception as e:
             logger.error(f"Error processing triggered data: {e}")
 
@@ -384,50 +398,50 @@ class OscTab:
         try:
             if not self.trigger_sets:
                 return
-                
+
             # Clear the plot
             self.graph_manager.clear()
-            
+
             # Calculate colors - from light (old) to dark (new)
             num_sets = len(self.trigger_sets)
-            
+
             # Plot sets from oldest to newest so newer ones are drawn on top
             for i, window_data in enumerate(self.trigger_sets):
                 # Calculate intensity - older sets are lighter
                 intensity = 0.3 + (i / (num_sets - 1)) * 0.7 if num_sets > 1 else 1.0
-                
+
                 # Create x-axis data starting from 0
                 x_data = list(range(len(window_data)))
-                
+
                 # Create hex color from light blue (old) to dark blue (new)
                 blue_value = int(255 * intensity)
                 color = f"#{0:02x}{0:02x}{blue_value:02x}"  # RGB in hex format
-                
+
                 # Remove markers for cleaner look with multiple overlapping lines
                 self.graph_manager.plot_line(x_data, window_data, color=color)
                 # Override the marker setting
-                self.graph_manager.ax.lines[-1].set_marker('')
-            
+                self.graph_manager.ax.lines[-1].set_marker("")
+
             # Add trigger level line on top
             if self.trigger_sets:
                 trigger_level = float(self.trigger_level.get_value())
                 max_length = max(len(data) for data in self.trigger_sets)
                 trigger_x = [0, max_length - 1]
                 trigger_y = [trigger_level, trigger_level]
-                self.graph_manager.plot_line(trigger_x, trigger_y, color='red')
+                self.graph_manager.plot_line(trigger_x, trigger_y, color="red")
                 # Remove marker from trigger line too
-                self.graph_manager.ax.lines[-1].set_marker('')
-            
+                self.graph_manager.ax.lines[-1].set_marker("")
+
             # Set proper axis labels and limits
             self.graph_manager.set_labels(
                 title=t("ui.osc_tab.oscilloscope_capture_title"),
-                xlabel=t("ui.osc_tab.samples_label"), 
-                ylabel=t("ui.osc_tab.value_label")
+                xlabel=t("ui.osc_tab.samples_label"),
+                ylabel=t("ui.osc_tab.value_label"),
             )
-            
+
             # Update the display
             self.graph_manager.update()
-            
+
         except Exception as e:
             logger.error(f"Error plotting all sets: {e}")
 
@@ -514,7 +528,7 @@ class OscTab:
             self.arm_button.config(text=t("ui.osc_tab.disarm"))
         if self._is_widget_valid("status_label"):
             self.status_label.config(text=t("ui.osc_tab.armed"), foreground="orange")
-            
+
         self._setup_trigger_monitoring()
 
     def _disarm(self):
@@ -533,7 +547,7 @@ class OscTab:
     def cleanup(self):
         """Clean up resources."""
         self._stop_refresh_timer()
-        self._cancel_all_callbacks() 
+        self._cancel_all_callbacks()
         self.is_armed = False
-        if hasattr(self, 'trigger_sets'):
+        if hasattr(self, "trigger_sets"):
             self.trigger_sets.clear()

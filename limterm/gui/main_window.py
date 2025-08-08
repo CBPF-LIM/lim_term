@@ -4,6 +4,7 @@ import time
 from ..config import DEFAULT_GEOMETRY
 from ..core import SerialManager
 from ..i18n import t, get_available_languages, set_language
+from ..utils.signal_handler import SignalHandler
 from .config_tab import ConfigTab
 from .data_tab import DataTab
 from .graph_tab import GraphTab
@@ -16,6 +17,13 @@ class MainWindow:
         self.root = tk.Tk()
         self.root.title(t("ui.main_window.title"))
         self.root.geometry(DEFAULT_GEOMETRY)
+
+        # Set up signal handler for graceful shutdown
+        self.signal_handler = SignalHandler(self)
+        self.signal_handler.setup_signal_handlers()
+
+        # Handle window close button (X)
+        self.root.protocol("WM_DELETE_WINDOW", self._on_window_close)
 
         self._setup_serial_manager()
         self._create_menu()
@@ -70,7 +78,9 @@ class MainWindow:
     def _create_tabs(self):
         self.tab_control = ttk.Notebook(self.root)
 
-        self.config_tab = ConfigTab(self.tab_control, self.serial_manager)
+        self.config_tab = ConfigTab(
+            self.tab_control, self.serial_manager, self.signal_handler
+        )
         self.data_tab = DataTab(self.tab_control)
         self.graph_tab = GraphTab(self.tab_control, self.data_tab, None)
         self.osc_tab = OscTab(self.tab_control, self.data_tab)
@@ -129,6 +139,8 @@ class MainWindow:
 
             self.root.mainloop()
 
+        except Exception as e:
+            print(f"Error in main loop: {e}")
         finally:
             self._running = False
 
@@ -138,7 +150,8 @@ class MainWindow:
             if hasattr(self, "osc_tab"):
                 self.osc_tab.cleanup()
 
-            self.serial_manager.disconnect()
+            if hasattr(self, "serial_manager"):
+                self.serial_manager.disconnect()
 
     def _game_loop(self):
         if not self._running:
@@ -172,3 +185,7 @@ class MainWindow:
                 self.root.after(16, self._game_loop)
         except tk.TclError:
             self._running = False
+
+    def _on_window_close(self):
+        """Handle window close button click"""
+        self.signal_handler.request_exit()

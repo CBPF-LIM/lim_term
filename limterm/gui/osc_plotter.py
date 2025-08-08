@@ -6,6 +6,7 @@ This module provides plotting functionality for the oscilloscope tab.
 
 from ..i18n import t
 import matplotlib
+
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import numpy as np

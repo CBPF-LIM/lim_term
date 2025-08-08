@@ -31,7 +31,7 @@ ui:
     connection_status: "🔗 Modo: {mode}\n📡 Porta: {port}\n⚡ Taxa: {baudrate} bps"
     synthetic_connection_status: "🔗 Modo: Sintético\n🧮 Gerando dados usando equações"
     available_math_functions: "Funções Matemáticas Disponíveis"
-  
+
   data_tab:
     save: "Salvar"
     load: "Carregar"
@@ -177,12 +177,12 @@ ui:
     trigger_monitoring_error: "Erro no monitoramento do trigger: {error}"
     png_saved: "PNG salvo: {filename}"
     data_saved: "Dados salvos: {filename}"
-    
+
     trigger_edges:
       rising: "Subida"
       falling: "Descida"
       both: "Ambas"
-      
+
     trigger_modes:
       continuous: "Contínuo"
       single: "Disparo Único"
@@ -260,7 +260,7 @@ common:
   column: "Coluna {column}"
   value: "Valor"
   percentage: "Porcentagem (%)"
-  
+
 dialogs:
   text_files: "Arquivos de texto"
   all_files: "Todos os arquivos"

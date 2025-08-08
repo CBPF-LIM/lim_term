@@ -177,12 +177,12 @@ ui:
     trigger_monitoring_error: "Erreur de surveillance du déclencheur : {error}"
     png_saved: "PNG sauvegardé : {filename}"
     data_saved: "Données sauvegardées : {filename}"
-    
+
     trigger_edges:
       rising: "Montant"
       falling: "Descendant"
       both: "Les Deux"
-      
+
     trigger_modes:
       continuous: "Continu"
       single: "Coup Unique"
@@ -260,7 +260,7 @@ common:
   column: "Colonne {column}"
   value: "Valeur"
   percentage: "Pourcentage (%)"
-  
+
 dialogs:
   text_files: "Fichiers texte"
   all_files: "Tous les fichiers"

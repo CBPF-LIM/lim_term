@@ -177,12 +177,12 @@ ui:
     trigger_monitoring_error: "Trigger-Überwachungsfehler: {error}"
     png_saved: "PNG gespeichert: {filename}"
     data_saved: "Daten gespeichert: {filename}"
-    
+
     trigger_edges:
       rising: "Steigend"
       falling: "Fallend"
       both: "Beide"
-      
+
     trigger_modes:
       continuous: "Kontinuierlich"
       single: "Einzelschuss"
@@ -260,7 +260,7 @@ common:
   column: "Spalte {column}"
   value: "Wert"
   percentage: "Prozent (%)"
-  
+
 dialogs:
   text_files: "Textdateien"
   all_files: "Alle Dateien"
