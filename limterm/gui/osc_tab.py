@@ -384,25 +384,17 @@ class OscTab:
             self.status_label.config(text=t("ui.osc_tab.armed"), foreground="orange")
 
     def _plot_all_sets(self):
-        """Plot all trigger sets with color gradient from oldest (light) to newest (dark)."""
+        """Plot all trigger sets with simple blue color."""
         try:
             if not self.trigger_sets:
                 return
 
             self.graph_manager.clear()
 
-            num_sets = len(self.trigger_sets)
-
             for i, window_data in enumerate(self.trigger_sets):
-
-                intensity = 0.3 + (i / (num_sets - 1)) * 0.7 if num_sets > 1 else 1.0
-
                 x_data = list(range(len(window_data)))
 
-                blue_value = int(255 * intensity)
-                color = f"#{0:02x}{0:02x}{blue_value:02x}"
-
-                self.graph_manager.plot_line(x_data, window_data, color=color)
+                self.graph_manager.plot_line(x_data, window_data, color="blue")
 
                 self.graph_manager.ax.lines[-1].set_marker("")
 

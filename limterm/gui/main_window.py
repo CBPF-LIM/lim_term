@@ -38,19 +38,25 @@ class MainWindow:
         self.root.config(menu=menubar)
 
         self.view_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label=t("ui.main_window.view_menu_label"), menu=self.view_menu)
+        menubar.add_cascade(
+            label=t("ui.main_window.view_menu_label"), menu=self.view_menu
+        )
 
         self.view_menu.add_command(
-            label=t("ui.main_window.config_tab_shortcut"), command=lambda: self._switch_to_tab(0)
+            label=t("ui.main_window.config_tab_shortcut"),
+            command=lambda: self._switch_to_tab(0),
         )
         self.view_menu.add_command(
-            label=t("ui.main_window.data_tab_shortcut"), command=lambda: self._switch_to_tab(1)
+            label=t("ui.main_window.data_tab_shortcut"),
+            command=lambda: self._switch_to_tab(1),
         )
         self.view_menu.add_command(
-            label=t("ui.main_window.graph_tab_shortcut"), command=lambda: self._switch_to_tab(2)
+            label=t("ui.main_window.graph_tab_shortcut"),
+            command=lambda: self._switch_to_tab(2),
         )
         self.view_menu.add_command(
-            label=t("ui.main_window.osc_tab_shortcut"), command=lambda: self._switch_to_tab(3)
+            label=t("ui.main_window.osc_tab_shortcut"),
+            command=lambda: self._switch_to_tab(3),
         )
 
         self.view_menu.add_separator()

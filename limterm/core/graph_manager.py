@@ -1,11 +1,8 @@
-import matplotlib
-
-matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
-
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from ..config import FIGURE_SIZE, FIGURE_DPI
 from ..i18n import t
+from ..matplotlib_optimizations import get_optimized_figure_params
 
 
 class GraphManager:
@@ -13,6 +10,14 @@ class GraphManager:
         self.figure = plt.Figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
         self.ax = self.figure.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(self.figure, parent_widget)
+
+        params = get_optimized_figure_params()
+        self.figure.patch.set_visible(params["patch_visible"])
+        self.figure.patch.set_facecolor(params["facecolor"])
+        self.ax.set_axisbelow(params["axisbelow"])
+        self.ax.spines["top"].set_visible(params["spines_top"])
+        self.ax.spines["right"].set_visible(params["spines_right"])
+        self.ax.tick_params(top=params["ticks_top"], right=params["ticks_right"])
 
     def get_widget(self):
         return self.canvas.get_tk_widget()
@@ -159,7 +164,12 @@ class GraphManager:
             plotted_series += 1
 
         if plotted_series > 1:
-            self.ax.legend(loc="upper right")
+            params = get_optimized_figure_params()
+            self.ax.legend(
+                loc="upper right",
+                framealpha=params["legend_framealpha"],
+                facecolor=params["legend_facecolor"],
+            )
 
         if settings_list:
             first_settings = settings_list[0]
@@ -235,10 +245,15 @@ class GraphManager:
             ylabel_text = ylabel or t("common.value")
 
         self.ax.stackplot(
-            x_list, *y_lists, labels=labels, colors=actual_colors, alpha=0.8
+            x_list, *y_lists, labels=labels, colors=actual_colors, alpha=1.0
         )
 
-        self.ax.legend(loc="upper right")
+        params = get_optimized_figure_params()
+        self.ax.legend(
+            loc="upper right",
+            framealpha=params["legend_framealpha"],
+            facecolor=params["legend_facecolor"],
+        )
 
         self.set_labels(
             title=title or t("ui.graph_tab.stacked_chart_title"),

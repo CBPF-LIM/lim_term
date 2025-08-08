@@ -295,7 +295,11 @@ class ConfigTab:
                     self.signal_handler.set_busy(True)
 
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
-                status_text = t("ui.config_tab.connected_hardware_status", port=port, baudrate=baudrate)
+                status_text = t(
+                    "ui.config_tab.connected_hardware_status",
+                    port=port,
+                    baudrate=baudrate,
+                )
                 self.status_label.config(text=status_text, foreground="black")
                 self._show_connection_info(mode, port, baudrate)
 

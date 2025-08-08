@@ -18,7 +18,7 @@ class LanguageValidator:
     def load_yaml(self, file_path):
         """Load YAML file and return its content."""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 return yaml.safe_load(f)
         except Exception as e:
             print(f"Error loading {file_path}: {e}")
@@ -49,7 +49,6 @@ class LanguageValidator:
 
         lang_keys = self.get_keys_recursive(lang_data)
 
-        # Find missing keys
         missing_keys = en_keys - lang_keys
         if missing_keys:
             print(f"❌ Missing keys in {lang_file.name}:")
@@ -57,7 +56,6 @@ class LanguageValidator:
                 print(f"   - {key}")
             self.errors_found = True
 
-        # Find extra keys
         extra_keys = lang_keys - en_keys
         if extra_keys:
             print(f"❌ Extra keys in {lang_file.name}:")
@@ -75,7 +73,6 @@ class LanguageValidator:
         """Validate that all language files have the same number of lines."""
         print(f"\n--- Validating Line Counts ---")
 
-        # Get all language files including en.yml
         lang_files = list(self.languages_dir.glob("*.yml"))
 
         if not lang_files:
@@ -83,11 +80,10 @@ class LanguageValidator:
             self.errors_found = True
             return False
 
-        # Count lines in each file
         counts = {}
         for file_path in sorted(lang_files):
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     count = sum(1 for _ in f)
                 counts[file_path.name] = count
                 print(f"📄 {file_path.name}: {count} lines")
@@ -96,14 +92,17 @@ class LanguageValidator:
                 self.errors_found = True
                 return False
 
-        # Check if all counts are the same
         unique_counts = set(counts.values())
         if len(unique_counts) != 1:
-            print(f"❌ Line count mismatch! Files have different line counts: {sorted(unique_counts)}")
+            print(
+                f"❌ Line count mismatch! Files have different line counts: {sorted(unique_counts)}"
+            )
             self.errors_found = True
             return False
         else:
-            print(f"✅ All language files have the same line count: {list(unique_counts)[0]}")
+            print(
+                f"✅ All language files have the same line count: {list(unique_counts)[0]}"
+            )
             return True
 
     def validate_all(self):
@@ -111,7 +110,6 @@ class LanguageValidator:
         print("🔍 Language File Validator")
         print("=" * 50)
 
-        # Load English reference
         if not self.en_file.exists():
             print(f"❌ Reference file {self.en_file} not found!")
             return False
@@ -124,7 +122,6 @@ class LanguageValidator:
         en_keys = self.get_keys_recursive(en_data)
         print(f"📋 English reference has {len(en_keys)} keys")
 
-        # Find all language files
         lang_files = [f for f in self.languages_dir.glob("*.yml") if f.name != "en.yml"]
 
         if not lang_files:
@@ -133,14 +130,11 @@ class LanguageValidator:
 
         print(f"🌐 Found {len(lang_files)} language files to validate")
 
-        # Validate each file
         for lang_file in sorted(lang_files):
             self.validate_language_file(lang_file, en_keys)
 
-        # Validate line counts
         self.validate_line_counts()
 
-        # Summary
         print("\n" + "=" * 50)
         if self.errors_found:
             print("❌ Validation FAILED - Fix the issues above")
