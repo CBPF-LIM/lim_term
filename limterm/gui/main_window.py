@@ -26,6 +26,7 @@ class MainWindow:
         self._setup_serial_manager()
         self._create_menu()
         self._create_tabs()
+        self._setup_keyboard_shortcuts()
 
     def _setup_serial_manager(self):
         self.serial_manager = SerialManager(
@@ -35,6 +36,24 @@ class MainWindow:
     def _create_menu(self):
         menubar = tk.Menu(self.root)
         self.root.config(menu=menubar)
+
+        self.view_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label=t("ui.main_window.view_menu_label"), menu=self.view_menu)
+
+        self.view_menu.add_command(
+            label=t("ui.main_window.config_tab_shortcut"), command=lambda: self._switch_to_tab(0)
+        )
+        self.view_menu.add_command(
+            label=t("ui.main_window.data_tab_shortcut"), command=lambda: self._switch_to_tab(1)
+        )
+        self.view_menu.add_command(
+            label=t("ui.main_window.graph_tab_shortcut"), command=lambda: self._switch_to_tab(2)
+        )
+        self.view_menu.add_command(
+            label=t("ui.main_window.osc_tab_shortcut"), command=lambda: self._switch_to_tab(3)
+        )
+
+        self.view_menu.add_separator()
 
         self.language_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Language", menu=self.language_menu)
@@ -187,3 +206,29 @@ class MainWindow:
     def _on_window_close(self):
         """Handle window close button click"""
         self.signal_handler.request_exit()
+
+    def _setup_keyboard_shortcuts(self):
+        """Set up keyboard shortcuts for tab navigation"""
+
+        self.root.bind("<Control-1>", lambda e: self._switch_to_tab(0))
+        self.root.bind("<Control-2>", lambda e: self._switch_to_tab(1))
+        self.root.bind("<Control-3>", lambda e: self._switch_to_tab(2))
+        self.root.bind("<Control-4>", lambda e: self._switch_to_tab(3))
+
+        self.root.bind("<Control-Key-1>", lambda e: self._switch_to_tab(0))
+        self.root.bind("<Control-Key-2>", lambda e: self._switch_to_tab(1))
+        self.root.bind("<Control-Key-3>", lambda e: self._switch_to_tab(2))
+        self.root.bind("<Control-Key-4>", lambda e: self._switch_to_tab(3))
+
+        self.root.focus_set()
+        self.root.focus_force()
+
+    def _switch_to_tab(self, tab_index):
+        """Switch to the specified tab"""
+        try:
+            if hasattr(self, "tab_control") and tab_index < self.tab_control.index(
+                "end"
+            ):
+                self.tab_control.select(tab_index)
+        except tk.TclError:
+            pass

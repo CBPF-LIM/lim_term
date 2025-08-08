@@ -276,7 +276,7 @@ class ConfigTab:
                 self.synthetic_generator = None
             self.connect_button.config(text=t("ui.config_tab.connect"))
             self.status_label.config(
-                text=t("ui.config_tab.not_connected"), foreground="red"
+                text=f"🔴 {t('ui.config_tab.not_connected')}", foreground="red"
             )
             self._set_equation_widgets_state("normal")
             self._show_config_interface()
@@ -295,9 +295,8 @@ class ConfigTab:
                     self.signal_handler.set_busy(True)
 
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
-                self.status_label.config(
-                    text=t("ui.config_tab.connected"), foreground="green"
-                )
+                status_text = t("ui.config_tab.connected_hardware_status", port=port, baudrate=baudrate)
+                self.status_label.config(text=status_text, foreground="black")
                 self._show_connection_info(mode, port, baudrate)
 
         elif mode == "synthetic":
@@ -316,9 +315,9 @@ class ConfigTab:
                     self.signal_handler.set_busy(True)
 
                 self.connect_button.config(text=t("ui.config_tab.disconnect"))
-                self.status_label.config(
-                    text=t("ui.config_tab.connected"), foreground="green"
-                )
+
+                status_text = t("ui.config_tab.connected_synthetic_status", fps=fps)
+                self.status_label.config(text=status_text, foreground="black")
                 self._set_equation_widgets_state("disabled")
                 self._show_connection_info(mode, "SYNTHETIC_MODE", "N/A")
             except Exception as e:
@@ -327,12 +326,36 @@ class ConfigTab:
         else:
             print(t("ui.config_tab.mode_unknown_error").format(mode=mode))
 
+    def _set_connection_widgets_state(self, state):
+        """Enable or disable connection-related widgets"""
+        try:
+
+            combo_state = "readonly" if state == "normal" else "disabled"
+
+            if hasattr(self, "mode_combobox"):
+                self.mode_combobox.config(state=combo_state)
+
+            if hasattr(self, "port_combobox"):
+                self.port_combobox.config(state=combo_state)
+
+            if hasattr(self, "baudrate_combobox"):
+                self.baudrate_combobox.config(state=combo_state)
+
+            if hasattr(self, "refresh_button"):
+                self.refresh_button.config(state=state)
+
+        except Exception as e:
+            print(f"Error setting widget state: {e}")
+
     def _show_config_interface(self):
 
+        self.mode_frame.grid(column=0, row=0, padx=(0, 5), pady=5, sticky="nsew")
+        self._set_connection_widgets_state("normal")
         self._on_mode_changed()
 
     def _show_connection_info(self, mode, port, baudrate):
-        self.mode_frame.grid_remove()
+
+        self._set_connection_widgets_state("disabled")
 
     def _load_preferences(self):
 

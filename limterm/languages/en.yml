@@ -6,6 +6,11 @@ ui:
   main_window:
     title: "Lim Terminal"
     restart_required: "To update the language, close and reopen the application."
+    view_menu_label: "View"
+    config_tab_shortcut: "Config Tab (Ctrl+1)"
+    data_tab_shortcut: "Data Tab (Ctrl+2)" 
+    graph_tab_shortcut: "Graph Tab (Ctrl+3)"
+    osc_tab_shortcut: "Oscilloscope Tab (Ctrl+4)"
 
   tabs:
     configuration: "Configuration"
@@ -41,6 +46,8 @@ ui:
     status: "Status"
     not_connected: "Not connected"
     connected: "Connected"
+    connected_hardware_status: "🟢 Connected | Mode: Hardware | Port: {port} | Baudrate: {baudrate} bps"
+    connected_synthetic_status: "🟢 Connected | Mode: Synthetic | FPS: {fps}"
 
   data_tab:
     save: "Save"

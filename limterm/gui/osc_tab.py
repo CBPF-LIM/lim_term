@@ -173,7 +173,7 @@ class OscTab:
         self.window_size = PrefEntry(
             capture_frame,
             pref_key="osc.capture.window_size",
-            default_value="100",
+            default_value="25",
             width=8,
         )
         self.window_size.grid(column=1, row=0, padx=5, pady=2)
