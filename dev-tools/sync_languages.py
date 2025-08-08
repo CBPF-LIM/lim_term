@@ -225,11 +225,31 @@ class LanguageSynchronizer:
             return None
 
     def save_yaml_preserve_order(self, data, file_path):
-        """Save YAML file with proper formatting."""
+        """Save YAML file with proper formatting, preserving literal \\n strings."""
         try:
-            # First, save normally
-            with open(file_path, 'w', encoding='utf-8') as f:
-                yaml.dump(data, f, default_flow_style=False, allow_unicode=True, indent=2, sort_keys=False)
+            # Custom representer to preserve \n sequences in strings
+            def str_presenter(dumper, data):
+                if '\n' in data:
+                    # For strings containing \n, use quoted style to preserve the literal \n
+                    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='"')
+                # For regular strings, use default style
+                return dumper.represent_scalar('tag:yaml.org,2002:str', data)
+            
+            # Add the custom representer just for this operation
+            yaml.add_representer(str, str_presenter)
+            
+            try:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    yaml.dump(data, f, 
+                             default_flow_style=False, 
+                             allow_unicode=True, 
+                             indent=2, 
+                             sort_keys=False,
+                             width=1000)
+            finally:
+                # Reset the representer to avoid affecting other code
+                yaml.add_representer(str, yaml.representer.SafeRepresenter.represent_str)
+                
             return True
         except Exception as e:
             print(f"Error saving {file_path}: {e}")
