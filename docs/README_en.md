@@ -4,7 +4,7 @@
 
 </div>
 
-<p align="center"><b>Lim Terminal</b> — Comunicação serial e visualização de dados em tempo real.</p>
+<p align="center"><b>Lim Terminal</b> — Serial communication and real‑time data visualization.</p>
 
 <p align="center">
   <a href="README_en.md">EN</a> ·
@@ -16,8 +16,8 @@
 
 ---
 
-Lim Terminal é uma ferramenta multiplataforma para comunicação serial e visualização de dados.
+Lim Terminal is a cross‑platform tool for serial communication and data visualization.
 
 - Download: <a href="https://github.com/CBPF-LIM/lim_term/releases">https://github.com/CBPF-LIM/lim_term/releases</a>
-- Manual completo: <a href="manual/en/index.md">manual/en/index.md</a>
+- Full manual: <a href="manual/en/index.md">manual/en/index.md</a>
 
