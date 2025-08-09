@@ -17,4 +17,4 @@
 ---
 
 - Download the latest release: [https://github.com/CBPF-LIM/lim_term/releases]()
-- Full manual: [https://github.com/CBPF-LIM/lim_term/blob/main/docs/manual/en/index.md]()
+- Full manual [HERE](https://github.com/CBPF-LIM/lim_term/blob/main/docs/manual/en/index.md)
