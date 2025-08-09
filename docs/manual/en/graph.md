@@ -17,10 +17,10 @@ Each line of data is automatically split into columns and assigned an index. You
 - **Data format:** Input must be line-based, with columns separated by spaces or tabs.
 - **Axis selection:** Choose one column for the X axis and one or more columns for the Y axes.
 - **Window size:** Set the number of most recent lines to display
-- **Update frequency:** Adjust how often the chart refreshes. This affects only the display, not the data, and can help reduce CPU usage.
+- **Update frequency:** Chart refresh rate. This affects only the display, not the data, and can help reduce CPU usage.
 - **Export options:**
   - Save the current chart as a PNG image
-  - Export raw data as text
+  - Export raw data as plain text
 - **Customization:** Modify colors, markers, and line styles.
 
 ## XY Charts
