@@ -33,12 +33,14 @@ Use the Configuration tab to connect to real hardware or generate synthetic data
 
 Switch to Synthetic mode and define equations for columns. Useful for testing without hardware.
 
-- Equations:
-  - Use retro reference of `a`, `b`, `c` and `d`.
-  - There is a hidden `n` counter, which is the index of the generated line.
-  - Button to show all supported math functions.
-  - Do not need to use, for example, `math.sin()`. Just use `sin()`.
-- FPS control the line generation speed, which is (1000/FPS) milliseconds.
+- **Equations:**
+  - Reference columns as `a`, `b`, `c`, and `d`.
+  - Use the hidden counter `n` for the current row index.
+  - Click the button to view all available math functions.
+  - Math functions can be used directly, e.g., `sin()`, `cos()`, without the `math.` prefix.
+- **FPS:**
+  - Controls the data generation speed.
+  - Each line is generated every `(1000 / FPS)` milliseconds.
 
 <p align="center">
   <a href="index.md">Index</a> ·
