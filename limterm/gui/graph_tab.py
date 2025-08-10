@@ -15,6 +15,7 @@ from ..utils import (
     get_original_marker_from_internal,
     get_default_series_hex_colors,
 )
+import time
 
 
 class GraphTab:
@@ -420,55 +421,64 @@ class GraphTab:
         pass
 
     def plot_graph(self):
+        if (
+            not hasattr(self, "x_column_entry")
+            or not self.x_column_entry.winfo_exists()
+        ):
+            return
+        if (
+            not hasattr(self, "data_window_entry")
+            or not self.data_window_entry.winfo_exists()
+        ):
+            return
+        if (
+            not hasattr(self, "group_combobox")
+            or not self.group_combobox.winfo_exists()
+        ):
+            return
+
+        # Parse inputs with narrow validation
         try:
-            if (
-                not hasattr(self, "x_column_entry")
-                or not self.x_column_entry.winfo_exists()
-            ):
-                return
-            if (
-                not hasattr(self, "data_window_entry")
-                or not self.data_window_entry.winfo_exists()
-            ):
-                return
-            if (
-                not hasattr(self, "group_combobox")
-                or not self.group_combobox.winfo_exists()
-            ):
-                return
-
             x_col = int(self.x_column_entry.get_value()) - 1
+        except ValueError:
+            self.data_tab.add_message(
+                t("ui.graph_tab.parameter_error").format(
+                    error=t("ui.graph_tab.invalid_x_column")
+                )
+            )
+            return
 
-            if x_col < 0:
-                raise ValueError(t("ui.graph_tab.positive_numbers"))
+        if x_col < 0:
+            self.data_tab.add_message(
+                t("ui.graph_tab.parameter_error").format(
+                    error=t("ui.graph_tab.positive_numbers")
+                )
+            )
+            return
 
-            data_lines = self.data_tab.get_data()
-            if not data_lines:
-                return
+        data_lines = self.data_tab.get_data()
+        if not data_lines:
+            return
 
-            data_window_str = self.data_window_entry.get_value()
+        data_window_str = self.data_window_entry.get_value()
+        try:
             data_window = int(data_window_str) if data_window_str else 0
-            if data_window > 0:
-                data_lines = data_lines[-data_window:]
+        except ValueError:
+            data_window = 0
+        if data_window > 0:
+            data_lines = data_lines[-data_window:]
 
-            x_data, _ = DataParser.extract_columns(data_lines, x_col, 0)
-            if not x_data:
-                self.data_tab.add_message(t("ui.graph_tab.could_not_extract_data"))
-                return
+        x_data, _ = DataParser.extract_columns(data_lines, x_col, 0)
+        if not x_data:
+            self.data_tab.add_message(t("ui.graph_tab.could_not_extract_data"))
+            return
 
-            group = self.group_combobox.get_value()
+        group = self.group_combobox.get_value()
 
-            if group == "stacked":
-                self._plot_stacked_chart(x_data, data_lines, x_col)
-            else:
-                self._plot_time_series_chart(x_data, data_lines, x_col)
-
-        except tk.TclError as e:
-            pass
-        except ValueError as e:
-            self.data_tab.add_message(t("ui.graph_tab.parameter_error").format(error=e))
-        except Exception as e:
-            self.data_tab.add_message(t("ui.graph_tab.graph_error").format(error=e))
+        if group == "stacked":
+            self._plot_stacked_chart(x_data, data_lines, x_col)
+        else:
+            self._plot_time_series_chart(x_data, data_lines, x_col)
 
     def _plot_time_series_chart(self, x_data, data_lines, x_col):
         y_series_data = []
@@ -601,43 +611,33 @@ class GraphTab:
         self._refresh_chart()
 
     def _refresh_chart(self):
-        try:
-            if not self.is_paused:
-                data_lines = self.data_tab.get_data()
-                if data_lines:
-                    if self.debug_refresh:
-                        self.refresh_counter += 1
-                        fps_actual = 1000 / self.refresh_rate_ms
-                        print(
-                            f"Chart refresh #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Fixed Rate"
-                        )
-
+        if not self.is_paused:
+            data_lines = self.data_tab.get_data()
+            if data_lines:
+                if self.debug_refresh:
+                    self.refresh_counter += 1
+                    fps_actual = 1000 / self.refresh_rate_ms
+                    print(
+                        f"Chart refresh #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Fixed Rate"
+                    )
+                try:
                     self.plot_graph()
-        except Exception as e:
-            if self.debug_refresh:
-                print(f"Chart refresh error: {e}")
-        finally:
-            if hasattr(self, "frame") and self.frame.winfo_exists():
-                self.refresh_timer_id = self.frame.after(
-                    self.refresh_rate_ms, self._refresh_chart
-                )
+                except Exception as e:
+                    if self.debug_refresh:
+                        print(f"Chart refresh error: {e}")
+        if hasattr(self, "frame") and self.frame.winfo_exists():
+            self.refresh_timer_id = self.frame.after(
+                self.refresh_rate_ms, self._refresh_chart
+            )
 
     def _stop_refresh_timer(self):
-        if self.refresh_timer_id:
-            try:
-                self.frame.after_cancel(self.refresh_timer_id)
-            except Exception:
-                pass
-            self.refresh_timer_id = None
+        if self.refresh_timer_id and hasattr(self, "frame") and self.frame.winfo_exists():
+            self.frame.after_cancel(self.refresh_timer_id)
+        self.refresh_timer_id = None
 
-    def _set_refresh_rate(self, fps):
-        try:
-            fps = float(fps)
-            if fps <= 0:
-                return
+    def _set_refresh_rate(self, fps: float):
+        if fps and fps > 0:
             self.refresh_rate_ms = int(1000 / fps)
-        except Exception:
-            pass
 
     def cleanup(self):
         self._stop_refresh_timer()
@@ -649,18 +649,15 @@ class GraphTab:
             pass
 
     def _on_fps_change(self, event=None):
+        value = self.fps_combobox.get_value()
         try:
-            fps = float(self.fps_combobox.get_value())
-            self._set_refresh_rate(fps)
-            self.fps_debug_label.config(
-                text=f"({int(fps)} Hz = {self.refresh_rate_ms}ms)"
-            )
-            import time
-
-            self.last_render_time = time.time()
-            self.refresh_counter = 0
-        except Exception:
-            pass
+            fps = float(value)
+        except ValueError:
+            return
+        self._set_refresh_rate(fps)
+        self.fps_debug_label.config(text=f"({int(fps)} Hz = {self.refresh_rate_ms}ms)")
+        self.last_render_time = time.time()
+        self.refresh_counter = 0
 
     def set_tab_active(self, is_active):
         self.is_tab_active = is_active
@@ -677,20 +674,17 @@ class GraphTab:
         return (current_time - self.last_render_time) >= refresh_interval
 
     def render_frame(self):
-        import time
-
-        try:
-            data_lines = self.data_tab.get_data()
-            if data_lines:
-                self.refresh_counter += 1
-                if self.debug_refresh:
-                    fps_actual = 1000 / self.refresh_rate_ms
-                    print(
-                        f"Render frame #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Game Loop Style"
-                    )
-                self.plot_graph()
-            self.last_render_time = time.time()
-        except Exception as e:
+        data_lines = self.data_tab.get_data()
+        if data_lines:
+            self.refresh_counter += 1
             if self.debug_refresh:
-                print(f"Render frame error: {e}")
-            self.last_render_time = time.time()
+                fps_actual = 1000 / self.refresh_rate_ms
+                print(
+                    f"Render frame #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Game Loop Style"
+                )
+            try:
+                self.plot_graph()
+            except Exception as e:
+                if self.debug_refresh:
+                    print(f"Render frame error: {e}")
+        self.last_render_time = time.time()
