@@ -43,7 +43,7 @@ class GraphTab:
         return self.frame
 
     def _create_widgets(self):
-        # Build toolbar, settings panel, and chart area
+                                                       
         self._create_toolbar()
         self._create_settings_panel()
         self._create_chart_area()
@@ -299,7 +299,7 @@ class GraphTab:
     def _create_series_widgets(self):
 
         group = self.group_combobox.get_value()
-        # Clear previous series widgets
+                                       
         for child in self.series_config_frame.winfo_children():
             child.destroy()
         self.series_widgets = []
@@ -433,7 +433,7 @@ class GraphTab:
         if not (hasattr(self, "group_combobox") and widget_exists(self.group_combobox)):
             return
 
-        # Parse inputs with narrow validation
+                                             
         try:
             x_col = int(self.x_column_entry.get_value()) - 1
         except ValueError as e:
