@@ -8,6 +8,7 @@ import os
 import datetime
 import time
 from collections import deque
+from ..config import CAPTURE_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -279,7 +280,7 @@ class DataTab:
 
     def _setup_capture_file(self):
         try:
-            capture_dir = "lim_captures"
+            capture_dir = CAPTURE_DIR
             if not os.path.exists(capture_dir):
                 os.makedirs(capture_dir)
 
@@ -420,7 +421,7 @@ class DataTab:
     def _save_data(self):
         buffer_lines = list(self.data_buffer)
         if buffer_lines:
-            capture_dir = "lim_captures"
+            capture_dir = CAPTURE_DIR
             if not os.path.exists(capture_dir):
                 os.makedirs(capture_dir)
 
@@ -457,36 +458,6 @@ class DataTab:
                     )
                 except Exception as e:
                     self._add_message(t("ui.data_tab.error_saving").format(error=e))
-
-    def _save_buffer_to_file(self, file_manager):
-        if not self.data_buffer:
-            return False
-
-        try:
-
-            lines = []
-            current_time = time.time()
-            for line in self.data_buffer:
-                if (
-                    self.timestamp_enabled.get_value()
-                    and self.timestamp_start is not None
-                ):
-
-                    elapsed = current_time - self.timestamp_start
-                    hours = int(elapsed // 3600)
-                    minutes = int((elapsed % 3600) // 60)
-                    seconds = elapsed % 60
-                    timestamp = f"{hours:02d}:{minutes:02d}:{seconds:06.3f} "
-                    lines.append(timestamp + line)
-                else:
-                    lines.append(line)
-
-            content = "\n".join(lines)
-            file_manager.set_content(content)
-            return True
-        except Exception as e:
-            print(f"Error saving data buffer: {e}")
-            return False
 
     def add_data(self, line):
         self.data_buffer.append(line)

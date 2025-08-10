@@ -27,6 +27,8 @@ DEFAULT_Y_COLUMN = "3"
 
 DEFAULT_REFRESH_RATE = 10
 
+CAPTURE_DIR = "lim_captures"
+
 COLOR_KEYS = [
     "blue",
     "cyan",
