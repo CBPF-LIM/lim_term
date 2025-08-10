@@ -14,9 +14,12 @@ def _find_docstring_ranges(source: str):
         return ranges
 
     # Module docstring
-    if tree.body and isinstance(tree.body[0], ast.Expr) and isinstance(
-        getattr(tree.body[0], "value", None), ast.Constant
-    ) and isinstance(tree.body[0].value.value, str):
+    if (
+        tree.body
+        and isinstance(tree.body[0], ast.Expr)
+        and isinstance(getattr(tree.body[0], "value", None), ast.Constant)
+        and isinstance(tree.body[0].value.value, str)
+    ):
         node = tree.body[0]
         ranges.append((node.lineno, getattr(node, "end_lineno", node.lineno)))
 
@@ -24,9 +27,12 @@ def _find_docstring_ranges(source: str):
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             body = getattr(node, "body", [])
-            if body and isinstance(body[0], ast.Expr) and isinstance(
-                getattr(body[0], "value", None), ast.Constant
-            ) and isinstance(body[0].value.value, str):
+            if (
+                body
+                and isinstance(body[0], ast.Expr)
+                and isinstance(getattr(body[0], "value", None), ast.Constant)
+                and isinstance(body[0].value.value, str)
+            ):
                 ds = body[0]
                 ranges.append((ds.lineno, getattr(ds, "end_lineno", ds.lineno)))
 

@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import ttk
 import time
@@ -20,12 +19,11 @@ class OscTab:
 
         self.is_armed = False
         self.trigger_sets = []
-        self.max_sets = 4                                       
+        self.max_sets = 4
 
-        self.update_interval_ms = 33                                           
+        self.update_interval_ms = 33
         self.update_timer_id = None
 
-                                                   
         self.most_recent_trigger_idx = None
         self.current_values = []
 
@@ -211,12 +209,11 @@ class OscTab:
             return
 
         try:
-                                                            
+
             if self.is_armed:
                 self._process_data_directly()
-                self._plot_sets()                                
+                self._plot_sets()
 
-                                  
             self.update_timer_id = self.frame.after(
                 self.update_interval_ms, self._start_update_loop
             )
@@ -225,12 +222,11 @@ class OscTab:
 
     def _process_data_directly(self):
         try:
-                         
+
             data_lines = self.data_tab.get_data()
             if not data_lines or len(data_lines) < 10:
                 return
 
-                          
             try:
                 column = int(self.trigger_source.get_value())
                 trigger_level = float(self.trigger_level.get_value())
@@ -239,9 +235,8 @@ class OscTab:
             except (ValueError, AttributeError):
                 return
 
-                                             
             values = []
-            for line in reversed(data_lines[-200:]):                            
+            for line in reversed(data_lines[-200:]):
                 try:
                     parts = line.strip().split()
                     if len(parts) > column:
@@ -250,18 +245,17 @@ class OscTab:
                 except (ValueError, IndexError):
                     continue
 
-            if len(values) < window_size + 5:                                          
+            if len(values) < window_size + 5:
                 return
 
-            values.reverse()                               
+            values.reverse()
 
-                                                                 
             complete_sets = []
             most_recent_trigger_idx = None
 
             i = 1
-            while i < len(values) - 1:                         
-                                             
+            while i < len(values) - 1:
+
                 triggered = False
                 if (
                     trigger_edge == "rising"
@@ -280,30 +274,25 @@ class OscTab:
                     triggered = True
 
                 if triggered:
-                    most_recent_trigger_idx = i                                 
+                    most_recent_trigger_idx = i
 
-                                                           
                     if i + window_size <= len(values):
-                                                
+
                         window_data = values[i : i + window_size]
                         complete_sets.append(window_data)
-                        i += (
-                            window_size // 2
-                        )                                            
+                        i += window_size // 2
                     else:
-                                                                                              
+
                         break
                 else:
                     i += 1
 
-                                                               
             if complete_sets:
                 self.trigger_sets.extend(complete_sets)
-                                                                                     
+
                 if len(self.trigger_sets) > self.max_sets - 1:
                     self.trigger_sets = self.trigger_sets[-(self.max_sets - 1) :]
 
-                                                        
             self.most_recent_trigger_idx = most_recent_trigger_idx
             self.current_values = values
 
@@ -314,44 +303,39 @@ class OscTab:
         try:
             self.graph_manager.clear()
 
-                                        
             for window_data in self.trigger_sets:
                 x_data = list(range(len(window_data)))
                 self.graph_manager.plot_line(x_data, window_data, color="blue")
 
-                                                                             
             if hasattr(self, "most_recent_trigger_idx") and hasattr(
                 self, "current_values"
             ):
                 if self.most_recent_trigger_idx is not None and self.current_values:
-                                                                                   
+
                     incomplete_data = self.current_values[
                         self.most_recent_trigger_idx :
                     ]
 
-                                                         
                     try:
                         window_size = int(self.window_size.get_value())
                         if len(incomplete_data) > window_size:
                             incomplete_data = incomplete_data[:window_size]
                     except (ValueError, AttributeError):
-                        pass                                          
+                        pass
 
-                    if len(incomplete_data) > 1:                                        
+                    if len(incomplete_data) > 1:
                         x_data = list(range(len(incomplete_data)))
-                                                                        
+
                         self.graph_manager.plot_line(
                             x_data, incomplete_data, color="#1760ff"
                         )
 
-                                    
             if self.trigger_sets or (
                 hasattr(self, "most_recent_trigger_idx")
                 and self.most_recent_trigger_idx
             ):
                 trigger_level = float(self.trigger_level.get_value())
 
-                                                      
                 all_lengths = [len(data) for data in self.trigger_sets]
                 if (
                     hasattr(self, "current_values")
@@ -362,7 +346,6 @@ class OscTab:
                         len(self.current_values) - self.most_recent_trigger_idx
                     )
 
-                                                            
                     try:
                         window_size = int(self.window_size.get_value())
                         incomplete_len = min(incomplete_len, window_size)
