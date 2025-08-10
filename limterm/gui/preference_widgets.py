@@ -1,9 +1,3 @@
-"""
-Preference-aware wrapper widgets that automatically save/load values from configuration.
-
-This module provides wrapper classes around standard tkinter widgets that automatically
-handle preference persistence without requiring manual event binding or save/load logic.
-"""
 
 import tkinter as tk
 from tkinter import ttk
@@ -12,16 +6,6 @@ from ..i18n import get_config_manager
 
 
 class PreferenceWidget:
-    """
-    Base wrapper class for tkinter widgets that automatically handles preference persistence.
-
-    This wrapper:
-    1. Creates the underlying tkinter widget with provided parameters
-    2. Automatically loads initial value from preferences
-    3. Binds to appropriate change events based on widget type
-    4. Saves values to preferences immediately when changed
-    5. Exposes all methods/properties of the underlying widget
-    """
 
     def __init__(
         self,
@@ -34,19 +18,6 @@ class PreferenceWidget:
         value_mapping: Optional[Dict[str, str]] = None,
         **widget_kwargs,
     ):
-        """
-        Initialize a preference-aware widget wrapper.
-
-        Args:
-            widget_class: The tkinter widget class (e.g., tk.Entry, ttk.Combobox)
-            parent: Parent tkinter widget
-            pref_key: Dot-notation preference key (e.g., 'graph.general.x_column')
-            default_value: Default value if not found in preferences
-            value_type: Type for value conversion (str, int, float, bool)
-            on_change: Optional callback when value changes (called after saving to prefs)
-            value_mapping: Dict mapping display labels to stored values (for comboboxes)
-            **widget_kwargs: All other parameters passed to the widget constructor
-        """
         self.pref_key = pref_key
         self.default_value = default_value
         self.value_type = value_type
@@ -67,7 +38,6 @@ class PreferenceWidget:
         self._load_from_preferences()
 
     def _parse_pref_key(self):
-        """Parse the dot-notation preference key into section and key parts."""
         parts = self.pref_key.split(".")
         if len(parts) < 2:
             raise ValueError(
@@ -78,7 +48,6 @@ class PreferenceWidget:
         self.pref_name = parts[-1]
 
     def _setup_preference_handling(self):
-        """Set up automatic change detection based on widget type."""
         widget_type = type(self.widget).__name__
 
         if widget_type in ["Entry"]:
@@ -124,7 +93,6 @@ class PreferenceWidget:
                 pass
 
     def _on_change_event(self, event=None):
-        """Handle change events for most widget types."""
         try:
             self._save_to_preferences()
             if self.on_change:
@@ -133,7 +101,6 @@ class PreferenceWidget:
             print(f"Warning: Could not save preference {self.pref_key}: {e}")
 
     def _on_checkbutton_change(self, original_command):
-        """Handle Checkbutton changes."""
         try:
             self._save_to_preferences()
             if self.on_change:
@@ -144,7 +111,6 @@ class PreferenceWidget:
             print(f"Warning: Could not save preference {self.pref_key}: {e}")
 
     def _on_scale_change(self, value, original_command):
-        """Handle Scale changes."""
         try:
             self._save_to_preferences()
             if self.on_change:
@@ -155,7 +121,6 @@ class PreferenceWidget:
             print(f"Warning: Could not save preference {self.pref_key}: {e}")
 
     def _get_widget_value(self) -> Any:
-        """Get the current value from the widget."""
         widget_type = type(self.widget).__name__
 
         if widget_type in ["Entry", "Spinbox"]:
@@ -190,7 +155,6 @@ class PreferenceWidget:
                 )
 
     def _set_widget_value(self, value: Any):
-        """Set the widget value."""
         widget_type = type(self.widget).__name__
 
         if widget_type in ["Entry", "Spinbox"]:
@@ -230,7 +194,6 @@ class PreferenceWidget:
                 )
 
     def _convert_value(self, value: Any) -> Any:
-        """Convert value to the specified type."""
         if value is None:
             return self.default_value
 
@@ -252,7 +215,6 @@ class PreferenceWidget:
             return self.default_value
 
     def _load_from_preferences(self):
-        """Load the initial value from preferences."""
         try:
             saved_value = self.config_manager.load_tab_setting(
                 self.pref_section, self.pref_name, self.default_value
@@ -265,7 +227,6 @@ class PreferenceWidget:
                 self._set_widget_value(self.default_value)
 
     def _save_to_preferences(self):
-        """Save the current widget value to preferences."""
         try:
             current_value = self._get_widget_value()
             converted_value = self._convert_value(current_value)
@@ -276,12 +237,10 @@ class PreferenceWidget:
             print(f"Warning: Could not save preference {self.pref_key}: {e}")
 
     def get_value(self):
-        """Get the current widget value, converted to the specified type."""
         raw_value = self._get_widget_value()
         return self._convert_value(raw_value)
 
     def set_value(self, value):
-        """Set the widget value and save to preferences."""
         converted_value = self._convert_value(value)
         self._set_widget_value(converted_value)
         self._save_to_preferences()
@@ -289,7 +248,6 @@ class PreferenceWidget:
     def refresh_language_mapping(
         self, new_value_mapping: Optional[Dict[str, str]] = None
     ):
-        """Update the value mapping when language changes and reload the current value."""
         if new_value_mapping is not None:
             self.value_mapping = new_value_mapping
             self.reverse_mapping = {v: k for k, v in self.value_mapping.items()}
@@ -302,7 +260,6 @@ class PreferenceWidget:
                 self._load_from_preferences()
 
     def __getattr__(self, name):
-        """Delegate all other attribute access to the underlying widget."""
         return getattr(self.widget, name)
 
 
@@ -313,7 +270,6 @@ def PrefEntry(
     on_change: Optional[Callable] = None,
     **kwargs,
 ) -> PreferenceWidget:
-    """Create a preference-aware Entry widget."""
     return PreferenceWidget(
         tk.Entry, parent, pref_key, default_value, str, on_change, **kwargs
     )
@@ -327,7 +283,6 @@ def PrefCombobox(
     value_mapping: Optional[Dict[str, str]] = None,
     **kwargs,
 ) -> PreferenceWidget:
-    """Create a preference-aware Combobox widget."""
     return PreferenceWidget(
         ttk.Combobox,
         parent,
@@ -347,7 +302,6 @@ def PrefCheckbutton(
     on_change: Optional[Callable] = None,
     **kwargs,
 ) -> PreferenceWidget:
-    """Create a preference-aware Checkbutton widget."""
 
     if "variable" not in kwargs:
         kwargs["variable"] = tk.BooleanVar()
@@ -363,7 +317,6 @@ def PrefScale(
     on_change: Optional[Callable] = None,
     **kwargs,
 ) -> PreferenceWidget:
-    """Create a preference-aware Scale widget."""
     return PreferenceWidget(
         tk.Scale, parent, pref_key, default_value, float, on_change, **kwargs
     )
@@ -377,7 +330,6 @@ def PrefSpinbox(
     on_change: Optional[Callable] = None,
     **kwargs,
 ) -> PreferenceWidget:
-    """Create a preference-aware Spinbox widget."""
     return PreferenceWidget(
         tk.Spinbox, parent, pref_key, default_value, value_type, on_change, **kwargs
     )

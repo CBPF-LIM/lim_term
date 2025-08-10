@@ -343,7 +343,6 @@ class GraphTab:
             self.pause_button.config(text=t("ui.graph_tab.pause"))
 
     def _save_chart(self):
-        """Save the current chart as PNG by directly saving the existing figure"""
         from tkinter import filedialog
 
         file_path = filedialog.asksaveasfilename(
@@ -364,7 +363,6 @@ class GraphTab:
                 self.data_tab.add_message(t("ui.data_tab.error_saving").format(error=e))
 
     def _save_data(self):
-        """Save the current data to a file using the same logic as data tab"""
         valid_lines = [
             item["value"] for item in self.data_tab.data if item["type"] == "data"
         ]
@@ -430,7 +428,6 @@ class GraphTab:
             self.data_tab.add_message(t("ui.graph_tab.graph_error").format(error=e))
 
     def _plot_time_series_chart(self, x_data, data_lines, x_col):
-        """Plot time series chart using preference widgets for value access."""
         y_series_data = []
         settings_list = []
         has_data = False
@@ -517,7 +514,6 @@ class GraphTab:
         )
 
     def _get_series_settings(self, series_index):
-        """Get series settings using preference widget API for type-safe value access."""
         color = self._get_stacked_color(series_index)
 
         if series_index < len(self.series_widgets):
@@ -563,18 +559,15 @@ class GraphTab:
             self.plot_graph()
 
     def _get_translated_graph_types(self):
-        """Get translated graph type labels."""
         return [t("ui.graph_types.line"), t("ui.graph_types.scatter")]
 
     def _get_graph_type_mapping(self):
-        """Get mapping from translated labels to internal values."""
         return {
             t("ui.graph_types.line"): "line",
             t("ui.graph_types.scatter"): "scatter",
         }
 
     def _get_translated_colors(self):
-        """Get translated color labels."""
         color_keys = [
             "blue",
             "cyan",
@@ -600,7 +593,6 @@ class GraphTab:
         return [t(f"ui.colors.{color}") for color in color_keys]
 
     def _get_color_mapping(self):
-        """Get mapping from translated color labels to internal values."""
         color_keys = [
             "blue",
             "cyan",
@@ -626,7 +618,6 @@ class GraphTab:
         return {t(f"ui.colors.{color}"): color for color in color_keys}
 
     def _get_translated_markers(self):
-        """Get translated marker labels."""
         marker_keys = [
             "circle",
             "square",
@@ -642,7 +633,6 @@ class GraphTab:
         return [t(f"ui.markers.{marker}") for marker in marker_keys]
 
     def _get_marker_mapping(self):
-        """Get mapping from translated marker labels to internal values."""
         marker_keys = [
             "circle",
             "square",
@@ -658,7 +648,6 @@ class GraphTab:
         return {t(f"ui.markers.{marker}"): marker for marker in marker_keys}
 
     def _get_original_marker_from_internal(self, internal_marker):
-        """Convert internal marker name to matplotlib marker symbol."""
         marker_mapping = {
             "circle": "o",
             "square": "s",
@@ -674,7 +663,6 @@ class GraphTab:
         return marker_mapping.get(internal_marker, "o")
 
     def _get_original_marker(self, translated_marker):
-        """Convert translated marker to matplotlib marker symbol."""
         marker_mapping = {
             t("ui.markers.circle"): "o",
             t("ui.markers.square"): "s",
@@ -690,7 +678,6 @@ class GraphTab:
         return marker_mapping.get(translated_marker, "o")
 
     def _get_translated_marker_from_original(self, original_marker):
-        """Convert matplotlib marker to translated marker text"""
         for key, value in MARKER_MAPPING.items():
             if value == original_marker:
                 return t(f"ui.markers.{key}")
@@ -704,7 +691,6 @@ class GraphTab:
         return type_mapping.get(translated_type, "line")
 
     def _get_original_color_from_internal(self, internal_color):
-        """Convert internal color name to hex color."""
         color_mapping = {
             "blue": "#1f77b4",
             "cyan": "#17becf",
@@ -755,7 +741,6 @@ class GraphTab:
         return color_mapping.get(translated_color, "#1f77b4")
 
     def _on_group_change(self, event=None):
-        """Called when the visualization group changes. Preferences are automatically saved."""
         self._create_series_widgets()
         self._on_setting_change()
 
@@ -778,7 +763,6 @@ class GraphTab:
             self._create_time_series_row(self.series_config_frame, i, f"Y{i}", i - 1)
 
     def _create_time_series_row(self, parent, row, label, index):
-        """Create a time series configuration row using preference widgets."""
         ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
 
         type_combo = PrefCombobox(
@@ -822,7 +806,6 @@ class GraphTab:
         self.series_widgets = []
 
     def _get_stacked_color(self, series_index):
-        """Get color for stacked chart series using preference widget API."""
         if series_index < len(self.y_color_combos):
             internal_color = self.y_color_combos[series_index].get_value()
             return self._get_original_color_from_internal(internal_color)
@@ -834,7 +817,6 @@ class GraphTab:
         return self.frame
 
     def _on_color_setting_change(self, color_index):
-        """Called when a color setting changes. Preferences are automatically saved."""
 
         self._on_setting_change()
 
@@ -889,7 +871,6 @@ class GraphTab:
             pass
 
     def _on_fps_change(self, event=None):
-        """Called when FPS setting changes. Preferences are automatically saved."""
         try:
             fps = int(self.fps_combobox.get_value())
             self._set_refresh_rate(fps)
@@ -905,7 +886,6 @@ class GraphTab:
             pass
 
     def set_tab_active(self, is_active):
-        """Set whether this tab is currently active (optimization for rendering)."""
         self.is_tab_active = is_active
         if not is_active:
             self._stop_refresh_timer()
@@ -946,7 +926,6 @@ class GraphTab:
             self.last_render_time = time.time()
 
     def _on_normalize_change(self):
-        """Handle immediate change when normalization checkbox is clicked"""
         try:
             self._save_stacked_preferences()
 

@@ -327,7 +327,6 @@ class DataTab:
                 self.capture_filename = None
 
     def _refresh_preview(self):
-        """Refresh the entire preview with timestamps if enabled."""
         if not self.preview_enabled.get_value():
             return
 
@@ -415,7 +414,6 @@ class DataTab:
         self.timestamp_start = time.time()
 
     def _clear_data(self):
-        """Clear only the preview, not the data buffer."""
         if hasattr(self, "text_widget"):
             self.text_widget.delete(1.0, "end")
 
@@ -461,7 +459,6 @@ class DataTab:
                     self._add_message(t("ui.data_tab.error_saving").format(error=e))
 
     def _save_buffer_to_file(self, file_manager):
-        """Save the current data buffer to file."""
         if not self.data_buffer:
             return False
 
@@ -527,7 +524,6 @@ class DataTab:
                 logger.error(f"Error in auto preview update: {e}")
 
     def _update_preview(self):
-        """Update the preview widget with current buffer data."""
         if not hasattr(self, "text_widget") or not self.preview_enabled.get_value():
             return
 

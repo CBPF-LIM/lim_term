@@ -331,7 +331,6 @@ class ConfigTab:
             print(t("ui.config_tab.mode_unknown_error").format(mode=mode))
 
     def _set_connection_widgets_state(self, state):
-        """Enable or disable connection-related widgets"""
         try:
 
             combo_state = "readonly" if state == "normal" else "disabled"
@@ -433,7 +432,6 @@ class ConfigTab:
         self._update_math_functions_visibility()
 
     def _toggle_settings(self):
-        """Toggle the visibility of the settings frame."""
         if self.settings_visible:
             self.settings_frame.grid_remove()
             self.settings_button.config(text=t("ui.config_tab.show_settings"))

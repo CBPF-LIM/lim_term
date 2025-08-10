@@ -1,7 +1,3 @@
-"""
-Oscilloscope-inspired data capture and visualization tab.
-
-"""
 
 import tkinter as tk
 from tkinter import ttk
@@ -16,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class OscTab:
-    """Oscilloscope-inspired data capture and visualization tab."""
 
     def __init__(self, parent, data_tab):
         self.frame = ttk.Frame(parent)
@@ -25,12 +20,12 @@ class OscTab:
 
         self.is_armed = False
         self.trigger_sets = []
-        self.max_sets = 4  # Keep only up to 4 sets as requested
+        self.max_sets = 4                                       
 
-        self.update_interval_ms = 33  # 1/30 seconds = ~33ms for direct updates
+        self.update_interval_ms = 33                                           
         self.update_timer_id = None
 
-        # For tracking incomplete (most recent) set
+                                                   
         self.most_recent_trigger_idx = None
         self.current_values = []
 
@@ -38,7 +33,6 @@ class OscTab:
         self._start_update_loop()
 
     def _create_widgets(self):
-        """Create the oscilloscope interface."""
         main_controls_frame = ttk.Frame(self.frame)
         main_controls_frame.grid(column=0, row=0, padx=10, pady=5, sticky="ew")
 
@@ -91,7 +85,6 @@ class OscTab:
         self.frame.columnconfigure(0, weight=1)
 
     def _create_settings_widgets(self):
-        """Create the settings widgets inside the collapsible frame."""
         settings_container = ttk.Frame(self.settings_frame)
         settings_container.pack(fill="both", expand=True, padx=5, pady=5)
 
@@ -200,7 +193,6 @@ class OscTab:
         settings_container.columnconfigure(1, weight=1)
 
     def _toggle_settings(self):
-        """Toggle the visibility of the settings frame."""
         if self.settings_visible:
             self.settings_frame.grid_remove()
             self.settings_button.config(text=t("ui.osc_tab.show_settings"))
@@ -215,17 +207,16 @@ class OscTab:
         )
 
     def _start_update_loop(self):
-        """Start the simple, direct update loop: every 1/30s read buffer, find triggers, select sets, plot."""
         if not self._is_frame_valid():
             return
 
         try:
-            # Always process and plot every 1/30s when armed
+                                                            
             if self.is_armed:
                 self._process_data_directly()
-                self._plot_sets()  # Always plot after processing
+                self._plot_sets()                                
 
-            # Schedule next update
+                                  
             self.update_timer_id = self.frame.after(
                 self.update_interval_ms, self._start_update_loop
             )
@@ -233,14 +224,13 @@ class OscTab:
             self.is_armed = False
 
     def _process_data_directly(self):
-        """Simple direct processing: read buffer, find triggers, manage complete and incomplete sets."""
         try:
-            # Read buffer
+                         
             data_lines = self.data_tab.get_data()
             if not data_lines or len(data_lines) < 10:
                 return
 
-            # Get settings
+                          
             try:
                 column = int(self.trigger_source.get_value())
                 trigger_level = float(self.trigger_level.get_value())
@@ -249,9 +239,9 @@ class OscTab:
             except (ValueError, AttributeError):
                 return
 
-            # Extract values from recent data
+                                             
             values = []
-            for line in reversed(data_lines[-200:]):  # Look at recent data only
+            for line in reversed(data_lines[-200:]):                            
                 try:
                     parts = line.strip().split()
                     if len(parts) > column:
@@ -260,18 +250,18 @@ class OscTab:
                 except (ValueError, IndexError):
                     continue
 
-            if len(values) < window_size + 5:  # Need enough data for trigger detection
+            if len(values) < window_size + 5:                                          
                 return
 
-            values.reverse()  # Back to chronological order
+            values.reverse()                               
 
-            # Find triggers and separate complete/incomplete sets
+                                                                 
             complete_sets = []
             most_recent_trigger_idx = None
 
             i = 1
-            while i < len(values) - 1:  # Look through all data
-                # Check for trigger condition
+            while i < len(values) - 1:                         
+                                             
                 triggered = False
                 if (
                     trigger_edge == "rising"
@@ -290,30 +280,30 @@ class OscTab:
                     triggered = True
 
                 if triggered:
-                    most_recent_trigger_idx = i  # Track the most recent trigger
+                    most_recent_trigger_idx = i                                 
 
-                    # Check if we can create a complete set
+                                                           
                     if i + window_size <= len(values):
-                        # Complete set available
+                                                
                         window_data = values[i : i + window_size]
                         complete_sets.append(window_data)
                         i += (
                             window_size // 2
-                        )  # Skip ahead to avoid overlapping triggers
+                        )                                            
                     else:
-                        # This trigger is too close to the end - it will be the incomplete set
+                                                                                              
                         break
                 else:
                     i += 1
 
-            # Update complete sets (keep only most recent ones)
+                                                               
             if complete_sets:
                 self.trigger_sets.extend(complete_sets)
-                # Keep only most recent complete sets (leave room for incomplete set)
+                                                                                     
                 if len(self.trigger_sets) > self.max_sets - 1:
                     self.trigger_sets = self.trigger_sets[-(self.max_sets - 1) :]
 
-            # Store the incomplete set info for plotting
+                                                        
             self.most_recent_trigger_idx = most_recent_trigger_idx
             self.current_values = values
 
@@ -321,48 +311,47 @@ class OscTab:
             logger.error(f"Error in direct data processing: {e}")
 
     def _plot_sets(self):
-        """Plot all current trigger sets simply and directly: complete sets + incomplete set for real-time."""
         try:
             self.graph_manager.clear()
 
-            # Plot complete sets in blue
+                                        
             for window_data in self.trigger_sets:
                 x_data = list(range(len(window_data)))
                 self.graph_manager.plot_line(x_data, window_data, color="blue")
 
-            # Plot the most recent incomplete set for real-time visualization
+                                                                             
             if hasattr(self, "most_recent_trigger_idx") and hasattr(
                 self, "current_values"
             ):
                 if self.most_recent_trigger_idx is not None and self.current_values:
-                    # Get incomplete data from most recent trigger to current point
+                                                                                   
                     incomplete_data = self.current_values[
                         self.most_recent_trigger_idx :
                     ]
 
-                    # Limit incomplete set to window size
+                                                         
                     try:
                         window_size = int(self.window_size.get_value())
                         if len(incomplete_data) > window_size:
                             incomplete_data = incomplete_data[:window_size]
                     except (ValueError, AttributeError):
-                        pass  # Use full data if can't get window size
+                        pass                                          
 
-                    if len(incomplete_data) > 1:  # Only plot if we have meaningful data
+                    if len(incomplete_data) > 1:                                        
                         x_data = list(range(len(incomplete_data)))
-                        # Plot in cyan to distinguish from complete sets
+                                                                        
                         self.graph_manager.plot_line(
                             x_data, incomplete_data, color="#1760ff"
                         )
 
-            # Add trigger level line
+                                    
             if self.trigger_sets or (
                 hasattr(self, "most_recent_trigger_idx")
                 and self.most_recent_trigger_idx
             ):
                 trigger_level = float(self.trigger_level.get_value())
 
-                # Calculate max length across all data
+                                                      
                 all_lengths = [len(data) for data in self.trigger_sets]
                 if (
                     hasattr(self, "current_values")
@@ -373,7 +362,7 @@ class OscTab:
                         len(self.current_values) - self.most_recent_trigger_idx
                     )
 
-                    # Limit incomplete length to window size
+                                                            
                     try:
                         window_size = int(self.window_size.get_value())
                         incomplete_len = min(incomplete_len, window_size)
@@ -402,7 +391,6 @@ class OscTab:
             logger.error(f"Error plotting sets: {e}")
 
     def _stop_update_loop(self):
-        """Stop the update loop."""
         if self.update_timer_id:
             try:
                 if self._is_frame_valid():
@@ -426,7 +414,6 @@ class OscTab:
             return False
 
     def set_tab_active(self, is_active):
-        """Handle tab activation/deactivation."""
         self.is_active = is_active
         if not is_active:
             self._stop_update_loop()
@@ -434,7 +421,6 @@ class OscTab:
             self._start_update_loop()
 
     def _clear_display(self):
-        """Clear the oscilloscope display and accumulated trigger sets."""
         try:
             self.trigger_sets.clear()
             self.most_recent_trigger_idx = None
@@ -497,14 +483,12 @@ class OscTab:
             self.data_tab.add_message(t("ui.osc_tab.save_error", error=str(e)))
 
     def _toggle_arm(self):
-        """Toggle armed state."""
         if self.is_armed:
             self._disarm()
         else:
             self._arm()
 
     def _arm(self):
-        """Arm the oscilloscope for trigger detection."""
         if not self._is_frame_valid():
             return
 
@@ -523,7 +507,6 @@ class OscTab:
             self.status_label.config(text=t("ui.osc_tab.armed"), foreground="orange")
 
     def _disarm(self):
-        """Disarm the oscilloscope."""
         self.is_armed = False
 
         if self._is_widget_valid("arm_button"):
@@ -532,11 +515,9 @@ class OscTab:
             self.status_label.config(text=t("ui.osc_tab.ready"), foreground="blue")
 
     def get_frame(self):
-        """Get the tab frame."""
         return self.frame
 
     def cleanup(self):
-        """Clean up resources."""
         self._stop_update_loop()
         self.is_armed = False
 
