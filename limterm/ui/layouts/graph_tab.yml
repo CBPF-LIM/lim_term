@@ -1,0 +1,321 @@
+widget: Frame
+name: root
+layout:
+  method: grid
+  column: 0
+  row: 0
+  sticky: ew
+  padx: 10
+  pady: [10, 5]
+children:
+  - widget: Frame
+    name: toolbar_frame
+    layout:
+      method: grid
+      column: 0
+      row: 0
+      sticky: ew
+    children:
+      - widget: Frame
+        name: button_container
+        layout:
+          method: grid
+          column: 0
+          row: 0
+          sticky: w
+        children:
+          - widget: Button
+            name: plot_button
+            options:
+              text: "${ui.graph_tab.update_graph}"
+              command: plot_graph
+            layout:
+              method: pack
+              side: left
+              padx: [0, 10]
+          - widget: Button
+            name: pause_button
+            options:
+              text: "${ui.graph_tab.pause}"
+              command: _toggle_pause
+            layout:
+              method: pack
+              side: left
+              padx: [0, 10]
+          - widget: Button
+            name: save_button
+            options:
+              text: "${ui.graph_tab.save_png}"
+              command: _save_chart
+            layout:
+              method: pack
+              side: left
+              padx: [0, 10]
+          - widget: Button
+            name: save_data_button
+            options:
+              text: "${ui.graph_tab.save_data}"
+              command: _save_data
+            layout:
+              method: pack
+              side: left
+              padx: [0, 10]
+      - widget: Button
+        name: options_button
+        options:
+          text: "${ui.graph_tab.show_settings}"
+          command: _toggle_options
+        layout:
+          method: grid
+          column: 1
+          row: 0
+          sticky: e
+  - widget: LabelFrame
+    name: graph_settings_frame
+    options:
+      text: "${ui.graph_tab.graph_settings}"
+    layout:
+      method: grid
+      column: 0
+      row: 1
+      columnspan: 4
+      padx: 10
+      pady: 5
+      sticky: ew
+    children:
+      - widget: Frame
+        name: axis_columns_frame
+        layout:
+          method: grid
+          column: 0
+          row: 0
+          padx: 5
+          pady: 5
+          sticky: ew
+        children:
+          - widget: Label
+            options:
+              text: "${ui.graph_tab.axis_and_columns}"
+            layout:
+              method: grid
+              column: 0
+              row: 0
+              columnspan: 7
+              padx: 5
+              pady: [5, 2]
+              sticky: w
+          - widget: Frame
+            name: x_frame
+            layout:
+              method: grid
+              column: 0
+              row: 1
+              padx: 5
+              pady: 5
+              sticky: w
+            children:
+              - widget: Label
+                name: x_label
+                options:
+                  text: "${ui.graph_tab.column_x}"
+                layout:
+                  method: pack
+                  side: top
+              - widget: PrefEntry
+                name: x_column_entry
+                options:
+                  pref_key: graph.general.x_column
+                  default_value: "2"
+                  width: 10
+                  justify: center
+                  on_change: _on_setting_change
+                layout:
+                  method: pack
+                  side: top
+          - widget: Separator
+            options:
+              orient: vertical
+            layout:
+              method: grid
+              column: 1
+              row: 1
+              sticky: ns
+              padx: 10
+          - widget: Frame
+            name: y1_frame
+            layout: {method: grid, column: 2, row: 1, padx: 5, pady: 5, sticky: w}
+            children:
+              - widget: Label
+                options: {text: "${ui.graph_tab.column_y1}"}
+                layout: {method: pack, side: top}
+              - widget: PrefEntry
+                name: y1_entry
+                options: {pref_key: graph.general.y1_column, default_value: "", width: 8, justify: center, on_change: _on_setting_change}
+                layout: {method: pack, side: top}
+          - widget: Frame
+            name: y2_frame
+            layout: {method: grid, column: 3, row: 1, padx: 5, pady: 5, sticky: w}
+            children:
+              - widget: Label
+                options: {text: "${ui.graph_tab.column_y2}"}
+                layout: {method: pack, side: top}
+              - widget: PrefEntry
+                name: y2_entry
+                options: {pref_key: graph.general.y2_column, default_value: "", width: 8, justify: center, on_change: _on_setting_change}
+                layout: {method: pack, side: top}
+          - widget: Frame
+            name: y3_frame
+            layout: {method: grid, column: 4, row: 1, padx: 5, pady: 5, sticky: w}
+            children:
+              - widget: Label
+                options: {text: "${ui.graph_tab.column_y3}"}
+                layout: {method: pack, side: top}
+              - widget: PrefEntry
+                name: y3_entry
+                options: {pref_key: graph.general.y3_column, default_value: "", width: 8, justify: center, on_change: _on_setting_change}
+                layout: {method: pack, side: top}
+          - widget: Frame
+            name: y4_frame
+            layout: {method: grid, column: 5, row: 1, padx: 5, pady: 5, sticky: w}
+            children:
+              - widget: Label
+                options: {text: "${ui.graph_tab.column_y4}"}
+                layout: {method: pack, side: top}
+              - widget: PrefEntry
+                name: y4_entry
+                options: {pref_key: graph.general.y4_column, default_value: "", width: 8, justify: center, on_change: _on_setting_change}
+                layout: {method: pack, side: top}
+          - widget: Frame
+            name: y5_frame
+            layout: {method: grid, column: 6, row: 1, padx: 5, pady: 5, sticky: w}
+            children:
+              - widget: Label
+                options: {text: "${ui.graph_tab.column_y5}"}
+                layout: {method: pack, side: top}
+              - widget: PrefEntry
+                name: y5_entry
+                options: {pref_key: graph.general.y5_column, default_value: "", width: 8, justify: center, on_change: _on_setting_change}
+                layout: {method: pack, side: top}
+      - widget: Frame
+        name: options_frame
+        layout:
+          method: grid
+          column: 0
+          row: 1
+          sticky: ew
+          padx: 5
+          pady: 5
+        children:
+          - widget: Frame
+            name: options_container
+            layout:
+              method: pack
+              fill: both
+              expand: true
+              padx: 5
+              pady: 5
+            children:
+              - widget: LabelFrame
+                name: global_frame
+                options: {text: "${ui.graph_tab.global_settings}"}
+                layout: {method: grid, column: 0, row: 0, padx: [0,5], pady: 5, sticky: nsew}
+                children:
+                  - widget: Label
+                    name: group_label
+                    options: {text: "${ui.graph_tab.visualization_group_label}"}
+                    layout: {method: grid, column: 0, row: 0, padx: 5, pady: 5, sticky: w}
+                  - widget: PrefCombobox
+                    name: group_combobox
+                    options:
+                      pref_key: graph.general.visualization_group
+                      default_value: time_series
+                      state: readonly
+                      values: ["${ui.graph_tab.visualization_types.time_series}", "${ui.graph_tab.visualization_types.stacked}"]
+                      value_mapping: {"${ui.graph_tab.visualization_types.time_series}": time_series, "${ui.graph_tab.visualization_types.stacked}": stacked}
+                      width: 15
+                      on_change: _on_group_change
+                    layout: {method: grid, column: 1, row: 0, padx: 5, pady: 5, sticky: w}
+                  - widget: Label
+                    name: window_label
+                    options: {text: "${ui.graph_tab.window_label}"}
+                    layout: {method: grid, column: 0, row: 1, padx: 5, pady: 5, sticky: w}
+                  - widget: PrefEntry
+                    name: data_window_entry
+                    options: {pref_key: graph.general.window_size, default_value: "50", width: 12, justify: center, on_change: _on_setting_change}
+                    layout: {method: grid, column: 1, row: 1, padx: 5, pady: 5, sticky: w}
+                  - widget: Label
+                    name: fps_label
+                    options: {text: "${ui.graph_tab.refresh_rate_label}"}
+                    layout: {method: grid, column: 0, row: 2, padx: 5, pady: 5, sticky: w}
+                  - widget: Frame
+                    name: fps_frame
+                    layout: {method: grid, column: 1, row: 2, padx: 5, pady: 5, sticky: w}
+                    children:
+                      - widget: PrefCombobox
+                        name: fps_combobox
+                        options: {pref_key: graph.general.refresh_rate, default_value: "30", state: readonly, values: ["1","5","10","15","20","30"], width: 5, on_change: _on_fps_change}
+                        layout: {method: pack, side: left}
+                      - widget: Label
+                        name: fps_debug_label
+                        options: {text: "(30 Hz = 33ms)", font: [TkDefaultFont, 8]}
+                        layout: {method: pack, side: left, padx: [5,0]}
+                  - widget: Label
+                    name: y_limits_label
+                    options: {text: "${ui.graph_tab.y_limits_label}"}
+                    layout: {method: grid, column: 0, row: 3, padx: 5, pady: 5, sticky: w}
+                  - widget: Frame
+                    name: y_limits_frame
+                    layout: {method: grid, column: 1, row: 3, padx: 5, pady: 5, sticky: w}
+                    children:
+                      - widget: PrefEntry
+                        name: min_y_entry
+                        options: {pref_key: graph.general.min_y, default_value: "", width: 12, justify: center, on_change: _on_setting_change}
+                        layout: {method: pack, side: left, padx: [0,5]}
+                      - widget: PrefEntry
+                        name: max_y_entry
+                        options: {pref_key: graph.general.max_y, default_value: "", width: 12, justify: center, on_change: _on_setting_change}
+                        layout: {method: pack, side: left}
+              - widget: LabelFrame
+                name: colors_frame
+                options: {text: "${ui.graph_tab.colors_settings}"}
+                layout: {method: grid, column: 1, row: 0, padx: 5, pady: 5, sticky: nsew}
+                children:
+                  - widget: Label
+                    options: {text: "Y1:"}
+                    layout: {method: grid, column: 0, row: 0, padx: 5, pady: 2, sticky: w}
+                  - widget: PrefCombobox
+                    name: y1_color
+                    options: {pref_key: graph.general.y1_color, default_value: blue, state: readonly, values: [blue, red, green, orange, magenta], width: 10, on_change: _on_color_setting_change}
+                    layout: {method: grid, column: 1, row: 0, padx: 5, pady: 2, sticky: w}
+                  - widget: Label
+                    options: {text: "Y2:"}
+                    layout: {method: grid, column: 0, row: 1, padx: 5, pady: 2, sticky: w}
+                  - widget: PrefCombobox
+                    name: y2_color
+                    options: {pref_key: graph.general.y2_color, default_value: red, state: readonly, values: [blue, red, green, orange, magenta], width: 10, on_change: _on_color_setting_change}
+                    layout: {method: grid, column: 1, row: 1, padx: 5, pady: 2, sticky: w}
+                  - widget: Label
+                    options: {text: "Y3:"}
+                    layout: {method: grid, column: 0, row: 2, padx: 5, pady: 2, sticky: w}
+                  - widget: PrefCombobox
+                    name: y3_color
+                    options: {pref_key: graph.general.y3_color, default_value: green, state: readonly, values: [blue, red, green, orange, magenta], width: 10, on_change: _on_color_setting_change}
+                    layout: {method: grid, column: 1, row: 2, padx: 5, pady: 2, sticky: w}
+                  - widget: Label
+                    options: {text: "Y4:"}
+                    layout: {method: grid, column: 0, row: 3, padx: 5, pady: 2, sticky: w}
+                  - widget: PrefCombobox
+                    name: y4_color
+                    options: {pref_key: graph.general.y4_color, default_value: orange, state: readonly, values: [blue, red, green, orange, magenta], width: 10, on_change: _on_color_setting_change}
+                    layout: {method: grid, column: 1, row: 3, padx: 5, pady: 2, sticky: w}
+                  - widget: Label
+                    options: {text: "Y5:"}
+                    layout: {method: grid, column: 0, row: 4, padx: 5, pady: 2, sticky: w}
+                  - widget: PrefCombobox
+                    name: y5_color
+                    options: {pref_key: graph.general.y5_color, default_value: magenta, state: readonly, values: [blue, red, green, orange, magenta], width: 10, on_change: _on_color_setting_change}
+                    layout: {method: grid, column: 1, row: 4, padx: 5, pady: 2, sticky: w}
+              - widget: LabelFrame
+                name: series_config_frame
+                options: {text: "${ui.graph_tab.series_settings}"}
+                layout: {method: grid, column: 2, row: 0, padx: [5,0], pady: 5, sticky: nsew}

@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+import os
+from ..utils.ui_builder import build_from_yaml
 from ..core import GraphManager
 from ..utils import DataParser, FileManager
 from ..config import DEFAULT_X_COLUMN
@@ -43,11 +45,49 @@ class GraphTab:
         return self.frame
 
     def _create_widgets(self):
-                                                       
-        self._create_toolbar()
-        self._create_settings_panel()
+
+        yaml_path = os.path.join(
+            os.path.dirname(__file__), "..", "ui", "layouts", "graph_tab.yml"
+        )
+        yaml_path = os.path.abspath(yaml_path)
+
+        # Build toolbar and settings panels from YAML
+        build_from_yaml(self.frame, yaml_path, self)
+
+        # Map Y entries into a list for existing logic
+        self.y_entries = []
+        for i in range(1, 6):
+            entry = getattr(self, f"y{i}_entry", None)
+            if entry is not None:
+                self.y_entries.append(entry)
+
+        # Map color comboboxes into a list for existing logic
+        self.y_color_combos = []
+        for i in range(1, 6):
+            combo = getattr(self, f"y{i}_color", None)
+            if combo is not None:
+                self.y_color_combos.append(combo)
+
+        # Respect saved visibility of the options panel
+        self.options_visible = self.config_manager.load_setting(
+            "graph.ui.options_visible", False
+        )
+        if not self.options_visible and hasattr(self, "graph_settings_frame"):
+            self.graph_settings_frame.grid_remove()
+            if hasattr(self, "options_button"):
+                self.options_button.config(text=t("ui.graph_tab.show_settings"))
+        else:
+            if hasattr(self, "options_button"):
+                self.options_button.config(text=t("ui.graph_tab.hide_settings"))
+
+        # Initialize dynamic series widgets section
+        if hasattr(self, "series_config_frame"):
+            self._create_series_widgets()
+
+        # Create chart area below the settings
         self._create_chart_area()
 
+        # Layout behavior
         self.frame.rowconfigure(3, weight=1)
         self.frame.columnconfigure(0, weight=1)
 
@@ -299,7 +339,7 @@ class GraphTab:
     def _create_series_widgets(self):
 
         group = self.group_combobox.get_value()
-                                       
+
         for child in self.series_config_frame.winfo_children():
             child.destroy()
         self.series_widgets = []
@@ -433,7 +473,6 @@ class GraphTab:
         if not (hasattr(self, "group_combobox") and widget_exists(self.group_combobox)):
             return
 
-                                             
         try:
             x_col = int(self.x_column_entry.get_value()) - 1
         except ValueError as e:
