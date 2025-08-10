@@ -1,6 +1,7 @@
 from .serial_utils import SerialPortManager, DataParser
 from .file_utils import FileManager
 from .mock_serial import MockSerial, SyntheticDataGenerator
+from .formatting import format_elapsed_since
 
 __all__ = [
     "SerialPortManager",
@@ -8,4 +9,5 @@ __all__ = [
     "FileManager",
     "MockSerial",
     "SyntheticDataGenerator",
+    "format_elapsed_since",
 ]

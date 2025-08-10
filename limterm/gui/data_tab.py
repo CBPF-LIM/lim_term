@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from ..utils import FileManager
+from ..utils import FileManager, format_elapsed_since
 from ..i18n import t, get_config_manager
 from .preference_widgets import PrefCheckbutton, PrefCombobox, PrefEntry
 import logging
@@ -340,15 +340,8 @@ class DataTab:
             end_idx = min(len(buffer_list), start_idx + limit)
 
             for line in buffer_list[start_idx:end_idx]:
-                if (
-                    self.timestamp_enabled.get_value()
-                    and self.timestamp_start is not None
-                ):
-                    elapsed = time.time() - self.timestamp_start
-                    hours = int(elapsed // 3600)
-                    minutes = int((elapsed % 3600) // 60)
-                    seconds = elapsed % 60
-                    timestamp = f"{hours:02d}:{minutes:02d}:{seconds:06.3f} "
+                if self.timestamp_enabled.get_value() and self.timestamp_start is not None:
+                    timestamp = format_elapsed_since(self.timestamp_start)
                     self.text_widget.insert("end", timestamp + line + "\n")
                 else:
                     self.text_widget.insert("end", line + "\n")
@@ -439,18 +432,8 @@ class DataTab:
                 try:
                     with open(file_path, "w", encoding="utf-8") as f:
                         for line in buffer_lines:
-                            if (
-                                self.timestamp_enabled.get_value()
-                                and self.timestamp_start is not None
-                            ):
-                                elapsed = time.time() - self.timestamp_start
-                                hours = int(elapsed // 3600)
-                                minutes = int((elapsed % 3600) // 60)
-                                seconds = elapsed % 60
-                                timestamp_str = (
-                                    f"{hours:02d}:{minutes:02d}:{seconds:06.3f} "
-                                )
-                                f.write(timestamp_str + line + "\n")
+                            if self.timestamp_enabled.get_value() and self.timestamp_start is not None:
+                                f.write(format_elapsed_since(self.timestamp_start) + line + "\n")
                             else:
                                 f.write(line + "\n")
                     self._add_message(
@@ -508,16 +491,8 @@ class DataTab:
 
             formatted_lines = []
             for line in lines_to_show:
-                if (
-                    self.timestamp_enabled.get_value()
-                    and self.timestamp_start is not None
-                ):
-                    elapsed = time.time() - self.timestamp_start
-                    hours = int(elapsed // 3600)
-                    minutes = int((elapsed % 3600) // 60)
-                    seconds = elapsed % 60
-                    timestamp = f"{hours:02d}:{minutes:02d}:{seconds:06.3f} "
-                    formatted_lines.append(timestamp + line)
+                if self.timestamp_enabled.get_value() and self.timestamp_start is not None:
+                    formatted_lines.append(format_elapsed_since(self.timestamp_start) + line)
                 else:
                     formatted_lines.append(line)
 
