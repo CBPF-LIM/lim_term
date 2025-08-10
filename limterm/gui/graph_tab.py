@@ -855,3 +855,259 @@ class GraphTab:
             if t(f"ui.markers.{key}") == translated_marker:
                 return sym
         return MARKER_MAPPING.get("circle", "o")
+
+    def _get_translated_marker_from_original(self, original_marker):
+        for key, value in MARKER_MAPPING.items():
+            if value == original_marker:
+                return t(f"ui.markers.{key}")
+        return t("ui.markers.circle")
+
+    def _get_original_graph_type(self, translated_type):
+        type_mapping = {
+            t("ui.graph_types.line"): "line",
+            t("ui.graph_types.scatter"): "scatter",
+        }
+        return type_mapping.get(translated_type, "line")
+
+    def _get_original_color_from_internal(self, internal_color):
+        color_mapping = {
+            "blue": "#1f77b4",
+            "cyan": "#17becf",
+            "teal": "#008080",
+            "green": "#2ca02c",
+            "lime": "#32cd32",
+            "yellow": "#ffff00",
+            "amber": "#ffc000",
+            "orange": "#ff7f0e",
+            "red": "#d62728",
+            "magenta": "#ff00ff",
+            "indigo": "#4b0082",
+            "violet": "#9467bd",
+            "turquoise": "#40e0d0",
+            "aquamarine": "#7fffd4",
+            "springgreen": "#00ff7f",
+            "chartreuse": "#7fff00",
+            "gold": "#ffd700",
+            "coral": "#ff7f50",
+            "crimson": "#dc143c",
+            "pink": "#ffc0cb",
+        }
+        return color_mapping.get(internal_color, "#1f77b4")
+
+    def _get_original_color(self, translated_color):
+        color_mapping = {
+            t("ui.colors.blue"): "#1f77b4",
+            t("ui.colors.cyan"): "#17becf",
+            t("ui.colors.teal"): "#008080",
+            t("ui.colors.green"): "#2ca02c",
+            t("ui.colors.lime"): "#32cd32",
+            t("ui.colors.yellow"): "#ffff00",
+            t("ui.colors.amber"): "#ffc000",
+            t("ui.colors.orange"): "#ff7f0e",
+            t("ui.colors.red"): "#d62728",
+            t("ui.colors.magenta"): "#ff00ff",
+            t("ui.colors.indigo"): "#4b0082",
+            t("ui.colors.violet"): "#9467bd",
+            t("ui.colors.turquoise"): "#40e0d0",
+            t("ui.colors.aquamarine"): "#7fffd4",
+            t("ui.colors.springgreen"): "#00ff7f",
+            t("ui.colors.chartreuse"): "#7fff00",
+            t("ui.colors.gold"): "#ffd700",
+            t("ui.colors.coral"): "#ff7f50",
+            t("ui.colors.crimson"): "#dc143c",
+            t("ui.colors.pink"): "#ffc0cb",
+        }
+        return color_mapping.get(translated_color, "#1f77b4")
+
+    def _on_group_change(self, event=None):
+        self._create_series_widgets()
+        self._on_setting_change()
+
+    def _create_series_widgets(self):
+        for widget in self.series_config_frame.winfo_children():
+            widget.destroy()
+
+        group = self.group_combobox.get_value()
+
+        if group == "time_series":
+            self._create_time_series_widgets()
+        elif group == "stacked":
+            self._create_stacked_widgets()
+
+    def _create_time_series_widgets(self):
+        self.series_config_frame.config(text=t("ui.graph_tab.time_series_settings"))
+
+        self.series_widgets = []
+        for i in range(1, 6):
+            self._create_time_series_row(self.series_config_frame, i, f"Y{i}", i - 1)
+
+    def _create_time_series_row(self, parent, row, label, index):
+        ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
+
+        type_combo = PrefCombobox(
+            parent,
+            pref_key=f"graph.time_series.y{index+1}_type",
+            default_value="line",
+            state="readonly",
+            values=self._get_translated_graph_types(),
+            width=10,
+            value_mapping=self._get_graph_type_mapping(),
+            on_change=lambda idx=index: self._on_series_setting_change(idx),
+        )
+        type_combo.grid(column=1, row=row, padx=5, pady=2)
+
+        marker_combo = PrefCombobox(
+            parent,
+            pref_key=f"graph.time_series.y{index+1}_marker",
+            default_value="circle",
+            state="readonly",
+            values=self._get_translated_markers(),
+            width=10,
+            value_mapping=self._get_marker_mapping(),
+            on_change=lambda idx=index: self._on_series_setting_change(idx),
+        )
+        marker_combo.grid(column=2, row=row, padx=5, pady=2)
+
+        self.series_widgets.append({"type": type_combo, "marker": marker_combo})
+
+    def _create_stacked_widgets(self):
+        self.series_config_frame.config(text=t("ui.graph_tab.stacked_settings"))
+
+        self.normalize_100_checkbox = PrefCheckbutton(
+            self.series_config_frame,
+            pref_key="graph.group.stacked.normalize_100",
+            default_value=False,
+            text=t("ui.graph_tab.normalize_100_percent"),
+            on_change=self._on_setting_change,
+        )
+        self.normalize_100_checkbox.grid(column=0, row=0, columnspan=4, padx=5, pady=10)
+
+        self.series_widgets = []
+
+    def _get_stacked_color(self, series_index):
+        if series_index < len(self.y_color_combos):
+            internal_color = self.y_color_combos[series_index].get_value()
+            return self._get_original_color_from_internal(internal_color)
+
+        default_colors = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#ff00ff"]
+        return default_colors[series_index % len(default_colors)]
+
+    def get_frame(self):
+        return self.frame
+
+    def _on_color_setting_change(self, color_index):
+
+        self._on_setting_change()
+
+    def _start_refresh_timer(self):
+        self._refresh_chart()
+
+    def _refresh_chart(self):
+        try:
+            if not self.is_paused:
+                data_lines = self.data_tab.get_data()
+                if data_lines:
+                    if self.debug_refresh:
+                        self.refresh_counter += 1
+                        fps_actual = 1000 / self.refresh_rate_ms
+                        print(
+                            f"Chart refresh #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Fixed Rate"
+                        )
+
+                    self.plot_graph()
+                else:
+                    pass
+            else:
+                pass
+
+        except Exception as e:
+            if self.debug_refresh:
+                print(f"Chart refresh error: {e}")
+        finally:
+            if hasattr(self, "frame") and self.frame.winfo_exists():
+                self.refresh_timer_id = self.frame.after(
+                    self.refresh_rate_ms, self._refresh_chart
+                )
+
+    def _stop_refresh_timer(self):
+        if self.refresh_timer_id:
+            try:
+                self.frame.after_cancel(self.refresh_timer_id)
+            except:
+                pass
+            self.refresh_timer_id = None
+
+    def _set_refresh_rate(self, fps):
+        self.refresh_rate_ms = int(1000 / fps)
+
+    def cleanup(self):
+        self._stop_refresh_timer()
+
+    def __del__(self):
+        try:
+            self.cleanup()
+        except:
+            pass
+
+    def _on_fps_change(self, event=None):
+        try:
+            fps = int(self.fps_combobox.get_value())
+            self._set_refresh_rate(fps)
+
+            self.fps_debug_label.config(text=f"({fps} Hz = {self.refresh_rate_ms}ms)")
+
+            import time
+
+            self.last_render_time = time.time()
+            self.refresh_counter = 0
+
+        except ValueError:
+            pass
+
+    def set_tab_active(self, is_active):
+        self.is_tab_active = is_active
+        if not is_active:
+            self._stop_refresh_timer()
+        else:
+            if hasattr(self, "frame") and self.frame.winfo_exists():
+                self._start_refresh_timer()
+
+    def should_render_now(self, current_time):
+        if self.is_paused or not getattr(self, "is_tab_active", True):
+            return False
+
+        refresh_interval = self.refresh_rate_ms / 1000.0
+
+        return (current_time - self.last_render_time) >= refresh_interval
+
+    def render_frame(self):
+        import time
+
+        try:
+            data_lines = self.data_tab.get_data()
+            if data_lines:
+                self.refresh_counter += 1
+
+                if self.debug_refresh:
+                    fps_actual = 1000 / self.refresh_rate_ms
+                    print(
+                        f"Render frame #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Game Loop Style"
+                    )
+
+                self.plot_graph()
+
+            self.last_render_time = time.time()
+
+        except Exception as e:
+            if self.debug_refresh:
+                print(f"Render frame error: {e}")
+
+            self.last_render_time = time.time()
+
+    def _on_normalize_change(self):
+        try:
+            self._save_stacked_preferences()
+
+            self._on_setting_change()
+        except Exception as e:
+            print(f"Note: Could not save normalization preference: {e}")
