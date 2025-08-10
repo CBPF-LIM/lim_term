@@ -1,0 +1,6 @@
+widget: Notebook
+name: tab_control
+layout:
+  method: pack
+  expand: true
+  fill: both

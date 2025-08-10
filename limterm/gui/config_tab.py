@@ -4,7 +4,7 @@ from ..config import DEFAULT_BAUDRATES, DEFAULT_BAUDRATE
 from ..utils import SyntheticDataGenerator
 from ..i18n import t, get_config_manager
 import math
-from ..utils.ui_builder import build_from_yaml
+from ..utils.ui_builder import build_from_layout_name
 
 
 class ConfigTab:
@@ -21,16 +21,8 @@ class ConfigTab:
         self._load_preferences()
 
     def _create_widgets(self):
-        import os as _os
+        build_from_layout_name(self.frame, "config_tab", self)
 
-        yaml_path = _os.path.join(
-            _os.path.dirname(__file__), "..", "ui", "layouts", "config_tab.yml"
-        )
-        yaml_path = _os.path.abspath(yaml_path)
-
-        build_from_yaml(self.frame, yaml_path, self)
-
-                                                                    
         eq_map = {
             "a": getattr(self, "eq_a", None),
             "b": getattr(self, "eq_b", None),
@@ -40,7 +32,6 @@ class ConfigTab:
         }
         self.equation_entries = {k: v for k, v in eq_map.items() if v is not None}
 
-                                                    
         if hasattr(self, "baudrate_combobox"):
             try:
                 self.baudrate_combobox["values"] = DEFAULT_BAUDRATES
@@ -48,7 +39,6 @@ class ConfigTab:
             except Exception:
                 pass
 
-                                                          
         if hasattr(self, "math_funcs_text"):
             try:
                 math_funcs = [
@@ -62,7 +52,6 @@ class ConfigTab:
             except Exception:
                 pass
 
-                             
         self.settings_visible = self.config_manager.load_setting(
             "config.ui.settings_visible", False
         )
@@ -77,13 +66,11 @@ class ConfigTab:
             if hasattr(self, "settings_button"):
                 self.settings_button.config(text=t("ui.config_tab.hide_settings"))
 
-                                   
         self.math_funcs_visible = self.config_manager.load_setting(
             "config.math_functions_visible", False
         )
         self._update_math_functions_visibility()
 
-                                                                          
         try:
             style = ttk.Style()
             frame_bg = style.lookup("TLabelframe", "background")
@@ -109,7 +96,6 @@ class ConfigTab:
         except Exception:
             pass
 
-                                                        
         try:
             self.frame.columnconfigure(0, weight=1)
             if hasattr(self, "settings_frame"):

@@ -34,6 +34,7 @@ children:
       - widget: LabelFrame
         name: connection_settings_frame
         options: {text: "${ui.config_tab.connection_settings}"}
+        layout: {method: grid, column: 0, row: 0, sticky: ew}
         children:
           - widget: Frame
             name: main_container
@@ -159,6 +160,7 @@ children:
       - widget: LabelFrame
         name: math_functions_frame
         options: {text: "${ui.config_tab.available_math_functions}"}
+        layout: {method: grid, column: 0, row: 1, sticky: ew, padx: 5, pady: 5}
         children:
           - widget: Text
             name: math_funcs_text

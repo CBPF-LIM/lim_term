@@ -7,7 +7,7 @@ import os
 import datetime
 import time
 from collections import deque
-from ..utils.ui_builder import build_from_yaml
+from ..utils.ui_builder import build_from_layout_name
 
 logger = logging.getLogger(__name__)
 
@@ -27,14 +27,7 @@ class DataTab:
         self._create_widgets()
 
     def _create_widgets(self):
-        import os as _os
-
-        yaml_path = _os.path.join(
-            _os.path.dirname(__file__), "..", "ui", "layouts", "data_tab.yml"
-        )
-        yaml_path = _os.path.abspath(yaml_path)
-
-        build_from_yaml(self.frame, yaml_path, self)
+        build_from_layout_name(self.frame, "data_tab", self)
 
         if hasattr(self, "text_widget") and hasattr(self, "scrollbar"):
             try:

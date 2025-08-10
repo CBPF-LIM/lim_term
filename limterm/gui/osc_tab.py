@@ -7,7 +7,7 @@ from ..core import GraphManager
 from ..i18n import t, get_config_manager
 from .preference_widgets import PrefEntry, PrefCombobox
 from ..utils import widget_exists, safe_after, safe_after_cancel
-from ..utils.ui_builder import build_from_yaml
+from ..utils.ui_builder import build_from_layout_name
 
 logger = logging.getLogger(__name__)
 
@@ -33,14 +33,7 @@ class OscTab:
         self._start_update_loop()
 
     def _create_widgets(self):
-        import os as _os
-
-        yaml_path = _os.path.join(
-            _os.path.dirname(__file__), "..", "ui", "layouts", "osc_tab.yml"
-        )
-        yaml_path = _os.path.abspath(yaml_path)
-
-        build_from_yaml(self.frame, yaml_path, self)
+        build_from_layout_name(self.frame, "osc_tab", self)
 
         self.settings_visible = self.config_manager.load_setting(
             "osc.ui.settings_visible", False

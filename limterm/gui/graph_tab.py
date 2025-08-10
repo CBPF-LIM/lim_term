@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import os
-from ..utils.ui_builder import build_from_yaml
+from ..utils.ui_builder import build_from_layout_name
 from ..core import GraphManager
 from ..utils import DataParser, FileManager
 from ..config import DEFAULT_X_COLUMN
@@ -45,13 +45,7 @@ class GraphTab:
         return self.frame
 
     def _create_widgets(self):
-
-        yaml_path = os.path.join(
-            os.path.dirname(__file__), "..", "ui", "layouts", "graph_tab.yml"
-        )
-        yaml_path = os.path.abspath(yaml_path)
-
-        build_from_yaml(self.frame, yaml_path, self)
+        build_from_layout_name(self.frame, "graph_tab", self)
 
         self.y_entries = []
         for i in range(1, 6):

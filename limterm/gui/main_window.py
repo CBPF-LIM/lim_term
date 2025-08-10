@@ -5,6 +5,7 @@ from ..config import DEFAULT_GEOMETRY
 from ..core import SerialManager
 from ..i18n import t, get_available_languages, set_language
 from ..utils.signal_handler import SignalHandler
+from ..utils.ui_builder import build_from_layout_name
 from .config_tab import ConfigTab
 from .data_tab import DataTab
 from .graph_tab import GraphTab
@@ -25,6 +26,7 @@ class MainWindow:
 
         self._setup_serial_manager()
         self._create_menu()
+        self._build_layout()
         self._create_tabs()
         self._setup_keyboard_shortcuts()
 
@@ -32,6 +34,15 @@ class MainWindow:
         self.serial_manager = SerialManager(
             data_callback=self._on_data_received, error_callback=self._on_error
         )
+
+    def _build_layout(self):
+        try:
+            build_from_layout_name(self.root, "main_window", self)
+        except Exception:
+
+            if not hasattr(self, "tab_control"):
+                self.tab_control = ttk.Notebook(self.root)
+                self.tab_control.pack(expand=1, fill="both")
 
     def _create_menu(self):
         menubar = tk.Menu(self.root)
@@ -99,7 +110,10 @@ class MainWindow:
         )
 
     def _create_tabs(self):
-        self.tab_control = ttk.Notebook(self.root)
+
+        if not hasattr(self, "tab_control"):
+            self.tab_control = ttk.Notebook(self.root)
+            self.tab_control.pack(expand=1, fill="both")
 
         self.config_tab = ConfigTab(
             self.tab_control, self.serial_manager, self.signal_handler
@@ -117,7 +131,10 @@ class MainWindow:
 
         self.tab_control.bind("<<NotebookTabChanged>>", self._on_tab_changed)
 
-        self.tab_control.pack(expand=1, fill="both")
+        try:
+            self.tab_control.pack_configure(expand=1, fill="both")
+        except Exception:
+            pass
 
         self._update_active_tab()
 
