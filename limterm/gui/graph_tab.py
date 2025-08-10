@@ -298,7 +298,9 @@ class GraphTab:
         if group == "time_series":
             self.series_config_frame.config(text=t("ui.graph_tab.time_series_settings"))
             for i in range(1, 6):
-                self._create_time_series_row(self.series_config_frame, i, f"Y{i}", i - 1)
+                self._create_time_series_row(
+                    self.series_config_frame, i, f"Y{i}", i - 1
+                )
         elif group == "stacked":
             self.series_config_frame.config(text=t("ui.graph_tab.stacked_settings"))
             self.normalize_100_checkbox = PrefCheckbutton(
@@ -366,6 +368,9 @@ class GraphTab:
             self.options_visible = True
 
     def _on_series_setting_change(self, series_index):
+        self._on_setting_change()
+
+    def _on_color_setting_change(self, color_index):
         self._on_setting_change()
 
     def _toggle_pause(self):
@@ -555,7 +560,11 @@ class GraphTab:
 
             if "type" in widgets:
                 type_value = widgets["type"].get_value()
-                marker_value = widgets.get("marker").get_value() if widgets.get("marker") else "circle"
+                marker_value = (
+                    widgets.get("marker").get_value()
+                    if widgets.get("marker")
+                    else "circle"
+                )
 
                 return {
                     "type": type_value,
@@ -640,7 +649,9 @@ class GraphTab:
         try:
             fps = float(self.fps_combobox.get_value())
             self._set_refresh_rate(fps)
-            self.fps_debug_label.config(text=f"({int(fps)} Hz = {self.refresh_rate_ms}ms)")
+            self.fps_debug_label.config(
+                text=f"({int(fps)} Hz = {self.refresh_rate_ms}ms)"
+            )
             import time
 
             self.last_render_time = time.time()
@@ -681,4 +692,3 @@ class GraphTab:
             if self.debug_refresh:
                 print(f"Render frame error: {e}")
             self.last_render_time = time.time()
-

@@ -338,7 +338,10 @@ class DataTab:
             end_idx = min(len(buffer_list), start_idx + limit)
 
             for line in buffer_list[start_idx:end_idx]:
-                if self.timestamp_enabled.get_value() and self.timestamp_start is not None:
+                if (
+                    self.timestamp_enabled.get_value()
+                    and self.timestamp_start is not None
+                ):
                     timestamp = format_elapsed_since(self.timestamp_start)
                     self.text_widget.insert("end", timestamp + line + "\n")
                 else:
@@ -428,8 +431,15 @@ class DataTab:
                 try:
                     with open(file_path, "w", encoding="utf-8") as f:
                         for line in buffer_lines:
-                            if self.timestamp_enabled.get_value() and self.timestamp_start is not None:
-                                f.write(format_elapsed_since(self.timestamp_start) + line + "\n")
+                            if (
+                                self.timestamp_enabled.get_value()
+                                and self.timestamp_start is not None
+                            ):
+                                f.write(
+                                    format_elapsed_since(self.timestamp_start)
+                                    + line
+                                    + "\n"
+                                )
                             else:
                                 f.write(line + "\n")
                     self._add_message(
@@ -487,8 +497,13 @@ class DataTab:
 
             formatted_lines = []
             for line in lines_to_show:
-                if self.timestamp_enabled.get_value() and self.timestamp_start is not None:
-                    formatted_lines.append(format_elapsed_since(self.timestamp_start) + line)
+                if (
+                    self.timestamp_enabled.get_value()
+                    and self.timestamp_start is not None
+                ):
+                    formatted_lines.append(
+                        format_elapsed_since(self.timestamp_start) + line
+                    )
                 else:
                     formatted_lines.append(line)
 
