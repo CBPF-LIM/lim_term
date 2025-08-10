@@ -1,0 +1,118 @@
+widget: Frame
+name: root
+layout: {method: pack, fill: x}
+children:
+  - widget: Frame
+    name: toolbar_frame
+    layout: {method: pack, fill: x, padx: 10, pady: [5,0]}
+    children:
+      - widget: Frame
+        name: button_container
+        layout: {method: pack, side: left, fill: x, expand: true}
+        children:
+          - widget: Button
+            name: save_button
+            options: {text: "${ui.data_tab.save}", command: _save_data}
+            layout: {method: pack, side: left, padx: [0,10]}
+          - widget: Button
+            name: load_button
+            options: {text: "${ui.data_tab.load}", command: _load_data}
+            layout: {method: pack, side: left, padx: [0,10]}
+          - widget: Button
+            name: clear_button
+            options: {text: "${ui.data_tab.clear}", command: _clear_data}
+            layout: {method: pack, side: left, padx: [0,10]}
+          - widget: Button
+            name: pause_button
+            options: {text: "${ui.data_tab.pause_preview}", command: _toggle_preview_pause}
+            layout: {method: pack, side: left, padx: [0,10]}
+          - widget: Button
+            name: reset_timestamp_button
+            options: {text: "${ui.data_tab.reset_timestamp}", command: _reset_timestamp}
+            layout: {method: pack, side: left, padx: [0,10]}
+      - widget: Button
+        name: toggle_settings_button
+        options: {text: "${ui.data_tab.show_settings}", command: _toggle_settings}
+        layout: {method: pack, side: right}
+  - widget: LabelFrame
+    name: data_settings_frame
+    options: {text: "${ui.data_tab.data_settings}"}
+    children:
+      - widget: Frame
+        name: settings_container
+        layout: {method: pack, fill: x, padx: 5, pady: 5}
+        children:
+          - widget: LabelFrame
+            name: capture_frame
+            options: {text: "${ui.data_tab.capture}"}
+            layout: {method: pack, side: left, fill: both, expand: true, padx: [0,5]}
+            children:
+              - widget: PrefCheckbutton
+                name: capture_enabled
+                options: {pref_key: data_capture.enabled, default_value: false, text: "${ui.data_tab.capture_enabled}", on_change: _on_capture_enabled_change}
+                layout: {method: grid, column: 0, row: 0, columnspan: 2, padx: 5, pady: 2, sticky: w}
+              - widget: Label
+                options: {text: "${ui.data_tab.filename_mode_label}"}
+                layout: {method: grid, column: 0, row: 1, padx: 5, pady: 2, sticky: w}
+              - widget: PrefCombobox
+                name: filename_mode
+                options:
+                  pref_key: data_capture.filename_mode
+                  default_value: auto
+                  state: readonly
+                  values: ["${ui.data_tab.filename_modes.auto}", "${ui.data_tab.filename_modes.fixed}"]
+                  value_mapping: {"${ui.data_tab.filename_modes.auto}": auto, "${ui.data_tab.filename_modes.fixed}": fixed}
+                  width: 12
+                  on_change: _on_filename_mode_change
+                layout: {method: grid, column: 1, row: 1, padx: 5, pady: 2, sticky: w}
+              - widget: Label
+                options: {text: "${ui.data_tab.fixed_filename_label}"}
+                layout: {method: grid, column: 0, row: 2, padx: 5, pady: 2, sticky: w}
+              - widget: PrefEntry
+                name: fixed_filename
+                options: {pref_key: data_capture.fixed_filename, default_value: data.txt, width: 15, on_change: _on_capture_setting_change}
+                layout: {method: grid, column: 1, row: 2, padx: 5, pady: 2, sticky: w}
+              - widget: Label
+                options: {text: "${ui.data_tab.file_mode_label}"}
+                layout: {method: grid, column: 0, row: 3, padx: 5, pady: 2, sticky: w}
+              - widget: PrefCombobox
+                name: file_mode
+                options:
+                  pref_key: data_capture.file_mode
+                  default_value: append
+                  state: readonly
+                  values: ["${ui.data_tab.file_modes.append}", "${ui.data_tab.file_modes.overwrite}"]
+                  value_mapping: {"${ui.data_tab.file_modes.append}": append, "${ui.data_tab.file_modes.overwrite}": overwrite}
+                  width: 12
+                  on_change: _on_capture_setting_change
+                layout: {method: grid, column: 1, row: 3, padx: 5, pady: 2, sticky: w}
+          - widget: LabelFrame
+            name: preview_frame
+            options: {text: "${ui.data_tab.preview}"}
+            layout: {method: pack, side: right, fill: both, expand: true, padx: [5,0]}
+            children:
+              - widget: PrefCheckbutton
+                name: preview_enabled
+                options: {pref_key: data_preview.enabled, default_value: false, text: "${ui.data_tab.enable_preview}", on_change: _on_preview_enabled_change}
+                layout: {method: grid, column: 0, row: 0, columnspan: 2, padx: 5, pady: 2, sticky: w}
+              - widget: Label
+                options: {text: "${ui.data_tab.preview_limit_label}"}
+                layout: {method: grid, column: 0, row: 1, padx: 5, pady: 2, sticky: w}
+              - widget: PrefCombobox
+                name: preview_limit
+                options: {pref_key: data_preview.limit, default_value: "50", state: readonly, values: ["10","25","50","100","200","500"], width: 12, on_change: _on_preview_limit_change}
+                layout: {method: grid, column: 1, row: 1, padx: 5, pady: 2, sticky: w}
+              - widget: PrefCheckbutton
+                name: timestamp_enabled
+                options: {pref_key: data_preview.timestamp_enabled, default_value: false, text: "${ui.data_tab.enable_timestamp}", on_change: _on_timestamp_enabled_change}
+                layout: {method: grid, column: 0, row: 2, columnspan: 2, padx: 5, pady: 2, sticky: w}
+  - widget: Frame
+    name: text_frame
+    layout: {method: pack, expand: true, fill: both, padx: 10, pady: 5}
+    children:
+      - widget: Text
+        name: text_widget
+        options: {wrap: word, height: 15}
+      - widget: Scrollbar
+        name: scrollbar
+        options: {orient: vertical, command: text_widget.yview}

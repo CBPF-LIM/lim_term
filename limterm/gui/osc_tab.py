@@ -7,6 +7,7 @@ from ..core import GraphManager
 from ..i18n import t, get_config_manager
 from .preference_widgets import PrefEntry, PrefCombobox
 from ..utils import widget_exists, safe_after, safe_after_cancel
+from ..utils.ui_builder import build_from_yaml
 
 logger = logging.getLogger(__name__)
 
@@ -32,48 +33,26 @@ class OscTab:
         self._start_update_loop()
 
     def _create_widgets(self):
-        main_controls_frame = ttk.Frame(self.frame)
-        main_controls_frame.grid(column=0, row=0, padx=10, pady=5, sticky="ew")
+        import os as _os
 
-        controls_left = ttk.Frame(main_controls_frame)
-        controls_left.pack(side="left", fill="x", expand=True)
-
-        controls_right = ttk.Frame(main_controls_frame)
-        controls_right.pack(side="right", padx=(10, 0))
-
-        self.arm_button = ttk.Button(
-            controls_left, text=t("ui.osc_tab.arm"), command=self._toggle_arm
+        yaml_path = _os.path.join(
+            _os.path.dirname(__file__), "..", "ui", "layouts", "osc_tab.yml"
         )
-        self.arm_button.pack(side="left", padx=(0, 10))
+        yaml_path = _os.path.abspath(yaml_path)
 
-        self.status_label = ttk.Label(
-            controls_left, text=t("ui.osc_tab.ready"), foreground="blue"
-        )
-        self.status_label.pack(side="left")
-
-        self.settings_button = ttk.Button(
-            controls_right,
-            text=t("ui.osc_tab.show_settings"),
-            command=self._toggle_settings,
-        )
-        self.settings_button.pack(side="right")
-
-        self.settings_frame = ttk.LabelFrame(
-            self.frame, text=t("ui.osc_tab.oscilloscope_settings")
-        )
-        self.settings_frame.grid(column=0, row=1, padx=10, pady=5, sticky="ew")
+        build_from_yaml(self.frame, yaml_path, self)
 
         self.settings_visible = self.config_manager.load_setting(
             "osc.ui.settings_visible", False
         )
 
-        self._create_settings_widgets()
-
-        if not self.settings_visible:
+        if not self.settings_visible and hasattr(self, "settings_frame"):
             self.settings_frame.grid_remove()
-            self.settings_button.config(text=t("ui.osc_tab.show_settings"))
+            if hasattr(self, "settings_button"):
+                self.settings_button.config(text=t("ui.osc_tab.show_settings"))
         else:
-            self.settings_button.config(text=t("ui.osc_tab.hide_settings"))
+            if hasattr(self, "settings_button"):
+                self.settings_button.config(text=t("ui.osc_tab.hide_settings"))
 
         self.graph_manager = GraphManager(self.frame)
         self.graph_manager.get_widget().grid(
@@ -82,114 +61,6 @@ class OscTab:
 
         self.frame.rowconfigure(2, weight=1)
         self.frame.columnconfigure(0, weight=1)
-
-    def _create_settings_widgets(self):
-        settings_container = ttk.Frame(self.settings_frame)
-        settings_container.pack(fill="both", expand=True, padx=5, pady=5)
-
-        trigger_frame = ttk.LabelFrame(settings_container, text=t("ui.osc_tab.trigger"))
-        trigger_frame.grid(column=0, row=0, padx=(0, 5), pady=5, sticky="new")
-
-        ttk.Label(trigger_frame, text=t("ui.osc_tab.trigger_source")).grid(
-            column=0, row=0, padx=5, pady=2, sticky="w"
-        )
-        self.trigger_source = PrefEntry(
-            trigger_frame,
-            pref_key="osc.trigger.source_column",
-            default_value="2",
-            width=8,
-        )
-        self.trigger_source.grid(column=1, row=0, padx=5, pady=2)
-
-        ttk.Label(trigger_frame, text=t("ui.osc_tab.trigger_level")).grid(
-            column=0, row=1, padx=5, pady=2, sticky="w"
-        )
-        self.trigger_level = PrefEntry(
-            trigger_frame,
-            pref_key="osc.trigger.level",
-            default_value="0.0",
-            width=8,
-        )
-        self.trigger_level.grid(column=1, row=1, padx=5, pady=2)
-
-        ttk.Label(trigger_frame, text=t("ui.osc_tab.trigger_edge")).grid(
-            column=0, row=2, padx=5, pady=2, sticky="w"
-        )
-        self.trigger_edge = PrefCombobox(
-            trigger_frame,
-            pref_key="osc.trigger.edge",
-            default_value="rising",
-            state="readonly",
-            values=[
-                t("ui.osc_tab.trigger_edges.rising"),
-                t("ui.osc_tab.trigger_edges.falling"),
-                t("ui.osc_tab.trigger_edges.both"),
-            ],
-            value_mapping={
-                t("ui.osc_tab.trigger_edges.rising"): "rising",
-                t("ui.osc_tab.trigger_edges.falling"): "falling",
-                t("ui.osc_tab.trigger_edges.both"): "both",
-            },
-            width=10,
-        )
-        self.trigger_edge.grid(column=1, row=2, padx=5, pady=2)
-
-        ttk.Label(trigger_frame, text=t("ui.osc_tab.trigger_mode")).grid(
-            column=0, row=3, padx=5, pady=2, sticky="w"
-        )
-        self.trigger_mode = PrefCombobox(
-            trigger_frame,
-            pref_key="osc.trigger.mode",
-            default_value="continuous",
-            state="readonly",
-            values=[
-                t("ui.osc_tab.trigger_modes.continuous"),
-                t("ui.osc_tab.trigger_modes.single"),
-            ],
-            value_mapping={
-                t("ui.osc_tab.trigger_modes.continuous"): "continuous",
-                t("ui.osc_tab.trigger_modes.single"): "single",
-            },
-            width=10,
-        )
-        self.trigger_mode.grid(column=1, row=3, padx=5, pady=2)
-
-        capture_frame = ttk.LabelFrame(settings_container, text=t("ui.osc_tab.capture"))
-        capture_frame.grid(column=1, row=0, padx=(5, 0), pady=5, sticky="new")
-
-        ttk.Label(capture_frame, text=t("ui.osc_tab.window_size")).grid(
-            column=0, row=0, padx=5, pady=2, sticky="w"
-        )
-        self.window_size = PrefEntry(
-            capture_frame,
-            pref_key="osc.capture.window_size",
-            default_value="25",
-            width=8,
-        )
-        self.window_size.grid(column=1, row=0, padx=5, pady=2)
-
-        save_controls_frame = ttk.Frame(capture_frame)
-        save_controls_frame.grid(
-            column=0, row=1, columnspan=2, padx=5, pady=5, sticky="ew"
-        )
-
-        self.save_png_button = ttk.Button(
-            save_controls_frame, text=t("ui.osc_tab.save_png"), command=self._save_png
-        )
-        self.save_png_button.pack(side="left", padx=2)
-
-        self.save_data_button = ttk.Button(
-            save_controls_frame, text=t("ui.osc_tab.save_data"), command=self._save_data
-        )
-        self.save_data_button.pack(side="left", padx=2)
-
-        self.clear_button = ttk.Button(
-            save_controls_frame, text=t("ui.osc_tab.clear"), command=self._clear_display
-        )
-        self.clear_button.pack(side="left", padx=2)
-
-        settings_container.columnconfigure(0, weight=1)
-        settings_container.columnconfigure(1, weight=1)
 
     def _toggle_settings(self):
         if self.settings_visible:

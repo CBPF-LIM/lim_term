@@ -1,0 +1,110 @@
+widget: Frame
+name: root
+layout: {method: grid, column: 0, row: 0, sticky: nsew}
+children:
+  - widget: Frame
+    name: main_controls_frame
+    layout: {method: grid, column: 0, row: 0, padx: 10, pady: 5, sticky: ew}
+    children:
+      - widget: Frame
+        name: controls_left
+        layout: {method: pack, side: left, fill: x, expand: true}
+        children:
+          - widget: Button
+            name: arm_button
+            options: {text: "${ui.osc_tab.arm}", command: _toggle_arm}
+            layout: {method: pack, side: left, padx: [0,10]}
+          - widget: Label
+            name: status_label
+            options: {text: "${ui.osc_tab.ready}", foreground: blue}
+            layout: {method: pack, side: left}
+      - widget: Frame
+        name: controls_right
+        layout: {method: pack, side: right, padx: [10,0]}
+        children:
+          - widget: Button
+            name: settings_button
+            options: {text: "${ui.osc_tab.show_settings}", command: _toggle_settings}
+            layout: {method: pack, side: right}
+  - widget: LabelFrame
+    name: settings_frame
+    options: {text: "${ui.osc_tab.oscilloscope_settings}"}
+    layout: {method: grid, column: 0, row: 1, padx: 10, pady: 5, sticky: ew}
+    children:
+      - widget: Frame
+        name: settings_container
+        layout: {method: pack, fill: both, expand: true, padx: 5, pady: 5}
+        children:
+          - widget: LabelFrame
+            name: trigger_frame
+            options: {text: "${ui.osc_tab.trigger}"}
+            layout: {method: grid, column: 0, row: 0, padx: [0,5], pady: 5, sticky: new}
+            children:
+              - widget: Label
+                options: {text: "${ui.osc_tab.trigger_source}"}
+                layout: {method: grid, column: 0, row: 0, padx: 5, pady: 2, sticky: w}
+              - widget: PrefEntry
+                name: trigger_source
+                options: {pref_key: osc.trigger.source_column, default_value: "2", width: 8}
+                layout: {method: grid, column: 1, row: 0, padx: 5, pady: 2}
+              - widget: Label
+                options: {text: "${ui.osc_tab.trigger_level}"}
+                layout: {method: grid, column: 0, row: 1, padx: 5, pady: 2, sticky: w}
+              - widget: PrefEntry
+                name: trigger_level
+                options: {pref_key: osc.trigger.level, default_value: "0.0", width: 8}
+                layout: {method: grid, column: 1, row: 1, padx: 5, pady: 2}
+              - widget: Label
+                options: {text: "${ui.osc_tab.trigger_edge}"}
+                layout: {method: grid, column: 0, row: 2, padx: 5, pady: 2, sticky: w}
+              - widget: PrefCombobox
+                name: trigger_edge
+                options:
+                  pref_key: osc.trigger.edge
+                  default_value: rising
+                  state: readonly
+                  values: ["${ui.osc_tab.trigger_edges.rising}", "${ui.osc_tab.trigger_edges.falling}", "${ui.osc_tab.trigger_edges.both}"]
+                  value_mapping: {"${ui.osc_tab.trigger_edges.rising}": rising, "${ui.osc_tab.trigger_edges.falling}": falling, "${ui.osc_tab.trigger_edges.both}": both}
+                  width: 10
+                layout: {method: grid, column: 1, row: 2, padx: 5, pady: 2}
+              - widget: Label
+                options: {text: "${ui.osc_tab.trigger_mode}"}
+                layout: {method: grid, column: 0, row: 3, padx: 5, pady: 2, sticky: w}
+              - widget: PrefCombobox
+                name: trigger_mode
+                options:
+                  pref_key: osc.trigger.mode
+                  default_value: continuous
+                  state: readonly
+                  values: ["${ui.osc_tab.trigger_modes.continuous}", "${ui.osc_tab.trigger_modes.single}"]
+                  value_mapping: {"${ui.osc_tab.trigger_modes.continuous}": continuous, "${ui.osc_tab.trigger_modes.single}": single}
+                  width: 10
+                layout: {method: grid, column: 1, row: 3, padx: 5, pady: 2}
+          - widget: LabelFrame
+            name: capture_frame
+            options: {text: "${ui.osc_tab.capture}"}
+            layout: {method: grid, column: 1, row: 0, padx: [5,0], pady: 5, sticky: new}
+            children:
+              - widget: Label
+                options: {text: "${ui.osc_tab.window_size}"}
+                layout: {method: grid, column: 0, row: 0, padx: 5, pady: 2, sticky: w}
+              - widget: PrefEntry
+                name: window_size
+                options: {pref_key: osc.capture.window_size, default_value: "25", width: 8}
+                layout: {method: grid, column: 1, row: 0, padx: 5, pady: 2}
+              - widget: Frame
+                name: save_controls_frame
+                layout: {method: grid, column: 0, row: 1, columnspan: 2, padx: 5, pady: 5, sticky: ew}
+                children:
+                  - widget: Button
+                    name: save_png_button
+                    options: {text: "${ui.osc_tab.save_png}", command: _save_png}
+                    layout: {method: pack, side: left, padx: 2}
+                  - widget: Button
+                    name: save_data_button
+                    options: {text: "${ui.osc_tab.save_data}", command: _save_data}
+                    layout: {method: pack, side: left, padx: 2}
+                  - widget: Button
+                    name: clear_button
+                    options: {text: "${ui.osc_tab.clear}", command: _clear_display}
+                    layout: {method: pack, side: left, padx: 2}

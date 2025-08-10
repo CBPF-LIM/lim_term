@@ -44,6 +44,10 @@ def _get_widget_class(widget_type: str):
         "Label": ttk.Label,
         "Button": ttk.Button,
         "Separator": ttk.Separator,
+        "Combobox": ttk.Combobox,
+        "Entry": ttk.Entry,
+        "Text": tk.Text,
+        "Scrollbar": tk.Scrollbar,
     }
     return mapping.get(widget_type)
 
@@ -90,6 +94,15 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
 
     if name:
         setattr(context, name, widget)
+
+    for bind_spec in spec.get("bindings", []):
+        ev = bind_spec.get("event")
+        handler_name = bind_spec.get("handler")
+        if ev and handler_name and hasattr(context, handler_name):
+            try:
+                widget.bind(ev, getattr(context, handler_name))
+            except Exception:
+                pass
 
     for child in spec.get("children", []):
         build_widget(widget, child, context)

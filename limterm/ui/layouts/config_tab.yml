@@ -1,0 +1,166 @@
+widget: Frame
+name: root
+layout: {method: grid, column: 0, row: 0, sticky: nsew}
+children:
+  - widget: Frame
+    name: toggle_frame
+    layout: {method: grid, column: 0, row: 0, padx: 10, pady: 5, sticky: ew}
+    children:
+      - widget: Frame
+        name: button_container
+        layout: {method: grid, column: 0, row: 0, sticky: w}
+        children:
+          - widget: Button
+            name: connect_button
+            options: {text: "${ui.config_tab.connect}", command: _connect}
+            layout: {method: pack, side: left}
+      - widget: Button
+        name: settings_button
+        options: {text: "${ui.config_tab.show_settings}", command: _toggle_settings}
+        layout: {method: grid, column: 1, row: 0, sticky: e}
+  - widget: LabelFrame
+    name: info_frame
+    options: {text: "${ui.config_tab.status}"}
+    layout: {method: grid, column: 0, row: 1, padx: 10, pady: 5, sticky: ew}
+    children:
+      - widget: Label
+        name: status_label
+        options: {text: "${ui.config_tab.not_connected}", foreground: red}
+        layout: {method: pack, padx: 10, pady: 5}
+  - widget: Frame
+    name: settings_frame
+    layout: {method: grid, column: 0, row: 2, padx: 10, pady: 5, sticky: ew}
+    children:
+      - widget: LabelFrame
+        name: connection_settings_frame
+        options: {text: "${ui.config_tab.connection_settings}"}
+        children:
+          - widget: Frame
+            name: main_container
+            layout: {method: grid, column: 0, row: 0, sticky: ew, padx: 5, pady: 5}
+            children:
+              - widget: LabelFrame
+                name: mode_frame
+                options: {text: "${ui.config_tab.mode}"}
+                layout: {method: grid, column: 0, row: 0, padx: [0,5], pady: 5, sticky: nsew}
+                children:
+                  - widget: Label
+                    name: mode_label
+                    options: {text: "${ui.config_tab.mode_label}"}
+                    layout: {method: grid, column: 0, row: 0, padx: 10, pady: 10, sticky: w}
+                  - widget: PrefCombobox
+                    name: mode_combobox
+                    options:
+                      pref_key: config.mode
+                      default_value: hardware
+                      state: readonly
+                      values: ["${common.hardware}", "${common.synthetic}"]
+                      value_mapping: {"${common.hardware}": hardware, "${common.synthetic}": synthetic}
+                      on_change: _on_mode_changed
+                    layout: {method: grid, column: 1, row: 0, padx: 10, pady: 10, sticky: w}
+                  - widget: Label
+                    name: port_label
+                    options: {text: "${ui.config_tab.port_label}"}
+                    layout: {method: grid, column: 0, row: 1, padx: 10, pady: 10, sticky: w}
+                  - widget: Frame
+                    name: port_frame
+                    layout: {method: grid, column: 1, row: 1, padx: 10, pady: 10, sticky: w}
+                    children:
+                      - widget: Combobox
+                        name: port_combobox
+                        options: {state: readonly}
+                        layout: {method: grid, column: 0, row: 0, sticky: w}
+                        bindings:
+                          - {event: "<<ComboboxSelected>>", handler: _on_preference_changed}
+                      - widget: Button
+                        name: refresh_button
+                        options: {text: "🔄", width: 3, command: _update_ports}
+                        layout: {method: grid, column: 1, row: 0, padx: [5,0]}
+                  - widget: Label
+                    name: baudrate_label
+                    options: {text: "${ui.config_tab.baudrate_label}"}
+                    layout: {method: grid, column: 0, row: 2, padx: 10, pady: 10, sticky: w}
+                  - widget: Combobox
+                    name: baudrate_combobox
+                    options: {state: readonly}
+                    layout: {method: grid, column: 1, row: 2, padx: 10, pady: 10, sticky: w}
+                    bindings:
+                      - {event: "<<ComboboxSelected>>", handler: _on_preference_changed}
+              - widget: LabelFrame
+                name: synthetic_frame
+                options: {text: "${ui.config_tab.synthetic_settings}"}
+                layout: {method: grid, column: 1, row: 0, padx: [5,0], pady: 5, sticky: nsew}
+                children:
+                  - widget: Label
+                    name: fps_label
+                    options: {text: "FPS:"}
+                    layout: {method: grid, column: 0, row: 0, padx: 5, pady: 5, sticky: w}
+                  - widget: Frame
+                    name: fps_frame
+                    layout: {method: grid, column: 1, row: 0, padx: 5, pady: 5, sticky: ew}
+                    children:
+                      - widget: PrefCombobox
+                        name: fps_pref_combobox
+                        options: {pref_key: graph.general.refresh_rate, default_value: "10", state: readonly, values: ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"], width: 8}
+                        layout: {method: pack, side: left}
+                      - widget: Button
+                        name: math_funcs_button
+                        options: {text: "${ui.config_tab.show_math_functions}", command: _toggle_math_functions}
+                        layout: {method: pack, side: right}
+                  - widget: Frame
+                    name: equations_container
+                    layout: {method: grid, column: 0, row: 1, columnspan: 2, sticky: ew}
+                    children:
+                      - widget: Label
+                        options: {text: "a:"}
+                        layout: {method: grid, column: 0, row: 1, padx: 5, pady: 5, sticky: w}
+                      - widget: Entry
+                        name: eq_a
+                        options: {width: 40}
+                        layout: {method: grid, column: 1, row: 1, padx: 5, pady: 5, sticky: ew}
+                        bindings:
+                          - {event: "<KeyRelease>", handler: _on_equation_changed}
+                      - widget: Label
+                        options: {text: "b:"}
+                        layout: {method: grid, column: 0, row: 2, padx: 5, pady: 5, sticky: w}
+                      - widget: Entry
+                        name: eq_b
+                        options: {width: 40}
+                        layout: {method: grid, column: 1, row: 2, padx: 5, pady: 5, sticky: ew}
+                        bindings:
+                          - {event: "<KeyRelease>", handler: _on_equation_changed}
+                      - widget: Label
+                        options: {text: "c:"}
+                        layout: {method: grid, column: 0, row: 3, padx: 5, pady: 5, sticky: w}
+                      - widget: Entry
+                        name: eq_c
+                        options: {width: 40}
+                        layout: {method: grid, column: 1, row: 3, padx: 5, pady: 5, sticky: ew}
+                        bindings:
+                          - {event: "<KeyRelease>", handler: _on_equation_changed}
+                      - widget: Label
+                        options: {text: "d:"}
+                        layout: {method: grid, column: 0, row: 4, padx: 5, pady: 5, sticky: w}
+                      - widget: Entry
+                        name: eq_d
+                        options: {width: 40}
+                        layout: {method: grid, column: 1, row: 4, padx: 5, pady: 5, sticky: ew}
+                        bindings:
+                          - {event: "<KeyRelease>", handler: _on_equation_changed}
+                      - widget: Label
+                        options: {text: "e:"}
+                        layout: {method: grid, column: 0, row: 5, padx: 5, pady: 5, sticky: w}
+                      - widget: Entry
+                        name: eq_e
+                        options: {width: 40}
+                        layout: {method: grid, column: 1, row: 5, padx: 5, pady: 5, sticky: ew}
+                        bindings:
+                          - {event: "<KeyRelease>", handler: _on_equation_changed}
+      - widget: LabelFrame
+        name: math_functions_frame
+        options: {text: "${ui.config_tab.available_math_functions}"}
+        children:
+          - widget: Text
+            name: math_funcs_text
+            options: {height: 4, width: 80, wrap: word}
+            layout: {method: pack, fill: both, expand: true, padx: 5, pady: 5}

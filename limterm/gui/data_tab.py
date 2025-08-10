@@ -1,14 +1,13 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from ..utils import FileManager, format_elapsed_since, ensure_capture_dir
+from ..utils import format_elapsed_since, ensure_capture_dir
 from ..i18n import t, get_config_manager
-from .preference_widgets import PrefCheckbutton, PrefCombobox, PrefEntry
 import logging
 import os
 import datetime
 import time
 from collections import deque
-from ..config import CAPTURE_DIR
+from ..utils.ui_builder import build_from_yaml
 
 logger = logging.getLogger(__name__)
 
@@ -28,175 +27,21 @@ class DataTab:
         self._create_widgets()
 
     def _create_widgets(self):
+        import os as _os
 
-        toolbar_frame = ttk.Frame(self.frame)
-        toolbar_frame.pack(fill="x", padx=10, pady=(5, 0))
+        yaml_path = _os.path.join(
+            _os.path.dirname(__file__), "..", "ui", "layouts", "data_tab.yml"
+        )
+        yaml_path = _os.path.abspath(yaml_path)
 
-        button_container = ttk.Frame(toolbar_frame)
-        button_container.pack(side="left", fill="x", expand=True)
+        build_from_yaml(self.frame, yaml_path, self)
 
-        self.save_button = ttk.Button(
-            button_container, text=t("ui.data_tab.save"), command=self._save_data
-        )
-        self.save_button.pack(side="left", padx=(0, 10))
-
-        self.load_button = ttk.Button(
-            button_container, text=t("ui.data_tab.load"), command=self._load_data
-        )
-        self.load_button.pack(side="left", padx=(0, 10))
-
-        self.clear_button = ttk.Button(
-            button_container, text=t("ui.data_tab.clear"), command=self._clear_data
-        )
-        self.clear_button.pack(side="left", padx=(0, 10))
-
-        self.pause_button = ttk.Button(
-            button_container,
-            text=t("ui.data_tab.pause_preview"),
-            command=self._toggle_preview_pause,
-        )
-        self.pause_button.pack(side="left", padx=(0, 10))
-
-        self.reset_timestamp_button = ttk.Button(
-            button_container,
-            text=t("ui.data_tab.reset_timestamp"),
-            command=self._reset_timestamp,
-        )
-        self.reset_timestamp_button.pack(side="left", padx=(0, 10))
-
-        self.toggle_settings_button = ttk.Button(
-            toolbar_frame,
-            text=t("ui.data_tab.show_settings"),
-            command=self._toggle_settings,
-        )
-        self.toggle_settings_button.pack(side="right")
-
-        self.data_settings_frame = ttk.LabelFrame(
-            self.frame, text=t("ui.data_tab.data_settings")
-        )
-
-        settings_container = ttk.Frame(self.data_settings_frame)
-        settings_container.pack(fill="x", padx=5, pady=5)
-
-        capture_frame = ttk.LabelFrame(
-            settings_container, text=t("ui.data_tab.capture")
-        )
-        capture_frame.pack(side="left", fill="both", expand=True, padx=(0, 5))
-
-        self.capture_enabled = PrefCheckbutton(
-            capture_frame,
-            pref_key="data_capture.enabled",
-            default_value=False,
-            text=t("ui.data_tab.capture_enabled"),
-            on_change=self._on_capture_enabled_change,
-        )
-        self.capture_enabled.grid(
-            column=0, row=0, columnspan=2, padx=5, pady=2, sticky="w"
-        )
-
-        ttk.Label(capture_frame, text=t("ui.data_tab.filename_mode_label")).grid(
-            column=0, row=1, padx=5, pady=2, sticky="w"
-        )
-        self.filename_mode = PrefCombobox(
-            capture_frame,
-            pref_key="data_capture.filename_mode",
-            default_value="auto",
-            state="readonly",
-            values=[
-                t("ui.data_tab.filename_modes.auto"),
-                t("ui.data_tab.filename_modes.fixed"),
-            ],
-            value_mapping={
-                t("ui.data_tab.filename_modes.auto"): "auto",
-                t("ui.data_tab.filename_modes.fixed"): "fixed",
-            },
-            width=12,
-            on_change=self._on_filename_mode_change,
-        )
-        self.filename_mode.grid(column=1, row=1, padx=5, pady=2, sticky="w")
-
-        ttk.Label(capture_frame, text=t("ui.data_tab.fixed_filename_label")).grid(
-            column=0, row=2, padx=5, pady=2, sticky="w"
-        )
-        self.fixed_filename = PrefEntry(
-            capture_frame,
-            pref_key="data_capture.fixed_filename",
-            default_value="data.txt",
-            width=15,
-            on_change=self._on_capture_setting_change,
-        )
-        self.fixed_filename.grid(column=1, row=2, padx=5, pady=2, sticky="w")
-
-        ttk.Label(capture_frame, text=t("ui.data_tab.file_mode_label")).grid(
-            column=0, row=3, padx=5, pady=2, sticky="w"
-        )
-        self.file_mode = PrefCombobox(
-            capture_frame,
-            pref_key="data_capture.file_mode",
-            default_value="append",
-            state="readonly",
-            values=[
-                t("ui.data_tab.file_modes.append"),
-                t("ui.data_tab.file_modes.overwrite"),
-            ],
-            value_mapping={
-                t("ui.data_tab.file_modes.append"): "append",
-                t("ui.data_tab.file_modes.overwrite"): "overwrite",
-            },
-            width=12,
-            on_change=self._on_capture_setting_change,
-        )
-        self.file_mode.grid(column=1, row=3, padx=5, pady=2, sticky="w")
-
-        preview_frame = ttk.LabelFrame(
-            settings_container, text=t("ui.data_tab.preview")
-        )
-        preview_frame.pack(side="right", fill="both", expand=True, padx=(5, 0))
-
-        self.preview_enabled = PrefCheckbutton(
-            preview_frame,
-            pref_key="data_preview.enabled",
-            default_value=False,
-            text=t("ui.data_tab.enable_preview"),
-            on_change=self._on_preview_enabled_change,
-        )
-        self.preview_enabled.grid(
-            column=0, row=0, columnspan=2, padx=5, pady=2, sticky="w"
-        )
-
-        ttk.Label(preview_frame, text=t("ui.data_tab.preview_limit_label")).grid(
-            column=0, row=1, padx=5, pady=2, sticky="w"
-        )
-        self.preview_limit = PrefCombobox(
-            preview_frame,
-            pref_key="data_preview.limit",
-            default_value="50",
-            state="readonly",
-            values=["10", "25", "50", "100", "200", "500"],
-            width=12,
-            on_change=self._on_preview_limit_change,
-        )
-        self.preview_limit.grid(column=1, row=1, padx=5, pady=2, sticky="w")
-
-        self.timestamp_enabled = PrefCheckbutton(
-            preview_frame,
-            pref_key="data_preview.timestamp_enabled",
-            default_value=False,
-            text=t("ui.data_tab.enable_timestamp"),
-            on_change=self._on_timestamp_enabled_change,
-        )
-        self.timestamp_enabled.grid(
-            column=0, row=2, columnspan=2, padx=5, pady=2, sticky="w"
-        )
-
-        self.text_frame = ttk.Frame(self.frame)
-        self.text_frame.pack(expand=1, fill="both", padx=10, pady=5)
-
-        self.text_widget = tk.Text(self.text_frame, wrap="word", height=15)
-        self.scrollbar = tk.Scrollbar(
-            self.text_frame, orient="vertical", command=self.text_widget.yview
-        )
-        self.text_widget.config(yscrollcommand=self.scrollbar.set)
+        if hasattr(self, "text_widget") and hasattr(self, "scrollbar"):
+            try:
+                self.text_widget.config(yscrollcommand=self.scrollbar.set)
+                self.scrollbar.config(command=self.text_widget.yview)
+            except Exception:
+                pass
 
         self._update_widget_states()
         self._setup_initial_capture_state()
