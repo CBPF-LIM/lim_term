@@ -35,6 +35,9 @@ class GraphTab:
 
         self._create_widgets()
 
+    def get_frame(self):
+        return self.frame
+
     def _create_widgets(self):
         toolbar_frame = ttk.Frame(self.frame)
         toolbar_frame.grid(column=0, row=0, sticky="ew", padx=10, pady=(10, 5))
@@ -567,28 +570,16 @@ class GraphTab:
     def update_graph_settings(self, settings):
         self.graph_settings.update(settings)
 
-        if "type" in settings:
-            self.graph_type_combobox.set(settings["type"])
-        if "color" in settings:
-            self.color_combobox.set(settings["color"])
-        if "data_window" in settings:
+        # Update only if widgets exist in this tab
+        if "data_window" in settings and hasattr(self, "data_window_entry"):
             self.data_window_entry.delete(0, "end")
             self.data_window_entry.insert(0, str(settings["data_window"]))
-        if "min_y" in settings:
+        if "min_y" in settings and hasattr(self, "min_y_entry"):
             self.min_y_entry.delete(0, "end")
             self.min_y_entry.insert(0, settings["min_y"])
-        if "max_y" in settings:
+        if "max_y" in settings and hasattr(self, "max_y_entry"):
             self.max_y_entry.delete(0, "end")
             self.max_y_entry.insert(0, settings["max_y"])
-        if "dot_type" in settings:
-            # This method may not exist on this refactor path; ignore gracefully
-            try:
-                translated_marker = self._get_translated_marker_from_original(
-                    settings["dot_type"]
-                )
-                self.dot_type_combobox.set(translated_marker)
-            except Exception:
-                pass
 
         if self.data_tab.get_data() and not self.is_paused:
             self.plot_graph()
@@ -665,4 +656,29 @@ class GraphTab:
         else:
             if hasattr(self, "frame") and self.frame.winfo_exists():
                 self._start_refresh_timer()
+
+    def should_render_now(self, current_time):
+        if self.is_paused or not getattr(self, "is_tab_active", True):
+            return False
+        refresh_interval = self.refresh_rate_ms / 1000.0
+        return (current_time - self.last_render_time) >= refresh_interval
+
+    def render_frame(self):
+        import time
+
+        try:
+            data_lines = self.data_tab.get_data()
+            if data_lines:
+                self.refresh_counter += 1
+                if self.debug_refresh:
+                    fps_actual = 1000 / self.refresh_rate_ms
+                    print(
+                        f"Render frame #{self.refresh_counter}: {fps_actual:.1f} FPS ({self.refresh_rate_ms}ms) - Game Loop Style"
+                    )
+                self.plot_graph()
+            self.last_render_time = time.time()
+        except Exception as e:
+            if self.debug_refresh:
+                print(f"Render frame error: {e}")
+            self.last_render_time = time.time()
 
