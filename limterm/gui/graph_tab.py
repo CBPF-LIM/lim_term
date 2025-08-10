@@ -631,7 +631,11 @@ class GraphTab:
             )
 
     def _stop_refresh_timer(self):
-        if self.refresh_timer_id and hasattr(self, "frame") and self.frame.winfo_exists():
+        if (
+            self.refresh_timer_id
+            and hasattr(self, "frame")
+            and self.frame.winfo_exists()
+        ):
             self.frame.after_cancel(self.refresh_timer_id)
         self.refresh_timer_id = None
 
