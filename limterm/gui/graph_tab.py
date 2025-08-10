@@ -430,9 +430,7 @@ class GraphTab:
             hasattr(self, "data_window_entry") and widget_exists(self.data_window_entry)
         ):
             return
-        if not (
-            hasattr(self, "group_combobox") and widget_exists(self.group_combobox)
-        ):
+        if not (hasattr(self, "group_combobox") and widget_exists(self.group_combobox)):
             return
 
         # Parse inputs with narrow validation
@@ -621,7 +619,9 @@ class GraphTab:
                 except Exception as e:
                     if self.debug_refresh:
                         print(f"Chart refresh error: {e}")
-        self.refresh_timer_id = safe_after(self.frame, self.refresh_rate_ms, self._refresh_chart)
+        self.refresh_timer_id = safe_after(
+            self.frame, self.refresh_rate_ms, self._refresh_chart
+        )
 
     def _stop_refresh_timer(self):
         if self.refresh_timer_id:
