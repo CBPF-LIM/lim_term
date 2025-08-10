@@ -39,6 +39,15 @@ class GraphTab:
         return self.frame
 
     def _create_widgets(self):
+        # Build toolbar, settings panel, and chart area
+        self._create_toolbar()
+        self._create_settings_panel()
+        self._create_chart_area()
+
+        self.frame.rowconfigure(3, weight=1)
+        self.frame.columnconfigure(0, weight=1)
+
+    def _create_toolbar(self):
         toolbar_frame = ttk.Frame(self.frame)
         toolbar_frame.grid(column=0, row=0, sticky="ew", padx=10, pady=(10, 5))
         toolbar_frame.columnconfigure(0, weight=1)
@@ -75,6 +84,7 @@ class GraphTab:
         )
         self.options_button.grid(column=1, row=0, sticky="e")
 
+    def _create_settings_panel(self):
         self.graph_settings_frame = ttk.LabelFrame(
             self.frame, text=t("ui.graph_tab.graph_settings")
         )
@@ -130,7 +140,7 @@ class GraphTab:
 
         self.options_frame = ttk.Frame(self.graph_settings_frame)
         self.options_frame.grid(column=0, row=1, sticky="ew", padx=5, pady=5)
-        self._create_options_widgets()
+        self._build_options_sections()
 
         self.options_visible = self.config_manager.load_setting(
             "graph.ui.options_visible", False
@@ -141,16 +151,14 @@ class GraphTab:
         else:
             self.options_button.config(text=t("ui.graph_tab.hide_settings"))
 
+    def _create_chart_area(self):
         chart_frame = ttk.Frame(self.frame)
         chart_frame.grid(column=0, row=3, columnspan=4, padx=10, pady=10, sticky="nsew")
 
         self.graph_manager = GraphManager(chart_frame)
         self.graph_manager.get_widget().pack(fill="both", expand=True)
 
-        self.frame.rowconfigure(3, weight=1)
-        self.frame.columnconfigure(0, weight=1)
-
-    def _create_options_widgets(self):
+    def _build_options_sections(self):
 
         main_container = ttk.Frame(self.options_frame)
         main_container.pack(fill="both", expand=True, padx=5, pady=5)
@@ -287,10 +295,7 @@ class GraphTab:
     def _create_series_widgets(self):
 
         group = self.group_combobox.get_value()
-        for widget in getattr(self, "series_widgets", []):
-
-            pass
-
+        # Clear previous series widgets
         for child in self.series_config_frame.winfo_children():
             child.destroy()
         self.series_widgets = []
