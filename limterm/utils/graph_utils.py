@@ -41,5 +41,5 @@ def get_original_marker(translated_marker: str) -> str:
 
 
 def get_default_series_hex_colors():
-    # Fallback hex colors when no internal color is selected
+
     return ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#ff00ff"]

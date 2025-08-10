@@ -202,7 +202,6 @@ class GraphManager:
         xlabel=None,
         ylabel=None,
     ):
-        """Plot stacked area chart using pure Python without numpy dependency"""
         self.clear()
 
         if not y_series_data or not x_data:

@@ -285,12 +285,12 @@ class GraphTab:
         self._create_series_widgets()
 
     def _create_series_widgets(self):
-        # Decide which widgets to show based on group
+
         group = self.group_combobox.get_value()
         for widget in getattr(self, "series_widgets", []):
-            # just clear stored widgets list; the actual widgets are in the frame
+
             pass
-        # Remove existing series rows
+
         for child in self.series_config_frame.winfo_children():
             child.destroy()
         self.series_widgets = []
@@ -350,7 +350,7 @@ class GraphTab:
     def _get_stacked_color(self, series_index):
         if series_index < len(self.y_color_combos):
             internal_color = self.y_color_combos[series_index].get_value()
-            # internal color is already the config key (e.g., 'blue')
+
             return internal_color
         defaults = get_default_series_hex_colors()
         return defaults[series_index % len(defaults)]
@@ -579,7 +579,6 @@ class GraphTab:
     def update_graph_settings(self, settings):
         self.graph_settings.update(settings)
 
-        # Update only if widgets exist in this tab
         if "data_window" in settings and hasattr(self, "data_window_entry"):
             self.data_window_entry.delete(0, "end")
             self.data_window_entry.insert(0, str(settings["data_window"]))
@@ -593,7 +592,6 @@ class GraphTab:
         if self.data_tab.get_data() and not self.is_paused:
             self.plot_graph()
 
-    # Refresh timer helpers
     def _start_refresh_timer(self):
         self._refresh_chart()
 
@@ -659,7 +657,6 @@ class GraphTab:
         except Exception:
             pass
 
-    # Legacy API used by outer UI
     def set_tab_active(self, is_active):
         self.is_tab_active = is_active
         if not is_active:

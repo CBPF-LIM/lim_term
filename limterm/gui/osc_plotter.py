@@ -1,16 +1,9 @@
-"""
-Oscilloscope plotting and visualization utilities.
-
-This module provides plotting functionality for the oscilloscope tab.
-"""
-
 from ..i18n import t
 from ..matplotlib_optimizations import get_optimized_figure_params
 import matplotlib.pyplot as plt
 
 
 class OscPlotter:
-    """Handles oscilloscope data plotting and visualization."""
 
     def __init__(self, graph_manager, trigger_source, trigger_level, window_size):
         self.graph_manager = graph_manager
@@ -32,7 +25,6 @@ class OscPlotter:
         self.current_set_index = 0
 
     def plot_realtime_data(self, trigger_data):
-        """Plot captured data during real-time capture using optimized blitting."""
         if not trigger_data or not hasattr(self, "graph_manager"):
             return
 
@@ -50,7 +42,6 @@ class OscPlotter:
             print(t("errors.realtime_plot_error", error=str(e)))
 
     def plot_final_data(self, trigger_data):
-        """Plot final captured data after capture completion."""
         if not trigger_data or not hasattr(self, "graph_manager"):
             return
 
@@ -73,7 +64,6 @@ class OscPlotter:
             return None
 
     def _add_to_buffer(self, x_data, y_data):
-        """Add completed capture to N-set ring buffer."""
         while len(self.capture_sets) < self.set_buffer_size:
             self.capture_sets.append(None)
 
@@ -82,7 +72,6 @@ class OscPlotter:
         self.current_set_index = (self.current_set_index + 1) % self.set_buffer_size
 
     def _plot_current_and_buffer_sets(self, current_x, current_y, trigger_col, title):
-        """Plot current incomplete capture plus buffered complete captures."""
         self.graph_manager.clear()
 
         for capture_set in self.capture_sets:
@@ -102,7 +91,6 @@ class OscPlotter:
         self.graph_manager.canvas.draw_idle()
 
     def _plot_buffer_sets(self, trigger_col, title):
-        """Plot all buffered complete captures."""
         self.graph_manager.clear()
 
         for capture_set in self.capture_sets:
@@ -117,7 +105,6 @@ class OscPlotter:
         self.graph_manager.canvas.draw_idle()
 
     def _add_static_elements(self, trigger_col, title):
-        """Add static elements like trigger level line and labels."""
         trigger_level = float(self.trigger_level.get_value())
 
         all_x = []
@@ -147,7 +134,6 @@ class OscPlotter:
         self.graph_manager.ax.grid(True, alpha=1.0, linewidth=0.5, color="lightgray")
 
     def _update_axis_limits(self):
-        """Update axis limits to fit all buffered data automatically with optimized calculations."""
         all_x = []
         all_y = []
 
@@ -174,7 +160,6 @@ class OscPlotter:
         self.graph_manager.ax.set_ylim(min_y - y_margin, max_y + y_margin)
 
     def clear_all_data(self):
-        """Clear all plotting data and reset for new session."""
         self.capture_sets = []
         self.current_set_index = 0
         self.data_line = None
@@ -187,7 +172,6 @@ class OscPlotter:
             self.graph_manager.clear()
 
     def _extract_plot_data(self, trigger_data, trigger_col):
-        """Extract X and Y data from trigger data for plotting."""
         x_data = []
         y_data = []
 

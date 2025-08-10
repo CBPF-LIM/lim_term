@@ -122,11 +122,9 @@ class MainWindow:
         self._update_active_tab()
 
     def _on_tab_changed(self, event):
-        """Handle tab change for rendering optimization."""
         self._update_active_tab()
 
     def _update_active_tab(self):
-        """Update which tab is active for rendering optimization."""
         try:
             active_tab_index = self.tab_control.index("current")
 
@@ -210,11 +208,9 @@ class MainWindow:
             self._running = False
 
     def _on_window_close(self):
-        """Handle window close button click"""
         self.signal_handler.request_exit()
 
     def _setup_keyboard_shortcuts(self):
-        """Set up keyboard shortcuts for tab navigation"""
 
         self.root.bind("<Control-1>", lambda e: self._switch_to_tab(0))
         self.root.bind("<Control-2>", lambda e: self._switch_to_tab(1))
@@ -230,7 +226,6 @@ class MainWindow:
         self.root.focus_force()
 
     def _switch_to_tab(self, tab_index):
-        """Switch to the specified tab"""
         try:
             if hasattr(self, "tab_control") and tab_index < self.tab_control.index(
                 "end"

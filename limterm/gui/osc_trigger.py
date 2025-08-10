@@ -1,15 +1,8 @@
-"""
-Oscilloscope trigger detection and management.
-
-This module provides trigger detection logic for the oscilloscope tab.
-"""
-
 import time
 from ..i18n import t
 
 
 class OscTrigger:
-    """Handles oscilloscope trigger detection and logic."""
 
     def __init__(
         self, data_tab, trigger_source, trigger_level, trigger_edge, trigger_mode
@@ -27,20 +20,17 @@ class OscTrigger:
         self.trigger_point_index = -1
 
     def arm(self):
-        """Arm the trigger for detection."""
         self.is_armed = True
         self.is_triggered = False
         self.last_sample_value = None
         self.arm_start_time = time.time()
 
     def disarm(self):
-        """Disarm the trigger."""
         self.is_armed = False
         self.is_triggered = False
         self.last_sample_value = None
 
     def check_trigger_conditions(self):
-        """Check if trigger conditions are met."""
         if not self.is_armed:
             return False
 
@@ -84,7 +74,6 @@ class OscTrigger:
     def _check_edge_condition(
         self, last_value, current_value, trigger_level, trigger_edge
     ):
-        """Check if edge condition is met."""
         if trigger_edge == "rising":
             return last_value <= trigger_level < current_value
         elif trigger_edge == "falling":
@@ -96,15 +85,12 @@ class OscTrigger:
         return False
 
     def _trigger_detected(self, data_lines):
-        """Handle trigger detection."""
         self.is_triggered = True
         self.trigger_point_index = len(data_lines)
 
     def get_trigger_point_index(self):
-        """Get the index where trigger was detected."""
         return self.trigger_point_index
 
     def reset_trigger_state(self):
-        """Reset trigger detection state."""
         self.last_sample_value = None
         self.is_triggered = False

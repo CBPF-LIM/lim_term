@@ -14,15 +14,12 @@ class GraphOptionsWindow:
         self._load_current_settings()
 
     def _get_translated_graph_types(self):
-        """Get translated graph type options"""
         return [t("ui.graph_types.line"), t("ui.graph_types.scatter")]
 
     def _get_translated_colors(self):
-        """Get translated color options"""
         return [t(f"ui.colors.{color}") for color in COLOR_KEYS]
 
     def _get_translated_markers(self):
-        """Get translated marker options"""
         marker_keys = [
             "circle",
             "square",
@@ -38,14 +35,12 @@ class GraphOptionsWindow:
         return [t(f"ui.markers.{marker}") for marker in marker_keys]
 
     def _get_original_marker(self, translated_marker):
-        """Convert translated marker back to matplotlib marker"""
         marker_mapping = {}
         for key, value in MARKER_MAPPING.items():
             marker_mapping[t(f"ui.markers.{key}")] = value
         return marker_mapping.get(translated_marker, "o")
 
     def _get_translated_marker(self, original_marker):
-        """Convert matplotlib marker to translated marker"""
         for key, value in MARKER_MAPPING.items():
             if value == original_marker:
                 return t(f"ui.markers.{key}")
