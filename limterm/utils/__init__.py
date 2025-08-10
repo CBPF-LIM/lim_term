@@ -14,6 +14,7 @@ from .graph_utils import (
     get_original_marker,
     get_default_series_hex_colors,
 )
+from .tkinter_utils import widget_exists, safe_after, safe_after_cancel
 
 __all__ = [
     "SerialPortManager",
@@ -33,4 +34,7 @@ __all__ = [
     "get_original_marker_from_internal",
     "get_original_marker",
     "get_default_series_hex_colors",
+    "widget_exists",
+    "safe_after",
+    "safe_after_cancel",
 ]

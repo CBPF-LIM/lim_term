@@ -14,6 +14,9 @@ from ..utils import (
     get_marker_mapping,
     get_original_marker_from_internal,
     get_default_series_hex_colors,
+    widget_exists,
+    safe_after,
+    safe_after_cancel,
 )
 import time
 
@@ -421,19 +424,14 @@ class GraphTab:
         pass
 
     def plot_graph(self):
-        if (
-            not hasattr(self, "x_column_entry")
-            or not self.x_column_entry.winfo_exists()
+        if not (hasattr(self, "x_column_entry") and widget_exists(self.x_column_entry)):
+            return
+        if not (
+            hasattr(self, "data_window_entry") and widget_exists(self.data_window_entry)
         ):
             return
-        if (
-            not hasattr(self, "data_window_entry")
-            or not self.data_window_entry.winfo_exists()
-        ):
-            return
-        if (
-            not hasattr(self, "group_combobox")
-            or not self.group_combobox.winfo_exists()
+        if not (
+            hasattr(self, "group_combobox") and widget_exists(self.group_combobox)
         ):
             return
 
@@ -623,18 +621,11 @@ class GraphTab:
                 except Exception as e:
                     if self.debug_refresh:
                         print(f"Chart refresh error: {e}")
-        if hasattr(self, "frame") and self.frame.winfo_exists():
-            self.refresh_timer_id = self.frame.after(
-                self.refresh_rate_ms, self._refresh_chart
-            )
+        self.refresh_timer_id = safe_after(self.frame, self.refresh_rate_ms, self._refresh_chart)
 
     def _stop_refresh_timer(self):
-        if (
-            self.refresh_timer_id
-            and hasattr(self, "frame")
-            and self.frame.winfo_exists()
-        ):
-            self.frame.after_cancel(self.refresh_timer_id)
+        if self.refresh_timer_id:
+            safe_after_cancel(self.frame, self.refresh_timer_id)
         self.refresh_timer_id = None
 
     def _set_refresh_rate(self, fps: float):
@@ -666,7 +657,7 @@ class GraphTab:
         if not is_active:
             self._stop_refresh_timer()
         else:
-            if hasattr(self, "frame") and self.frame.winfo_exists():
+            if widget_exists(self.frame):
                 self._start_refresh_timer()
 
     def should_render_now(self, current_time):

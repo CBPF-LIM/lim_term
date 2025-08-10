@@ -6,6 +6,7 @@ import logging
 from ..core import GraphManager
 from ..i18n import t, get_config_manager
 from .preference_widgets import PrefEntry, PrefCombobox
+from ..utils import widget_exists, safe_after, safe_after_cancel
 
 logger = logging.getLogger(__name__)
 
@@ -205,20 +206,14 @@ class OscTab:
         )
 
     def _start_update_loop(self):
-        if not self._is_frame_valid():
+        if not widget_exists(self.frame):
             return
-
-        try:
-
-            if self.is_armed:
-                self._process_data_directly()
-                self._plot_sets()
-
-            self.update_timer_id = self.frame.after(
-                self.update_interval_ms, self._start_update_loop
-            )
-        except tk.TclError:
-            self.is_armed = False
+        if self.is_armed:
+            self._process_data_directly()
+            self._plot_sets()
+        self.update_timer_id = safe_after(
+            self.frame, self.update_interval_ms, self._start_update_loop
+        )
 
     def _process_data_directly(self):
         try:
@@ -375,26 +370,14 @@ class OscTab:
 
     def _stop_update_loop(self):
         if self.update_timer_id:
-            try:
-                if self._is_frame_valid():
-                    self.frame.after_cancel(self.update_timer_id)
-            except (tk.TclError, AttributeError):
-                pass
+            safe_after_cancel(self.frame, self.update_timer_id)
             self.update_timer_id = None
 
     def _is_widget_valid(self, widget_name):
-        try:
-            return (
-                hasattr(self, widget_name) and getattr(self, widget_name).winfo_exists()
-            )
-        except tk.TclError:
-            return False
+        return hasattr(self, widget_name) and widget_exists(getattr(self, widget_name))
 
     def _is_frame_valid(self):
-        try:
-            return hasattr(self, "frame") and self.frame.winfo_exists()
-        except tk.TclError:
-            return False
+        return hasattr(self, "frame") and widget_exists(self.frame)
 
     def set_tab_active(self, is_active):
         self.is_active = is_active
