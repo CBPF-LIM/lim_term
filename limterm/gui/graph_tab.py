@@ -440,11 +440,9 @@ class GraphTab:
         # Parse inputs with narrow validation
         try:
             x_col = int(self.x_column_entry.get_value()) - 1
-        except ValueError:
+        except ValueError as e:
             self.data_tab.add_message(
-                t("ui.graph_tab.parameter_error").format(
-                    error=t("ui.graph_tab.invalid_x_column")
-                )
+                t("ui.graph_tab.parameter_error").format(error=str(e))
             )
             return
 
