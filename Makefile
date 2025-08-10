@@ -5,6 +5,9 @@ default: run
 lint:
 	poetry run black .
 
+strip:
+	poetry run python dev-tools/strip_comments.py limterm/**/*.py
+
 run:
 	poetry run limterm
 
