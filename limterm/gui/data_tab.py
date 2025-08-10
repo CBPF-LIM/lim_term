@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from ..utils import FileManager, format_elapsed_since
+from ..utils import FileManager, format_elapsed_since, ensure_capture_dir
 from ..i18n import t, get_config_manager
 from .preference_widgets import PrefCheckbutton, PrefCombobox, PrefEntry
 import logging
@@ -280,9 +280,7 @@ class DataTab:
 
     def _setup_capture_file(self):
         try:
-            capture_dir = CAPTURE_DIR
-            if not os.path.exists(capture_dir):
-                os.makedirs(capture_dir)
+            capture_dir = ensure_capture_dir()
 
             filename_mode = self.filename_mode.get_value()
 
@@ -414,9 +412,7 @@ class DataTab:
     def _save_data(self):
         buffer_lines = list(self.data_buffer)
         if buffer_lines:
-            capture_dir = CAPTURE_DIR
-            if not os.path.exists(capture_dir):
-                os.makedirs(capture_dir)
+            capture_dir = ensure_capture_dir()
 
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             default_filename = f"manual_save_{timestamp}.txt"
