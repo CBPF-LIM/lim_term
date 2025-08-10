@@ -51,24 +51,20 @@ class GraphTab:
         )
         yaml_path = os.path.abspath(yaml_path)
 
-        # Build toolbar and settings panels from YAML
         build_from_yaml(self.frame, yaml_path, self)
 
-        # Map Y entries into a list for existing logic
         self.y_entries = []
         for i in range(1, 6):
             entry = getattr(self, f"y{i}_entry", None)
             if entry is not None:
                 self.y_entries.append(entry)
 
-        # Map color comboboxes into a list for existing logic
         self.y_color_combos = []
         for i in range(1, 6):
             combo = getattr(self, f"y{i}_color", None)
             if combo is not None:
                 self.y_color_combos.append(combo)
 
-        # Respect saved visibility of the options panel
         self.options_visible = self.config_manager.load_setting(
             "graph.ui.options_visible", False
         )
@@ -80,14 +76,11 @@ class GraphTab:
             if hasattr(self, "options_button"):
                 self.options_button.config(text=t("ui.graph_tab.hide_settings"))
 
-        # Initialize dynamic series widgets section
         if hasattr(self, "series_config_frame"):
             self._create_series_widgets()
 
-        # Create chart area below the settings
         self._create_chart_area()
 
-        # Layout behavior
         self.frame.rowconfigure(3, weight=1)
         self.frame.columnconfigure(0, weight=1)
 

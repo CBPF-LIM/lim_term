@@ -44,7 +44,6 @@ def _get_widget_class(widget_type: str):
         "Label": ttk.Label,
         "Button": ttk.Button,
         "Separator": ttk.Separator,
-        # preference widgets are resolved in build_widget via context
     }
     return mapping.get(widget_type)
 
@@ -55,7 +54,6 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
     layout = spec.get("layout", {})
     options = _resolve_i18n(spec.get("options", {}))
 
-    # Resolve handlers by name from context
     handler_keys = [
         "command",
         "on_change",
@@ -67,16 +65,15 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
             else:
                 options.pop(hk)
 
-    # Preference widgets may be in the context module
-    base_pkg = context.__class__.__module__.rsplit(".", 1)[0]  # e.g., 'limterm.gui'
+    base_pkg = context.__class__.__module__.rsplit(".", 1)[0]
     pref_mod_name = base_pkg + ".preference_widgets"
     try:
         pref_mod = importlib.import_module(pref_mod_name)
     except Exception:
         pref_mod = None
-    PrefEntry = getattr(pref_mod, "PrefEntry", None) if pref_mod else None  # type: ignore
-    PrefCombobox = getattr(pref_mod, "PrefCombobox", None) if pref_mod else None  # type: ignore
-    PrefCheckbutton = getattr(pref_mod, "PrefCheckbutton", None) if pref_mod else None  # type: ignore
+    PrefEntry = getattr(pref_mod, "PrefEntry", None) if pref_mod else None
+    PrefCombobox = getattr(pref_mod, "PrefCombobox", None) if pref_mod else None
+    PrefCheckbutton = getattr(pref_mod, "PrefCheckbutton", None) if pref_mod else None
 
     widget = None
     cls = _get_widget_class(widget_type)
@@ -94,7 +91,6 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
     if name:
         setattr(context, name, widget)
 
-    # Build children
     for child in spec.get("children", []):
         build_widget(widget, child, context)
 
