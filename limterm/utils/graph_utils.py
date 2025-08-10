@@ -18,7 +18,7 @@ def get_translated_colors():
 
 
 def get_color_mapping():
-    return {t(f"ui.colors.{color}"): color for color in COLOR_KEYS]
+    return {t(f"ui.colors.{color}"): color for color in COLOR_KEYS}
 
 
 def get_translated_markers():
