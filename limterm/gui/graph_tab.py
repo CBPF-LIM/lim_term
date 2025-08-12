@@ -1,7 +1,4 @@
-import tkinter as tk
-from tkinter import ttk
-import os
-from ..utils.ui_builder import build_from_layout_name
+from ..utils.ui_builder import build_from_layout_name, build_from_spec
 from ..core import GraphManager
 from ..utils import DataParser, FileManager
 from ..config import DEFAULT_X_COLUMN
@@ -25,7 +22,8 @@ import time
 
 class GraphTab:
     def __init__(self, parent, data_tab, open_options_callback):
-        self.frame = ttk.Frame(parent)
+                                                                               
+        self.frame = build_from_layout_name(parent, "graph_tab", self)
         self.data_tab = data_tab
         self.config_manager = get_config_manager()
         self.graph_settings = {}
@@ -39,14 +37,7 @@ class GraphTab:
         self.last_render_time = 0
         self.series_widgets = []
 
-        self._create_widgets()
-
-    def get_frame(self):
-        return self.frame
-
-    def _create_widgets(self):
-        build_from_layout_name(self.frame, "graph_tab", self)
-
+                          
         self.y_entries = []
         for i in range(1, 6):
             entry = getattr(self, f"y{i}_entry", None)
@@ -75,256 +66,26 @@ class GraphTab:
 
         self._create_chart_area()
 
-        self.frame.rowconfigure(3, weight=1)
-        self.frame.columnconfigure(0, weight=1)
+        try:
+            self.frame.rowconfigure(3, weight=1)
+            self.frame.columnconfigure(0, weight=1)
+        except Exception:
+            pass
 
-    def _create_toolbar(self):
-        toolbar_frame = ttk.Frame(self.frame)
-        toolbar_frame.grid(column=0, row=0, sticky="ew", padx=10, pady=(10, 5))
-        toolbar_frame.columnconfigure(0, weight=1)
-
-        button_container = ttk.Frame(toolbar_frame)
-        button_container.grid(column=0, row=0, sticky="w")
-
-        self.plot_button = ttk.Button(
-            button_container,
-            text=t("ui.graph_tab.update_graph"),
-            command=self.plot_graph,
-        )
-        self.plot_button.pack(side="left", padx=(0, 10))
-
-        self.pause_button = ttk.Button(
-            button_container, text=t("ui.graph_tab.pause"), command=self._toggle_pause
-        )
-        self.pause_button.pack(side="left", padx=(0, 10))
-
-        self.save_button = ttk.Button(
-            button_container, text=t("ui.graph_tab.save_png"), command=self._save_chart
-        )
-        self.save_button.pack(side="left", padx=(0, 10))
-
-        self.save_data_button = ttk.Button(
-            button_container, text=t("ui.graph_tab.save_data"), command=self._save_data
-        )
-        self.save_data_button.pack(side="left", padx=(0, 10))
-
-        self.options_button = ttk.Button(
-            toolbar_frame,
-            text=t("ui.graph_tab.show_settings"),
-            command=self._toggle_options,
-        )
-        self.options_button.grid(column=1, row=0, sticky="e")
-
-    def _create_settings_panel(self):
-        self.graph_settings_frame = ttk.LabelFrame(
-            self.frame, text=t("ui.graph_tab.graph_settings")
-        )
-        self.graph_settings_frame.grid(
-            column=0, row=1, columnspan=4, padx=10, pady=5, sticky="ew"
-        )
-
-        self.axis_columns_frame = ttk.Frame(self.graph_settings_frame)
-        self.axis_columns_frame.grid(column=0, row=0, padx=5, pady=5, sticky="ew")
-
-        axis_label = ttk.Label(
-            self.axis_columns_frame,
-            text=t("ui.graph_tab.axis_and_columns"),
-            font=("TkDefaultFont", 9, "bold"),
-        )
-        axis_label.grid(column=0, row=0, columnspan=7, padx=5, pady=(5, 2), sticky="w")
-
-        x_frame = ttk.Frame(self.axis_columns_frame)
-        x_frame.grid(column=0, row=1, padx=5, pady=5, sticky="w")
-
-        self.x_label = ttk.Label(x_frame, text=t("ui.graph_tab.column_x"))
-        self.x_label.pack(side="top")
-        self.x_column_entry = PrefEntry(
-            x_frame,
-            pref_key="graph.general.x_column",
-            default_value=str(DEFAULT_X_COLUMN),
-            width=10,
-            justify="center",
-            on_change=self._on_setting_change,
-        )
-        self.x_column_entry.pack(side="top")
-
-        separator = ttk.Separator(self.axis_columns_frame, orient="vertical")
-        separator.grid(column=1, row=1, sticky="ns", padx=10)
-
-        self.y_entries = []
-        for i in range(1, 6):
-            y_frame = ttk.Frame(self.axis_columns_frame)
-            y_frame.grid(column=i + 1, row=1, padx=5, pady=5, sticky="w")
-
-            y_label = ttk.Label(y_frame, text=t(f"ui.graph_tab.column_y{i}"))
-            y_label.pack(side="top")
-            y_entry = PrefEntry(
-                y_frame,
-                pref_key=f"graph.general.y{i}_column",
-                default_value="",
-                width=8,
-                justify="center",
-                on_change=self._on_setting_change,
-            )
-            y_entry.pack(side="top")
-            self.y_entries.append(y_entry)
-
-        self.options_frame = ttk.Frame(self.graph_settings_frame)
-        self.options_frame.grid(column=0, row=1, sticky="ew", padx=5, pady=5)
-        self._build_options_sections()
-
-        self.options_visible = self.config_manager.load_setting(
-            "graph.ui.options_visible", False
-        )
-        if not self.options_visible:
-            self.graph_settings_frame.grid_remove()
-            self.options_button.config(text=t("ui.graph_tab.show_settings"))
-        else:
-            self.options_button.config(text=t("ui.graph_tab.hide_settings"))
+    def get_frame(self):
+        return self.frame
 
     def _create_chart_area(self):
-        chart_frame = ttk.Frame(self.frame)
-        chart_frame.grid(column=0, row=3, columnspan=4, padx=10, pady=10, sticky="nsew")
+                                                                     
+        chart_parent = getattr(self, "chart_frame", None)
+        if not chart_parent or not widget_exists(chart_parent):
+                                                                
+            return
 
-        self.graph_manager = GraphManager(chart_frame)
+        self.graph_manager = GraphManager(chart_parent)
         self.graph_manager.get_widget().pack(fill="both", expand=True)
 
-    def _build_options_sections(self):
-
-        main_container = ttk.Frame(self.options_frame)
-        main_container.pack(fill="both", expand=True, padx=5, pady=5)
-
-        global_frame = ttk.LabelFrame(
-            main_container, text=t("ui.graph_tab.global_settings")
-        )
-        global_frame.grid(column=0, row=0, padx=(0, 5), pady=5, sticky="nsew")
-
-        self.group_label = ttk.Label(
-            global_frame, text=t("ui.graph_tab.visualization_group_label")
-        )
-        self.group_label.grid(column=0, row=0, padx=5, pady=5, sticky="w")
-        self.group_combobox = PrefCombobox(
-            global_frame,
-            pref_key="graph.general.visualization_group",
-            default_value="time_series",
-            state="readonly",
-            values=[
-                t("ui.graph_tab.visualization_types.time_series"),
-                t("ui.graph_tab.visualization_types.stacked"),
-            ],
-            value_mapping={
-                t("ui.graph_tab.visualization_types.time_series"): "time_series",
-                t("ui.graph_tab.visualization_types.stacked"): "stacked",
-            },
-            width=15,
-            on_change=self._on_group_change,
-        )
-        self.group_combobox.grid(column=1, row=0, padx=5, pady=5, sticky="w")
-
-        self.window_label = ttk.Label(global_frame, text=t("ui.graph_tab.window_label"))
-        self.window_label.grid(column=0, row=1, padx=5, pady=5, sticky="w")
-        self.data_window_entry = PrefEntry(
-            global_frame,
-            pref_key="graph.general.window_size",
-            default_value="50",
-            width=12,
-            justify="center",
-            on_change=self._on_setting_change,
-        )
-        self.data_window_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
-
-        self.fps_label = ttk.Label(
-            global_frame, text=t("ui.graph_tab.refresh_rate_label")
-        )
-        self.fps_label.grid(column=0, row=2, padx=5, pady=5, sticky="w")
-
-        fps_frame = ttk.Frame(global_frame)
-        fps_frame.grid(column=1, row=2, padx=5, pady=5, sticky="w")
-
-        self.fps_combobox = PrefCombobox(
-            fps_frame,
-            pref_key="graph.general.refresh_rate",
-            default_value="30",
-            state="readonly",
-            values=["1", "5", "10", "15", "20", "30"],
-            width=5,
-            on_change=self._on_fps_change,
-        )
-        self.fps_combobox.pack(side="left")
-
-        self.fps_debug_label = ttk.Label(
-            fps_frame, text="(30 Hz = 33ms)", font=("TkDefaultFont", 8)
-        )
-        self.fps_debug_label.pack(side="left", padx=(5, 0))
-
-        self.y_limits_label = ttk.Label(
-            global_frame, text=t("ui.graph_tab.y_limits_label")
-        )
-        self.y_limits_label.grid(column=0, row=3, padx=5, pady=5, sticky="w")
-
-        y_limits_frame = ttk.Frame(global_frame)
-        y_limits_frame.grid(column=1, row=3, padx=5, pady=5, sticky="w")
-
-        self.min_y_entry = PrefEntry(
-            y_limits_frame,
-            pref_key="graph.general.min_y",
-            default_value="",
-            width=12,
-            justify="center",
-            on_change=self._on_setting_change,
-        )
-        self.min_y_entry.pack(side="left", padx=(0, 5))
-
-        self.max_y_entry = PrefEntry(
-            y_limits_frame,
-            pref_key="graph.general.max_y",
-            default_value="",
-            width=12,
-            justify="center",
-            on_change=self._on_setting_change,
-        )
-        self.max_y_entry.pack(side="left")
-
-        colors_frame = ttk.LabelFrame(
-            main_container, text=t("ui.graph_tab.colors_settings")
-        )
-        colors_frame.grid(column=1, row=0, padx=5, pady=5, sticky="nsew")
-
-        self.y_color_combos = []
-        default_colors = ["blue", "red", "green", "orange", "magenta"]
-
-        for i in range(5):
-            color_label = ttk.Label(colors_frame, text=f"Y{i+1}:")
-            color_label.grid(column=0, row=i, padx=5, pady=2, sticky="w")
-
-            color_combo = PrefCombobox(
-                colors_frame,
-                pref_key=f"graph.general.y{i+1}_color",
-                default_value=default_colors[i],
-                state="readonly",
-                values=get_translated_colors(),
-                width=10,
-                value_mapping=get_color_mapping(),
-                on_change=lambda idx=i: self._on_color_setting_change(idx),
-            )
-            color_combo.grid(column=1, row=i, padx=5, pady=2, sticky="w")
-            self.y_color_combos.append(color_combo)
-
-        self.series_config_frame = ttk.LabelFrame(
-            main_container, text=t("ui.graph_tab.series_settings")
-        )
-        self.series_config_frame.grid(
-            column=2, row=0, padx=(5, 0), pady=5, sticky="nsew"
-        )
-
-        main_container.columnconfigure(0, weight=1)
-        main_container.columnconfigure(1, weight=1)
-        main_container.columnconfigure(2, weight=1)
-
-        self._create_series_widgets()
-
     def _create_series_widgets(self):
-
         group = self.group_combobox.get_value()
 
         for child in self.series_config_frame.winfo_children():
@@ -339,43 +100,98 @@ class GraphTab:
                 )
         elif group == "stacked":
             self.series_config_frame.config(text=t("ui.graph_tab.stacked_settings"))
-            self.normalize_100_checkbox = PrefCheckbutton(
-                self.series_config_frame,
-                pref_key="graph.group.stacked.normalize_100",
-                default_value=False,
-                text=t("ui.graph_tab.normalize_100_percent"),
-                on_change=self._on_setting_change,
-            )
-            self.normalize_100_checkbox.grid(
-                column=0, row=0, columnspan=4, padx=5, pady=10
-            )
+                                         
+            spec = {
+                "widget": "PrefCheckbutton",
+                "name": "normalize_100_checkbox",
+                "options": {
+                    "pref_key": "graph.group.stacked.normalize_100",
+                    "default_value": False,
+                    "text": "${ui.graph_tab.normalize_100_percent}",
+                    "on_change": "_on_setting_change",
+                },
+                "layout": {
+                    "method": "grid",
+                    "column": 0,
+                    "row": 0,
+                    "columnspan": 4,
+                    "padx": 5,
+                    "pady": 10,
+                },
+            }
+            build_from_spec(self.series_config_frame, spec, self)
 
     def _create_time_series_row(self, parent, row, label, index):
-        ttk.Label(parent, text=label).grid(column=0, row=row, padx=5, pady=2)
-
-        type_combo = PrefCombobox(
+               
+        build_from_spec(
             parent,
-            pref_key=f"graph.time_series.y{index+1}_type",
-            default_value="line",
-            state="readonly",
-            values=get_translated_graph_types(),
-            width=10,
-            value_mapping=get_graph_type_mapping(),
-            on_change=lambda idx=index: self._on_series_setting_change(idx),
+            {
+                "widget": "Label",
+                "options": {"text": label},
+                "layout": {
+                    "method": "grid",
+                    "column": 0,
+                    "row": row,
+                    "padx": 5,
+                    "pady": 2,
+                },
+            },
+            self,
         )
-        type_combo.grid(column=1, row=row, padx=5, pady=2)
 
-        marker_combo = PrefCombobox(
+                       
+        type_combo = build_from_spec(
             parent,
-            pref_key=f"graph.time_series.y{index+1}_marker",
-            default_value="circle",
-            state="readonly",
-            values=get_translated_markers(),
-            width=10,
-            value_mapping=get_marker_mapping(),
-            on_change=lambda idx=index: self._on_series_setting_change(idx),
+            {
+                "widget": "PrefCombobox",
+                "options": {
+                    "pref_key": f"graph.time_series.y{index+1}_type",
+                    "default_value": "line",
+                    "state": "readonly",
+                    "values": get_translated_graph_types(),
+                    "width": 10,
+                    "value_mapping": get_graph_type_mapping(),
+                    "on_change": (
+                        lambda idx=index: (lambda: self._on_series_setting_change(idx))
+                    )(),
+                },
+                "layout": {
+                    "method": "grid",
+                    "column": 1,
+                    "row": row,
+                    "padx": 5,
+                    "pady": 2,
+                },
+            },
+            self,
         )
-        marker_combo.grid(column=2, row=row, padx=5, pady=2)
+
+                         
+        marker_combo = build_from_spec(
+            parent,
+            {
+                "widget": "PrefCombobox",
+                "options": {
+                    "pref_key": f"graph.time_series.y{index+1}_marker",
+                    "default_value": "circle",
+                    "state": "readonly",
+                    "values": get_translated_markers(),
+                    "width": 10,
+                    "value_mapping": get_marker_mapping(),
+                    "on_change": (
+                        lambda idx=index: (lambda: self._on_series_setting_change(idx))
+                    )(),
+                },
+                "layout": {
+                    "method": "grid",
+                    "column": 2,
+                    "row": row,
+                    "padx": 5,
+                    "pady": 2,
+                },
+            },
+            self,
+        )
 
         self.series_widgets.append({"type": type_combo, "marker": marker_combo})
 

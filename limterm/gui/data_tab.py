@@ -1,5 +1,4 @@
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import filedialog, messagebox, TclError
 from ..utils import format_elapsed_since, ensure_capture_dir
 from ..i18n import t, get_config_manager
 import logging
@@ -14,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 class DataTab:
     def __init__(self, parent):
-        self.frame = ttk.Frame(parent)
+                                                                              
+        self.frame = build_from_layout_name(parent, "data_tab", self)
         self.config_manager = get_config_manager()
 
         self.data_buffer = deque(maxlen=10000)
@@ -24,11 +24,11 @@ class DataTab:
         self.preview_paused = False
         self.timestamp_start = None
 
+                          
         self._create_widgets()
 
     def _create_widgets(self):
-        build_from_layout_name(self.frame, "data_tab", self)
-
+                                                                                       
         if hasattr(self, "text_widget") and hasattr(self, "scrollbar"):
             try:
                 self.text_widget.config(yscrollcommand=self.scrollbar.set)
@@ -186,7 +186,7 @@ class DataTab:
                     self.text_widget.insert("end", line + "\n")
 
             self.text_widget.see("end")
-        except tk.TclError:
+        except TclError:
             pass
 
     def _add_message(self, message):
@@ -194,7 +194,7 @@ class DataTab:
             try:
                 self.text_widget.insert("end", f"[MSG] {message}\n")
                 self.text_widget.see("end")
-            except tk.TclError:
+            except TclError:
                 pass
 
     def _load_data(self):

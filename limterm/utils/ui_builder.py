@@ -53,6 +53,9 @@ def _get_widget_class(widget_type: str):
         "Notebook": ttk.Notebook,
         "PanedWindow": ttk.Panedwindow,
         "Canvas": tk.Canvas,
+        "Toplevel": tk.Toplevel,
+                           
+        "Menu": tk.Menu,
     }
     return mapping.get(widget_type)
 
@@ -73,6 +76,101 @@ def _resolve_option_references(options: Dict[str, Any], context: Any) -> Dict[st
     return {k: resolve_ref(v) for k, v in options.items()}
 
 
+def _bind_handlers_in_options(options: Dict[str, Any], context: Any, keys: List[str]):
+    for hk in keys:
+        if hk in options and isinstance(options[hk], str):
+            if hasattr(context, options[hk]):
+                options[hk] = getattr(context, options[hk])
+            else:
+                options.pop(hk)
+    return options
+
+
+def _build_menu(widget_parent, spec: WidgetSpec, context):
+                            
+    options = _resolve_i18n(spec.get("options", {}))
+    menu_widget = tk.Menu(widget_parent, **options)
+
+                                                                  
+    if spec.get("attach_to_parent") and hasattr(widget_parent, "config"):
+        try:
+            widget_parent.config(menu=menu_widget)
+        except Exception:
+            pass
+
+                   
+    items: List[Dict[str, Any]] = spec.get("items", []) or []
+                                                                     
+    variables_attr_name = spec.get("variables_attr")
+
+    for item in items:
+        item_type = item.get("type")
+        if item_type == "separator":
+            try:
+                menu_widget.add_separator()
+            except Exception:
+                pass
+            continue
+
+        label = _resolve_i18n(item.get("label")) if item.get("label") else None
+
+        if item_type == "command":
+            cmd = item.get("command")
+            if isinstance(cmd, str) and hasattr(context, cmd):
+                cmd = getattr(context, cmd)
+            try:
+                menu_widget.add_command(label=label, command=cmd)
+            except Exception:
+                pass
+        elif item_type == "checkbutton":
+                                                                                                  
+            initial = bool(item.get("initial", False))
+            var = tk.BooleanVar(value=initial)
+                                         
+            vars_attr_local = item.get("variables_attr", variables_attr_name)
+            var_key = item.get("var_key")
+            if vars_attr_local and var_key:
+                d = getattr(context, vars_attr_local, None)
+                if not isinstance(d, dict):
+                    setattr(context, vars_attr_local, {})
+                    d = getattr(context, vars_attr_local)
+                d[var_key] = var
+
+            cmd = item.get("command")
+            if isinstance(cmd, str) and hasattr(context, cmd):
+                cmd = getattr(context, cmd)
+            try:
+                menu_widget.add_checkbutton(label=label, variable=var, command=cmd)
+            except Exception:
+                pass
+        elif item_type == "cascade":
+                                                                      
+            submenu_spec = item.get("submenu")
+            submenu = None
+            if isinstance(submenu_spec, dict):
+                                            
+                submenu = _build_menu(menu_widget, submenu_spec, context)
+            else:
+                try:
+                    submenu = tk.Menu(menu_widget, tearoff=0)
+                except Exception:
+                    submenu = None
+            try:
+                if submenu is not None:
+                    menu_widget.add_cascade(label=label, menu=submenu)
+            except Exception:
+                pass
+        else:
+                                                               
+            pass
+
+                                                  
+    name = spec.get("name")
+    if name:
+        setattr(context, name, menu_widget)
+    return menu_widget
+
+
 def build_widget(parent, spec: WidgetSpec, context) -> Any:
     widget_type = spec.get("widget")
     name = spec.get("name")
@@ -83,12 +181,7 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
         "command",
         "on_change",
     ]
-    for hk in handler_keys:
-        if hk in options and isinstance(options[hk], str):
-            if hasattr(context, options[hk]):
-                options[hk] = getattr(context, options[hk])
-            else:
-                options.pop(hk)
+    options = _bind_handlers_in_options(options, context, handler_keys)
 
     base_pkg = context.__class__.__module__.rsplit(".", 1)[0]
     pref_mod_name = base_pkg + ".preference_widgets"
@@ -101,6 +194,13 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
     PrefCheckbutton = getattr(pref_mod, "PrefCheckbutton", None) if pref_mod else None
 
     widget = None
+
+                                       
+    if widget_type == "Menu":
+        widget = _build_menu(parent, spec, context)
+                            
+        return widget
+
     cls = _get_widget_class(widget_type)
     if cls is not None:
         options = _resolve_option_references(options, context)
@@ -129,7 +229,16 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
     for child in spec.get("children", []):
         build_widget(widget, child, context)
 
-    _apply_layout(widget, layout)
+                                                                    
+    try:
+        if not isinstance(parent, ttk.Notebook):
+            _apply_layout(widget, layout)
+    except Exception:
+                                                                    
+        try:
+            _apply_layout(widget, layout)
+        except Exception:
+            pass
     return widget
 
 
@@ -153,3 +262,8 @@ def build_from_layout_name(parent, name: str, context) -> Any:
     yaml_path = os.path.abspath(yaml_path)
 
     return build_from_yaml(parent, yaml_path, context)
+
+
+def build_from_spec(parent, spec: WidgetSpec, context) -> Any:
+    spec = _resolve_i18n(spec)
+    return build_widget(parent, spec, context)

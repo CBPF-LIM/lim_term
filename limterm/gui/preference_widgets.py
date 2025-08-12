@@ -27,6 +27,8 @@ class PreferenceWidget:
         self.reverse_mapping = (
             {v: k for k, v in self.value_mapping.items()} if value_mapping else {}
         )
+                                                                                
+        self._current_value: Any = default_value
 
         self._parse_pref_key()
 
@@ -93,6 +95,11 @@ class PreferenceWidget:
 
     def _on_change_event(self, event=None):
         try:
+                                                
+            try:
+                self._current_value = self._get_widget_value_direct()
+            except Exception:
+                pass
             self._save_to_preferences()
             if self.on_change:
                 self.on_change()
@@ -101,6 +108,17 @@ class PreferenceWidget:
 
     def _on_checkbutton_change(self, original_command):
         try:
+                                                                             
+            val = False
+            try:
+                if self._tkinter_var and hasattr(self._tkinter_var, "get"):
+                    val = bool(self._tkinter_var.get())
+                else:
+                                                
+                    val = bool(self.widget.instate(["selected"]))
+            except Exception:
+                pass
+            self._current_value = val
             self._save_to_preferences()
             if self.on_change:
                 self.on_change()
@@ -111,6 +129,10 @@ class PreferenceWidget:
 
     def _on_scale_change(self, value, original_command):
         try:
+            try:
+                self._current_value = self._get_widget_value_direct()
+            except Exception:
+                pass
             self._save_to_preferences()
             if self.on_change:
                 self.on_change()
@@ -119,7 +141,7 @@ class PreferenceWidget:
         except Exception as e:
             print(f"Warning: Could not save preference {self.pref_key}: {e}")
 
-    def _get_widget_value(self) -> Any:
+    def _get_widget_value_direct(self) -> Any:
         widget_type = type(self.widget).__name__
 
         if widget_type in ["Entry", "Spinbox"]:
@@ -153,6 +175,16 @@ class PreferenceWidget:
                     f"Don't know how to get value from {widget_type}"
                 )
 
+    def _get_widget_value(self) -> Any:
+        widget_type = type(self.widget).__name__
+
+        if widget_type in ["Checkbutton"]:
+                                                   
+            return bool(self._current_value)
+
+                                                      
+        return self._get_widget_value_direct()
+
     def _set_widget_value(self, value: Any):
         widget_type = type(self.widget).__name__
 
@@ -168,10 +200,11 @@ class PreferenceWidget:
                 self.widget.set(str(value))
 
         elif widget_type in ["Checkbutton"]:
+                                                               
             if self._tkinter_var and hasattr(self._tkinter_var, "set"):
                 try:
                     self._tkinter_var.set(bool(value))
-                except Exception as e:
+                except Exception:
                     self._tkinter_var = tk.BooleanVar(value=bool(value))
                     self.widget.config(variable=self._tkinter_var)
             else:
@@ -191,6 +224,15 @@ class PreferenceWidget:
                 raise NotImplementedError(
                     f"Don't know how to set value for {widget_type}"
                 )
+
+                      
+        try:
+            if widget_type == "Checkbutton":
+                self._current_value = bool(value)
+            else:
+                self._current_value = self._convert_value(value)
+        except Exception:
+            self._current_value = value
 
     def _convert_value(self, value: Any) -> Any:
         if value is None:

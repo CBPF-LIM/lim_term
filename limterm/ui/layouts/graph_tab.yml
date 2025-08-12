@@ -319,3 +319,13 @@ children:
                 name: series_config_frame
                 options: {text: "${ui.graph_tab.series_settings}"}
                 layout: {method: grid, column: 2, row: 0, padx: [5,0], pady: 5, sticky: nsew}
+  - widget: Frame
+    name: chart_frame
+    layout:
+      method: grid
+      column: 0
+      row: 3
+      columnspan: 4
+      padx: 10
+      pady: 10
+      sticky: nsew

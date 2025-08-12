@@ -1,11 +1,8 @@
-import tkinter as tk
-from tkinter import ttk
 import time
 import os
 import logging
 from ..core import GraphManager
 from ..i18n import t, get_config_manager
-from .preference_widgets import PrefEntry, PrefCombobox
 from ..utils import widget_exists, safe_after, safe_after_cancel
 from ..utils.ui_builder import build_from_layout_name
 
@@ -15,7 +12,8 @@ logger = logging.getLogger(__name__)
 class OscTab:
 
     def __init__(self, parent, data_tab):
-        self.frame = ttk.Frame(parent)
+                                                                              
+        self.frame = build_from_layout_name(parent, "osc_tab", self)
         self.data_tab = data_tab
         self.config_manager = get_config_manager()
 
@@ -33,8 +31,6 @@ class OscTab:
         self._start_update_loop()
 
     def _create_widgets(self):
-        build_from_layout_name(self.frame, "osc_tab", self)
-
         self.settings_visible = self.config_manager.load_setting(
             "osc.ui.settings_visible", False
         )
@@ -47,13 +43,17 @@ class OscTab:
             if hasattr(self, "settings_button"):
                 self.settings_button.config(text=t("ui.osc_tab.hide_settings"))
 
-        self.graph_manager = GraphManager(self.frame)
-        self.graph_manager.get_widget().grid(
-            column=0, row=2, padx=10, pady=10, sticky="nsew"
-        )
+                                                                       
+        graph_parent = getattr(self, "graph_frame", None)
+        if graph_parent and widget_exists(graph_parent):
+            self.graph_manager = GraphManager(graph_parent)
+            self.graph_manager.get_widget().pack(fill="both", expand=True)
 
-        self.frame.rowconfigure(2, weight=1)
-        self.frame.columnconfigure(0, weight=1)
+        try:
+            self.frame.rowconfigure(2, weight=1)
+            self.frame.columnconfigure(0, weight=1)
+        except Exception:
+            pass
 
     def _toggle_settings(self):
         if self.settings_visible:

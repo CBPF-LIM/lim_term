@@ -1,13 +1,19 @@
-import tkinter as tk
-from tkinter import ttk
 from ..config import COLOR_KEYS, MARKER_MAPPING
 from ..i18n import t
+from ..utils.ui_builder import build_from_spec
 
 
 class GraphOptionsWindow:
     def __init__(self, parent, serial_gui):
-        self.window = tk.Toplevel(parent)
-        self.window.title(t("ui.graph_tab.graph_options_title"))
+                                                
+        self.window = build_from_spec(
+            parent,
+            {
+                "widget": "Toplevel",
+                "options": {"title": "${ui.graph_tab.graph_options_title}"},
+            },
+            self,
+        )
         self.serial_gui = serial_gui
 
         self._create_widgets()
@@ -47,55 +53,185 @@ class GraphOptionsWindow:
         return t("ui.markers.circle")
 
     def _create_widgets(self):
-        ttk.Label(self.window, text=t("ui.graph_tab.type_label")).grid(
-            column=0, row=0, padx=10, pady=10
-        )
-        self.graph_type_combobox = ttk.Combobox(
-            self.window, state="readonly", values=self._get_translated_graph_types()
-        )
-        self.graph_type_combobox.grid(column=1, row=0, padx=10, pady=10)
-
-        ttk.Label(self.window, text=t("ui.graph_tab.color_label")).grid(
-            column=0, row=1, padx=10, pady=10
-        )
-        self.color_combobox = ttk.Combobox(
-            self.window, state="readonly", values=self._get_translated_colors()
-        )
-        self.color_combobox.grid(column=1, row=1, padx=10, pady=10)
-
-        ttk.Label(self.window, text=t("ui.graph_tab.window_label")).grid(
-            column=0, row=2, padx=10, pady=10
-        )
-        self.data_window_entry = ttk.Entry(self.window)
-        self.data_window_entry.grid(column=1, row=2, padx=10, pady=10)
-        self.data_window_entry.insert(0, "0")
-
-        ttk.Label(self.window, text=t("ui.graph_tab.min_y_label")).grid(
-            column=0, row=3, padx=10, pady=10
-        )
-        self.min_y_entry = ttk.Entry(self.window)
-        self.min_y_entry.grid(column=1, row=3, padx=10, pady=10)
-
-        ttk.Label(self.window, text=t("ui.graph_tab.max_y_label")).grid(
-            column=0, row=4, padx=10, pady=10
-        )
-        self.max_y_entry = ttk.Entry(self.window)
-        self.max_y_entry.grid(column=1, row=4, padx=10, pady=10)
-
-        ttk.Label(self.window, text=t("ui.graph_tab.point_label")).grid(
-            column=0, row=5, padx=10, pady=10
-        )
-        self.dot_type_combobox = ttk.Combobox(
-            self.window, state="readonly", values=self._get_translated_markers()
-        )
-        self.dot_type_combobox.grid(column=1, row=5, padx=10, pady=10)
-
-        self.apply_button = ttk.Button(
-            self.window,
-            text=t("ui.graph_tab.apply_button"),
-            command=self._apply_settings,
-        )
-        self.apply_button.grid(column=0, row=6, columnspan=2, padx=10, pady=10)
+        spec = {
+            "widget": "Frame",
+            "name": "root",
+            "layout": {
+                "method": "pack",
+                "fill": "both",
+                "expand": True,
+                "padx": 10,
+                "pady": 10,
+            },
+            "children": [
+                {
+                    "widget": "Label",
+                    "options": {"text": "${ui.graph_tab.type_label}"},
+                    "layout": {
+                        "method": "grid",
+                        "column": 0,
+                        "row": 0,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Combobox",
+                    "name": "graph_type_combobox",
+                    "options": {
+                        "state": "readonly",
+                        "values": self._get_translated_graph_types(),
+                    },
+                    "layout": {
+                        "method": "grid",
+                        "column": 1,
+                        "row": 0,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Label",
+                    "options": {"text": "${ui.graph_tab.color_label}"},
+                    "layout": {
+                        "method": "grid",
+                        "column": 0,
+                        "row": 1,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Combobox",
+                    "name": "color_combobox",
+                    "options": {
+                        "state": "readonly",
+                        "values": self._get_translated_colors(),
+                    },
+                    "layout": {
+                        "method": "grid",
+                        "column": 1,
+                        "row": 1,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Label",
+                    "options": {"text": "${ui.graph_tab.window_label}"},
+                    "layout": {
+                        "method": "grid",
+                        "column": 0,
+                        "row": 2,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Entry",
+                    "name": "data_window_entry",
+                    "layout": {
+                        "method": "grid",
+                        "column": 1,
+                        "row": 2,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Label",
+                    "options": {"text": "${ui.graph_tab.min_y_label}"},
+                    "layout": {
+                        "method": "grid",
+                        "column": 0,
+                        "row": 3,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Entry",
+                    "name": "min_y_entry",
+                    "layout": {
+                        "method": "grid",
+                        "column": 1,
+                        "row": 3,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Label",
+                    "options": {"text": "${ui.graph_tab.max_y_label}"},
+                    "layout": {
+                        "method": "grid",
+                        "column": 0,
+                        "row": 4,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Entry",
+                    "name": "max_y_entry",
+                    "layout": {
+                        "method": "grid",
+                        "column": 1,
+                        "row": 4,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Label",
+                    "options": {"text": "${ui.graph_tab.point_label}"},
+                    "layout": {
+                        "method": "grid",
+                        "column": 0,
+                        "row": 5,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Combobox",
+                    "name": "dot_type_combobox",
+                    "options": {
+                        "state": "readonly",
+                        "values": self._get_translated_markers(),
+                    },
+                    "layout": {
+                        "method": "grid",
+                        "column": 1,
+                        "row": 5,
+                        "padx": 5,
+                        "pady": 5,
+                    },
+                },
+                {
+                    "widget": "Button",
+                    "name": "apply_button",
+                    "options": {
+                        "text": "${ui.graph_tab.apply_button}",
+                        "command": _apply_settings,
+                    },
+                    "layout": {
+                        "method": "grid",
+                        "column": 0,
+                        "row": 6,
+                        "columnspan": 2,
+                        "padx": 5,
+                        "pady": 10,
+                    },
+                },
+            ],
+        }
+        build_from_spec(self.window, spec, self)
+        if hasattr(self, "data_window_entry"):
+            try:
+                self.data_window_entry.insert(0, "0")
+            except Exception:
+                pass
 
     def _load_current_settings(self):
         settings = self.serial_gui.graph_settings
@@ -133,7 +269,6 @@ class GraphOptionsWindow:
                 )
 
             self.serial_gui.update_graph_settings(settings)
-            print("Configurações aplicadas:", settings)
             self.window.destroy()
 
         except Exception as e:

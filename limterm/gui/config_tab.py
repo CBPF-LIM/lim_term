@@ -1,15 +1,14 @@
-import tkinter as tk
-from tkinter import ttk
 from ..config import DEFAULT_BAUDRATES, DEFAULT_BAUDRATE
 from ..utils import SyntheticDataGenerator
 from ..i18n import t, get_config_manager
 import math
-from ..utils.ui_builder import build_from_layout_name
+from ..utils.ui_builder import build_from_layout_name, build_from_spec
 
 
 class ConfigTab:
     def __init__(self, parent, serial_manager, signal_handler=None):
-        self.frame = ttk.Frame(parent)
+                                           
+        self.frame = build_from_layout_name(parent, "config_tab", self)
         self.serial_manager = serial_manager
         self.signal_handler = signal_handler
         self.synthetic_generator = None
@@ -21,8 +20,7 @@ class ConfigTab:
         self._load_preferences()
 
     def _create_widgets(self):
-        build_from_layout_name(self.frame, "config_tab", self)
-
+                                              
         eq_map = {
             "a": getattr(self, "eq_a", None),
             "b": getattr(self, "eq_b", None),
@@ -52,6 +50,34 @@ class ConfigTab:
             except Exception:
                 pass
 
+                                                                        
+        try:
+            if hasattr(self, "mode_frame"):
+                spec = {
+                    "widget": "Label",
+                    "name": "win_simul_info",
+                    "options": {
+                        "text": "${dialogs.windows_virtual_port_info}",
+                        "foreground": "red",
+                        "justify": "left",
+                        "wraplength": 800,
+                    },
+                    "layout": {
+                        "method": "grid",
+                        "column": 0,
+                        "row": 10,
+                        "columnspan": 2,
+                        "padx": 10,
+                        "pady": 5,
+                        "sticky": "w",
+                    },
+                }
+                build_from_spec(self.mode_frame, spec, self)
+                                
+                self.win_simul_info.grid_remove()
+        except Exception:
+            pass
+
         self.settings_visible = self.config_manager.load_setting(
             "config.ui.settings_visible", False
         )
@@ -70,31 +96,6 @@ class ConfigTab:
             "config.math_functions_visible", False
         )
         self._update_math_functions_visibility()
-
-        try:
-            style = ttk.Style()
-            frame_bg = style.lookup("TLabelframe", "background")
-            self.win_simul_info = tk.Text(
-                self.mode_frame,
-                height=3,
-                width=120,
-                wrap="word",
-                foreground="red",
-                background=frame_bg,
-                borderwidth=0,
-                highlightthickness=0,
-            )
-            self.win_simul_info.insert(
-                "1.0",
-                t("dialogs.windows_virtual_port_info"),
-            )
-            self.win_simul_info.config(state="disabled")
-            self.win_simul_info.grid(
-                column=0, row=10, columnspan=2, padx=10, pady=5, sticky="w"
-            )
-            self.win_simul_info.grid_remove()
-        except Exception:
-            pass
 
         try:
             self.frame.columnconfigure(0, weight=1)
@@ -131,7 +132,8 @@ class ConfigTab:
 
             self.synthetic_frame.master.columnconfigure(0, weight=1)
             self.synthetic_frame.master.columnconfigure(1, weight=1)
-            self.win_simul_info.grid_remove()
+            if hasattr(self, "win_simul_info"):
+                self.win_simul_info.grid_remove()
             self.connect_button.config(
                 text=t("ui.config_tab.start_synthetic"), state="normal"
             )
@@ -139,7 +141,8 @@ class ConfigTab:
             self.port_combobox.config(state="readonly")
             self.baudrate_combobox.config(state="readonly")
             self.refresh_button.config(state="normal")
-            self.win_simul_info.grid_remove()
+            if hasattr(self, "win_simul_info"):
+                self.win_simul_info.grid_remove()
 
             self.synthetic_frame.grid_remove()
 
@@ -314,7 +317,7 @@ class ConfigTab:
     def _load_equations_to_ui(self, equations):
         for label, entry in self.equation_entries.items():
             equation = equations.get(label, "")
-            entry.delete(0, tk.END)
+            entry.delete(0, "end")
             entry.insert(0, equation)
 
     def _on_equation_changed(self, event=None):

@@ -3,6 +3,7 @@ import time
 import math
 from asteval import Interpreter
 import logging
+from ..i18n import t
 
 logger = logging.getLogger(__name__)
 

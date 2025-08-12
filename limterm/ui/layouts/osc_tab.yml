@@ -108,3 +108,6 @@ children:
                     name: clear_button
                     options: {text: "${ui.osc_tab.clear}", command: _clear_display}
                     layout: {method: pack, side: left, padx: 2}
+  - widget: Frame
+    name: graph_frame
+    layout: {method: grid, column: 0, row: 2, padx: 10, pady: 10, sticky: nsew}
