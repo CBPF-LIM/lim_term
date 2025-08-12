@@ -87,6 +87,21 @@ children:
                     layout: {method: grid, column: 1, row: 2, padx: 10, pady: 10, sticky: w}
                     bindings:
                       - {event: "<<ComboboxSelected>>", handler: _on_preference_changed}
+                  - widget: Label
+                    name: win_simul_info
+                    options:
+                      text: "${dialogs.windows_virtual_port_info}"
+                      foreground: red
+                      justify: left
+                      wraplength: 800
+                    layout:
+                      method: grid
+                      column: 0
+                      row: 10
+                      columnspan: 2
+                      padx: 10
+                      pady: 5
+                      sticky: w}
               - widget: LabelFrame
                 name: synthetic_frame
                 options: {text: "${ui.config_tab.synthetic_settings}"}

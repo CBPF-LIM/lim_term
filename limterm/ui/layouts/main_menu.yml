@@ -1,0 +1,33 @@
+widget: Menu
+name: menubar
+options:
+  tearoff: 0
+attach_to_parent: true
+items:
+  - type: cascade
+    label: "${ui.main_window.view_menu_label}"
+    submenu:
+      widget: Menu
+      options:
+        tearoff: 0
+      items:
+        - type: command
+          label: "${ui.main_window.config_tab_shortcut}"
+          command: _goto_config_tab
+        - type: command
+          label: "${ui.main_window.data_tab_shortcut}"
+          command: _goto_data_tab
+        - type: command
+          label: "${ui.main_window.graph_tab_shortcut}"
+          command: _goto_graph_tab
+        - type: command
+          label: "${ui.main_window.osc_tab_shortcut}"
+          command: _goto_osc_tab
+  - type: cascade
+    label: "Language"
+    submenu:
+      widget: Menu
+      name: language_menu
+      options:
+        tearoff: 0
+      items: []

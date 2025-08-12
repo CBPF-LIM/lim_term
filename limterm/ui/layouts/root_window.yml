@@ -1,0 +1,4 @@
+widget: Tk
+name: root
+options:
+  title: "${ui.main_window.title}"

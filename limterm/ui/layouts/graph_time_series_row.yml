@@ -1,0 +1,52 @@
+# Partial layout for a single time series row within series_config_frame
+# Expects a context object with attribute `row_index` and handler `_on_series_change`
+widget: Frame
+name: row_container
+layout:
+  method: grid
+  column: 0
+  row: ${row_index}
+  columnspan: 4
+  sticky: w
+children:
+  - widget: Label
+    options:
+      text: ""
+    layout:
+      method: grid
+      column: 0
+      row: 0
+      padx: 5
+      pady: 2
+  - widget: PrefCombobox
+    name: type_combo
+    options:
+      pref_key: graph.time_series.y${row_index}_type
+      default_value: line
+      state: readonly
+      values: ["${graph_types.line}", "${graph_types.scatter}"]
+      value_mapping: {"${graph_types.line}": line, "${graph_types.scatter}": scatter}
+      on_change: _on_series_change
+      width: 10
+    layout:
+      method: grid
+      column: 1
+      row: 0
+      padx: 5
+      pady: 2
+  - widget: PrefCombobox
+    name: marker_combo
+    options:
+      pref_key: graph.time_series.y${row_index}_marker
+      default_value: circle
+      state: readonly
+      values: ["${markers.circle}", "${markers.square}", "${markers.triangle}", "${markers.diamond}", "${markers.plus}", "${markers.x}"]
+      value_mapping: {"${markers.circle}": circle, "${markers.square}": square, "${markers.triangle}": triangle, "${markers.diamond}": diamond, "${markers.plus}": plus, "${markers.x}": x}
+      on_change: _on_series_change
+      width: 10
+    layout:
+      method: grid
+      column: 2
+      row: 0
+      padx: 5
+      pady: 2

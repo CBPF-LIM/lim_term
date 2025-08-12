@@ -1,4 +1,4 @@
-from ..utils.ui_builder import build_from_layout_name, build_from_spec, ask_save_as
+from ..utils.ui_builder import build_from_layout_name, ask_save_as
 from ..core import GraphManager
 from ..utils import DataParser, FileManager
 from ..config import DEFAULT_X_COLUMN
@@ -100,97 +100,35 @@ class GraphTab:
         elif group == "stacked":
             self.series_config_frame.config(text=t("ui.graph_tab.stacked_settings"))
 
-            spec = {
-                "widget": "PrefCheckbutton",
-                "name": "normalize_100_checkbox",
-                "options": {
-                    "pref_key": "graph.group.stacked.normalize_100",
-                    "default_value": False,
-                    "text": "${ui.graph_tab.normalize_100_percent}",
-                    "on_change": "_on_setting_change",
-                },
-                "layout": {
-                    "method": "grid",
-                    "column": 0,
-                    "row": 0,
-                    "columnspan": 4,
-                    "padx": 5,
-                    "pady": 10,
-                },
-            }
-            build_from_spec(self.series_config_frame, spec, self)
+            if hasattr(self, "normalize_100_checkbox"):
+                try:
+                    self.normalize_100_checkbox.grid(
+                        column=0, row=0, columnspan=4, padx=5, pady=10
+                    )
+                except Exception:
+                    pass
 
     def _create_time_series_row(self, parent, row, label, index):
 
-        build_from_spec(
-            parent,
-            {
-                "widget": "Label",
-                "options": {"text": label},
-                "layout": {
-                    "method": "grid",
-                    "column": 0,
-                    "row": row,
-                    "padx": 5,
-                    "pady": 2,
-                },
-            },
-            self,
-        )
+        try:
+            ctx = type("_RowCtx", (), {})()
+            setattr(
+                ctx,
+                "_on_series_change",
+                (lambda idx=index: (lambda: self._on_series_setting_change(idx)))(),
+            )
 
-        type_combo = build_from_spec(
-            parent,
-            {
-                "widget": "PrefCombobox",
-                "options": {
-                    "pref_key": f"graph.time_series.y{index+1}_type",
-                    "default_value": "line",
-                    "state": "readonly",
-                    "values": get_translated_graph_types(),
-                    "width": 10,
-                    "value_mapping": get_graph_type_mapping(),
-                    "on_change": (
-                        lambda idx=index: (lambda: self._on_series_setting_change(idx))
-                    )(),
-                },
-                "layout": {
-                    "method": "grid",
-                    "column": 1,
-                    "row": row,
-                    "padx": 5,
-                    "pady": 2,
-                },
-            },
-            self,
-        )
+            setattr(ctx, "row_index", row)
+            build_from_layout_name(parent, "graph_time_series_row", ctx)
+            if hasattr(ctx, "type_combo") and hasattr(ctx, "marker_combo"):
+                self.series_widgets.append(
+                    {"type": ctx.type_combo, "marker": ctx.marker_combo}
+                )
+            return
+        except Exception:
+            pass
 
-        marker_combo = build_from_spec(
-            parent,
-            {
-                "widget": "PrefCombobox",
-                "options": {
-                    "pref_key": f"graph.time_series.y{index+1}_marker",
-                    "default_value": "circle",
-                    "state": "readonly",
-                    "values": get_translated_markers(),
-                    "width": 10,
-                    "value_mapping": get_marker_mapping(),
-                    "on_change": (
-                        lambda idx=index: (lambda: self._on_series_setting_change(idx))
-                    )(),
-                },
-                "layout": {
-                    "method": "grid",
-                    "column": 2,
-                    "row": row,
-                    "padx": 5,
-                    "pady": 2,
-                },
-            },
-            self,
-        )
-
-        self.series_widgets.append({"type": type_combo, "marker": marker_combo})
+        return
 
     def _on_group_change(self, event=None):
         self._create_series_widgets()

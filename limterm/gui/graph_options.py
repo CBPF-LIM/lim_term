@@ -8,10 +8,8 @@ class GraphOptionsWindow:
 
         self.serial_gui = serial_gui
 
-                                       
         build_from_layout_name(parent, "graph_options_dialog", self)
 
-                                  
         self._post_build_setup()
         self._load_current_settings()
 
@@ -49,7 +47,7 @@ class GraphOptionsWindow:
         return t("ui.markers.circle")
 
     def _post_build_setup(self):
-                                        
+
         try:
             if hasattr(self, "graph_type_combobox"):
                 self.graph_type_combobox.configure(
@@ -62,7 +60,6 @@ class GraphOptionsWindow:
         except Exception:
             pass
 
-                                     
         if hasattr(self, "data_window_entry"):
             try:
                 self.data_window_entry.delete(0, "end")

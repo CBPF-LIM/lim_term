@@ -2,7 +2,7 @@ from ..config import DEFAULT_BAUDRATES, DEFAULT_BAUDRATE
 from ..utils import SyntheticDataGenerator
 from ..i18n import t, get_config_manager
 import math
-from ..utils.ui_builder import build_from_layout_name, build_from_spec
+from ..utils.ui_builder import build_from_layout_name
 
 
 class ConfigTab:
@@ -51,28 +51,7 @@ class ConfigTab:
                 pass
 
         try:
-            if hasattr(self, "mode_frame"):
-                spec = {
-                    "widget": "Label",
-                    "name": "win_simul_info",
-                    "options": {
-                        "text": "${dialogs.windows_virtual_port_info}",
-                        "foreground": "red",
-                        "justify": "left",
-                        "wraplength": 800,
-                    },
-                    "layout": {
-                        "method": "grid",
-                        "column": 0,
-                        "row": 10,
-                        "columnspan": 2,
-                        "padx": 10,
-                        "pady": 5,
-                        "sticky": "w",
-                    },
-                }
-                build_from_spec(self.mode_frame, spec, self)
-
+            if hasattr(self, "mode_frame") and hasattr(self, "win_simul_info"):
                 self.win_simul_info.grid_remove()
         except Exception:
             pass

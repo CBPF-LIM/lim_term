@@ -87,21 +87,12 @@ def _bind_handlers_in_options(options: Dict[str, Any], context: Any, keys: List[
     return options
 
 
-def _build_menu(widget_parent, spec: WidgetSpec, context):
-
-    options = _resolve_i18n(spec.get("options", {}))
-    menu_widget = tk.Menu(widget_parent, **options)
-
-    if spec.get("attach_to_parent") and hasattr(widget_parent, "config"):
-        try:
-            widget_parent.config(menu=menu_widget)
-        except Exception:
-            pass
-
-    items: List[Dict[str, Any]] = spec.get("items", []) or []
-
-    variables_attr_name = spec.get("variables_attr")
-
+def _fill_menu(
+    menu_widget: tk.Menu,
+    items: List[Dict[str, Any]],
+    context: Any,
+    variables_attr_name: Optional[str] = None,
+):
     for item in items:
         item_type = item.get("type")
         if item_type == "separator":
@@ -162,6 +153,24 @@ def _build_menu(widget_parent, spec: WidgetSpec, context):
         else:
 
             pass
+
+
+def _build_menu(widget_parent, spec: WidgetSpec, context):
+
+    options = _resolve_i18n(spec.get("options", {}))
+    menu_widget = tk.Menu(widget_parent, **options)
+
+    if spec.get("attach_to_parent") and hasattr(widget_parent, "config"):
+        try:
+            widget_parent.config(menu=menu_widget)
+        except Exception:
+            pass
+
+    items: List[Dict[str, Any]] = spec.get("items", []) or []
+
+    variables_attr_name = spec.get("variables_attr")
+
+    _fill_menu(menu_widget, items, context, variables_attr_name)
 
     name = spec.get("name")
     if name:
@@ -315,6 +324,19 @@ def build_from_layout_name(parent, name: str, context) -> Any:
 def build_from_spec(parent, spec: WidgetSpec, context) -> Any:
     spec = _resolve_i18n(spec)
     return build_widget(parent, spec, context)
+
+
+def extend_menu(
+    menu_widget: tk.Menu,
+    items: List[Dict[str, Any]],
+    context: Any,
+    variables_attr_name: Optional[str] = None,
+) -> tk.Menu:
+    try:
+        _fill_menu(menu_widget, items or [], context, variables_attr_name)
+    except Exception:
+        pass
+    return menu_widget
 
 
 class _InfoDialogContext:

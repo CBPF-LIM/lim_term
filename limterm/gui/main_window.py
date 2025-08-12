@@ -3,7 +3,7 @@ from ..config import DEFAULT_GEOMETRY
 from ..core import SerialManager
 from ..i18n import t, get_available_languages, set_language
 from ..utils.signal_handler import SignalHandler
-from ..utils.ui_builder import build_from_layout_name, build_from_spec, show_info_dialog
+from ..utils.ui_builder import build_from_layout_name, show_info_dialog, extend_menu
 from .config_tab import ConfigTab
 from .data_tab import DataTab
 from .graph_tab import GraphTab
@@ -13,17 +13,7 @@ from .osc_tab import OscTab
 class MainWindow:
     def __init__(self):
 
-        self.root = build_from_spec(
-            None,
-            {
-                "widget": "Tk",
-                "name": "root",
-                "options": {
-                    "title": "${ui.main_window.title}",
-                },
-            },
-            self,
-        )
+        self.root = build_from_layout_name(None, "root_window", self)
 
         try:
             self.root.geometry(DEFAULT_GEOMETRY)
@@ -53,100 +43,56 @@ class MainWindow:
         try:
             build_from_layout_name(self.root, "main_window", self)
         except Exception:
-
-            if not hasattr(self, "tab_control"):
-                build_from_spec(
-                    self.root,
-                    {
-                        "widget": "Notebook",
-                        "name": "tab_control",
-                        "layout": {
-                            "method": "pack",
-                            "expand": True,
-                            "fill": "both",
-                        },
-                    },
-                    self,
-                )
+            pass
 
     def _create_menu(self):
 
-        language_order = ["en", "pt-br", "fr", "es", "de"]
-        langs_by_code = {lang["code"]: lang for lang in get_available_languages()}
-        lang_items = []
-        for code in language_order:
-            if code in langs_by_code:
-                lang = langs_by_code[code]
-                lang_items.append(
-                    {
-                        "type": "checkbutton",
-                        "label": lang["display_name"],
-                        "var_key": lang["code"],
-                        "variables_attr": "language_vars",
-                        "command": (
-                            lambda c=lang["code"]: (lambda: self._change_language(c))
-                        )(),
-                    }
+        try:
+            build_from_layout_name(self.root, "main_menu", self)
+        except Exception:
+            pass
+
+        try:
+            language_order = ["en", "pt-br", "fr", "es", "de"]
+            langs_by_code = {lang["code"]: lang for lang in get_available_languages()}
+
+            lang_items = []
+            for code in language_order:
+                if code in langs_by_code:
+                    lang = langs_by_code[code]
+
+                    lang_items.append(
+                        {
+                            "type": "checkbutton",
+                            "label": lang["display_name"],
+                            "var_key": code,
+                            "command": (
+                                lambda c=code: (lambda: self._change_language(c))
+                            )(),
+                        }
+                    )
+
+            if hasattr(self, "language_menu"):
+                extend_menu(
+                    self.language_menu,
+                    lang_items,
+                    self,
+                    variables_attr_name="language_vars",
                 )
+        except Exception:
+            pass
 
-        menu_spec = {
-            "widget": "Menu",
-            "name": "menubar",
-            "options": {"tearoff": 0},
-            "attach_to_parent": True,
-            "items": [
-                {
-                    "type": "cascade",
-                    "label": "${ui.main_window.view_menu_label}",
-                    "submenu": {
-                        "widget": "Menu",
-                        "options": {"tearoff": 0},
-                        "items": [
-                            {
-                                "type": "command",
-                                "label": "${ui.main_window.config_tab_shortcut}",
-                                "command": (lambda: self._switch_to_tab(0)),
-                            },
-                            {
-                                "type": "command",
-                                "label": "${ui.main_window.data_tab_shortcut}",
-                                "command": (lambda: self._switch_to_tab(1)),
-                            },
-                            {
-                                "type": "command",
-                                "label": "${ui.main_window.graph_tab_shortcut}",
-                                "command": (lambda: self._switch_to_tab(2)),
-                            },
-                            {
-                                "type": "command",
-                                "label": "${ui.main_window.osc_tab_shortcut}",
-                                "command": (lambda: self._switch_to_tab(3)),
-                            },
-                        ],
-                    },
-                },
-                {
-                    "type": "cascade",
-                    "label": "Language",
-                    "submenu": {
-                        "widget": "Menu",
-                        "options": {"tearoff": 0},
-                        "items": lang_items,
-                    },
-                },
-            ],
-        }
-        build_from_spec(self.root, menu_spec, self)
+    def _goto_config_tab(self):
+        self._switch_to_tab(0)
 
-        from ..i18n import get_current_language
+    def _goto_data_tab(self):
+        self._switch_to_tab(1)
 
-        current_lang = get_current_language()
-        if hasattr(self, "language_vars") and isinstance(self.language_vars, dict):
-            if current_lang in self.language_vars:
-                try:
-                    self.language_vars[current_lang].set(True)
-                except Exception:
-                    pass
+    def _goto_graph_tab(self):
+        self._switch_to_tab(2)
+
+    def _goto_osc_tab(self):
+        self._switch_to_tab(3)
 
     def _change_language(self, language_code):
 
@@ -171,17 +117,6 @@ class MainWindow:
             pass
 
     def _create_tabs(self):
-
-        if not hasattr(self, "tab_control"):
-            build_from_spec(
-                self.root,
-                {
-                    "widget": "Notebook",
-                    "name": "tab_control",
-                    "layout": {"method": "pack", "expand": True, "fill": "both"},
-                },
-                self,
-            )
 
         self.config_tab = ConfigTab(
             self.tab_control, self.serial_manager, self.signal_handler
