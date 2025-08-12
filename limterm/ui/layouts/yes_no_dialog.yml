@@ -1,0 +1,42 @@
+widget: Toplevel
+name: _dialog
+options:
+  title: ${dialogs.question_title}
+children:
+  - widget: Frame
+    layout:
+      method: pack
+      padx: 12
+      pady: 12
+    children:
+      - widget: Label
+        options:
+          text: ${dialogs.question_message}
+          justify: left
+          wraplength: 420
+        layout:
+          method: pack
+          side: top
+          pady: 8
+      - widget: Frame
+        layout:
+          method: pack
+          side: bottom
+          pady: 4
+        children:
+          - widget: Button
+            options:
+              text: ${dialogs.yes}
+              command: _on_yes
+            layout:
+              method: pack
+              side: left
+              padx: 6
+          - widget: Button
+            options:
+              text: ${dialogs.no}
+              command: _on_no
+            layout:
+              method: pack
+              side: left
+              padx: 6

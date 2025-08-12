@@ -1,0 +1,34 @@
+widget: Toplevel
+name: _dialog
+options:
+  title: ${dialogs.info_title}
+children:
+  - widget: Frame
+    layout:
+      method: pack
+      padx: 12
+      pady: 12
+    children:
+      - widget: Label
+        options:
+          text: ${dialogs.info_message}
+          justify: left
+          wraplength: 420
+        layout:
+          method: pack
+          side: top
+          pady: 8
+      - widget: Frame
+        layout:
+          method: pack
+          side: bottom
+          pady: 4
+        children:
+          - widget: Button
+            options:
+              text: ${dialogs.ok}
+              command: _on_ok
+            layout:
+              method: pack
+              side: left
+              padx: 6

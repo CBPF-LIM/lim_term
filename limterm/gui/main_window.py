@@ -13,7 +13,6 @@ from .osc_tab import OscTab
 class MainWindow:
     def __init__(self):
 
-                                        
         self.root = build_from_spec(
             None,
             {
@@ -54,7 +53,7 @@ class MainWindow:
         try:
             build_from_layout_name(self.root, "main_window", self)
         except Exception:
-                                                                     
+
             if not hasattr(self, "tab_control"):
                 build_from_spec(
                     self.root,
@@ -72,7 +71,6 @@ class MainWindow:
 
     def _create_menu(self):
 
-                                                        
         language_order = ["en", "pt-br", "fr", "es", "de"]
         langs_by_code = {lang["code"]: lang for lang in get_available_languages()}
         lang_items = []

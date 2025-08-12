@@ -1,0 +1,42 @@
+widget: Toplevel
+name: _exit_dialog
+options:
+  title: ${dialogs.exit_title}
+children:
+  - widget: Frame
+    layout:
+      method: pack
+      padx: 10
+      pady: 10
+    children:
+      - widget: Label
+        options:
+          text: ${dialogs.exit_confirm}
+          justify: left
+          wraplength: 400
+        layout:
+          method: pack
+          side: top
+          pady: 10
+      - widget: Frame
+        layout:
+          method: pack
+          side: bottom
+          pady: 5
+        children:
+          - widget: Button
+            options:
+              text: ${dialogs.ok}
+              command: _on_exit_ok
+            layout:
+              method: pack
+              side: left
+              padx: 5
+          - widget: Button
+            options:
+              text: ${dialogs.cancel}
+              command: _on_exit_cancel
+            layout:
+              method: pack
+              side: left
+              padx: 5

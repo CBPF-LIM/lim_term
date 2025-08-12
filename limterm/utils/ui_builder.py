@@ -249,7 +249,7 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
         )
     elif cls is not None:
         options = _resolve_option_references(options, context)
-                                                                                               
+
         _title = None
         if widget_type in {"Tk", "Toplevel"} and isinstance(options, dict):
             _title = options.pop("title", None)
@@ -318,8 +318,10 @@ def build_from_spec(parent, spec: WidgetSpec, context) -> Any:
 
 
 class _InfoDialogContext:
-    def __init__(self):
+    def __init__(self, title: str, message: str):
         self._dialog = None
+        self._title = title
+        self._message = message
 
     def _on_ok(self):
         try:
@@ -330,44 +332,24 @@ class _InfoDialogContext:
 
 
 def show_info_dialog(parent, title: str, message: str) -> None:
-    ctx = _InfoDialogContext()
-    spec = {
-        "widget": "Toplevel",
-        "name": "_dialog",
-        "options": {"title": title},
-        "children": [
-            {
-                "widget": "Frame",
-                "layout": {"method": "pack", "padx": 12, "pady": 12},
-                "children": [
-                    {
-                        "widget": "Label",
-                        "options": {
-                            "text": message,
-                            "justify": "left",
-                            "wraplength": 420,
-                        },
-                        "layout": {"method": "pack", "side": "top", "pady": 8},
-                    },
-                    {
-                        "widget": "Frame",
-                        "layout": {"method": "pack", "side": "bottom", "pady": 4},
-                        "children": [
-                            {
-                                "widget": "Button",
-                                "options": {"text": "OK", "command": "_on_ok"},
-                                "layout": {"method": "pack", "side": "left", "padx": 6},
-                            }
-                        ],
-                    },
-                ],
-            }
-        ],
-    }
+    ctx = _InfoDialogContext(title, message)
     try:
-        build_from_spec(parent, spec, ctx)
+
+        build_from_layout_name(parent, "info_dialog", ctx)
         dlg = getattr(ctx, "_dialog", None)
         if dlg is not None:
+            try:
+                dlg.title(title)
+            except Exception:
+                pass
+
+            try:
+                frame = dlg.winfo_children()[0]
+                label = frame.winfo_children()[0]
+                if hasattr(label, "configure"):
+                    label.configure(text=message)
+            except Exception:
+                pass
             try:
                 dlg.transient(parent)
             except Exception:
@@ -385,14 +367,15 @@ def show_info_dialog(parent, title: str, message: str) -> None:
             except Exception:
                 pass
     except Exception:
-
         pass
 
 
 class _YesNoDialogContext:
-    def __init__(self):
+    def __init__(self, title: str, message: str):
         self._dialog = None
         self.result = False
+        self._title = title
+        self._message = message
 
     def _on_yes(self):
         self.result = True
@@ -412,49 +395,22 @@ class _YesNoDialogContext:
 
 
 def ask_yes_no(parent, title: str, message: str) -> bool:
-    ctx = _YesNoDialogContext()
-    spec = {
-        "widget": "Toplevel",
-        "name": "_dialog",
-        "options": {"title": title},
-        "children": [
-            {
-                "widget": "Frame",
-                "layout": {"method": "pack", "padx": 12, "pady": 12},
-                "children": [
-                    {
-                        "widget": "Label",
-                        "options": {
-                            "text": message,
-                            "justify": "left",
-                            "wraplength": 420,
-                        },
-                        "layout": {"method": "pack", "side": "top", "pady": 8},
-                    },
-                    {
-                        "widget": "Frame",
-                        "layout": {"method": "pack", "side": "bottom", "pady": 4},
-                        "children": [
-                            {
-                                "widget": "Button",
-                                "options": {"text": "Yes", "command": "_on_yes"},
-                                "layout": {"method": "pack", "side": "left", "padx": 6},
-                            },
-                            {
-                                "widget": "Button",
-                                "options": {"text": "No", "command": "_on_no"},
-                                "layout": {"method": "pack", "side": "left", "padx": 6},
-                            },
-                        ],
-                    },
-                ],
-            }
-        ],
-    }
+    ctx = _YesNoDialogContext(title, message)
     try:
-        build_from_spec(parent, spec, ctx)
+        build_from_layout_name(parent, "yes_no_dialog", ctx)
         dlg = getattr(ctx, "_dialog", None)
         if dlg is not None:
+            try:
+                dlg.title(title)
+            except Exception:
+                pass
+            try:
+                frame = dlg.winfo_children()[0]
+                label = frame.winfo_children()[0]
+                if hasattr(label, "configure"):
+                    label.configure(text=message)
+            except Exception:
+                pass
             try:
                 dlg.transient(parent)
             except Exception:
@@ -473,12 +429,7 @@ def ask_yes_no(parent, title: str, message: str) -> bool:
                 pass
         return bool(getattr(ctx, "result", False))
     except Exception:
-
         return False
-
-
-                                                                                        
-                                                                   
 
 
 def ask_open_filename(

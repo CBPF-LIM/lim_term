@@ -1,0 +1,137 @@
+widget: Toplevel
+name: window
+options:
+  title: ${ui.graph_tab.graph_options_title}
+children:
+  - widget: Frame
+    name: root
+    layout:
+      method: pack
+      fill: both
+      expand: true
+      padx: 10
+      pady: 10
+    children:
+      - widget: Label
+        options:
+          text: ${ui.graph_tab.type_label}
+        layout:
+          method: grid
+          column: 0
+          row: 0
+          padx: 5
+          pady: 5
+      - widget: Combobox
+        name: graph_type_combobox
+        options:
+          state: readonly
+          values: []
+        layout:
+          method: grid
+          column: 1
+          row: 0
+          padx: 5
+          pady: 5
+      - widget: Label
+        options:
+          text: ${ui.graph_tab.color_label}
+        layout:
+          method: grid
+          column: 0
+          row: 1
+          padx: 5
+          pady: 5
+      - widget: Combobox
+        name: color_combobox
+        options:
+          state: readonly
+          values: []
+        layout:
+          method: grid
+          column: 1
+          row: 1
+          padx: 5
+          pady: 5
+      - widget: Label
+        options:
+          text: ${ui.graph_tab.window_label}
+        layout:
+          method: grid
+          column: 0
+          row: 2
+          padx: 5
+          pady: 5
+      - widget: Entry
+        name: data_window_entry
+        layout:
+          method: grid
+          column: 1
+          row: 2
+          padx: 5
+          pady: 5
+      - widget: Label
+        options:
+          text: ${ui.graph_tab.min_y_label}
+        layout:
+          method: grid
+          column: 0
+          row: 3
+          padx: 5
+          pady: 5
+      - widget: Entry
+        name: min_y_entry
+        layout:
+          method: grid
+          column: 1
+          row: 3
+          padx: 5
+          pady: 5
+      - widget: Label
+        options:
+          text: ${ui.graph_tab.max_y_label}
+        layout:
+          method: grid
+          column: 0
+          row: 4
+          padx: 5
+          pady: 5
+      - widget: Entry
+        name: max_y_entry
+        layout:
+          method: grid
+          column: 1
+          row: 4
+          padx: 5
+          pady: 5
+      - widget: Label
+        options:
+          text: ${ui.graph_tab.point_label}
+        layout:
+          method: grid
+          column: 0
+          row: 5
+          padx: 5
+          pady: 5
+      - widget: Combobox
+        name: dot_type_combobox
+        options:
+          state: readonly
+          values: []
+        layout:
+          method: grid
+          column: 1
+          row: 5
+          padx: 5
+          pady: 5
+      - widget: Button
+        name: apply_button
+        options:
+          text: ${ui.graph_tab.apply_button}
+          command: _apply_settings
+        layout:
+          method: grid
+          column: 0
+          row: 6
+          columnspan: 2
+          padx: 5
+          pady: 10

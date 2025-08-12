@@ -1,6 +1,6 @@
 import signal
 import sys
-from .ui_builder import build_from_spec
+from .ui_builder import build_from_layout_name
 
 
 class SignalHandler:
@@ -53,57 +53,8 @@ class SignalHandler:
         parent = self.app_instance.root
         self._exit_result = False
 
-        spec = {
-            "widget": "Toplevel",
-            "name": "_exit_dialog",
-            "options": {"title": "Exit Confirmation"},
-            "children": [
-                {
-                    "widget": "Frame",
-                    "layout": {"method": "pack", "padx": 10, "pady": 10},
-                    "children": [
-                        {
-                            "widget": "Label",
-                            "options": {
-                                "text": "Are you sure you want to exit?",
-                                "justify": "left",
-                                "wraplength": 400,
-                            },
-                            "layout": {"method": "pack", "side": "top", "pady": 10},
-                        },
-                        {
-                            "widget": "Frame",
-                            "layout": {"method": "pack", "side": "bottom", "pady": 5},
-                            "children": [
-                                {
-                                    "widget": "Button",
-                                    "options": {"text": "OK", "command": "_on_exit_ok"},
-                                    "layout": {
-                                        "method": "pack",
-                                        "side": "left",
-                                        "padx": 5,
-                                    },
-                                },
-                                {
-                                    "widget": "Button",
-                                    "options": {
-                                        "text": "Cancel",
-                                        "command": "_on_exit_cancel",
-                                    },
-                                    "layout": {
-                                        "method": "pack",
-                                        "side": "left",
-                                        "padx": 5,
-                                    },
-                                },
-                            ],
-                        },
-                    ],
-                }
-            ],
-        }
         try:
-            build_from_spec(parent, spec, self)
+            build_from_layout_name(parent, "exit_confirmation_dialog", self)
 
             if hasattr(self._exit_dialog, "transient"):
                 try:
