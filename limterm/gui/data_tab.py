@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class DataTab:
     def __init__(self, parent):
-                                                                              
+
         self.frame = build_from_layout_name(parent, "data_tab", self)
         self.config_manager = get_config_manager()
 
@@ -24,11 +24,10 @@ class DataTab:
         self.preview_paused = False
         self.timestamp_start = None
 
-                          
         self._create_widgets()
 
     def _create_widgets(self):
-                                                                                       
+
         if hasattr(self, "text_widget") and hasattr(self, "scrollbar"):
             try:
                 self.text_widget.config(yscrollcommand=self.scrollbar.set)

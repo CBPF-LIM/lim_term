@@ -7,7 +7,7 @@ from ..utils.ui_builder import build_from_layout_name, build_from_spec
 
 class ConfigTab:
     def __init__(self, parent, serial_manager, signal_handler=None):
-                                           
+
         self.frame = build_from_layout_name(parent, "config_tab", self)
         self.serial_manager = serial_manager
         self.signal_handler = signal_handler
@@ -20,7 +20,7 @@ class ConfigTab:
         self._load_preferences()
 
     def _create_widgets(self):
-                                              
+
         eq_map = {
             "a": getattr(self, "eq_a", None),
             "b": getattr(self, "eq_b", None),
@@ -50,7 +50,6 @@ class ConfigTab:
             except Exception:
                 pass
 
-                                                                        
         try:
             if hasattr(self, "mode_frame"):
                 spec = {
@@ -73,7 +72,7 @@ class ConfigTab:
                     },
                 }
                 build_from_spec(self.mode_frame, spec, self)
-                                
+
                 self.win_simul_info.grid_remove()
         except Exception:
             pass

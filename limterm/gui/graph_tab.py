@@ -22,7 +22,7 @@ import time
 
 class GraphTab:
     def __init__(self, parent, data_tab, open_options_callback):
-                                                                               
+
         self.frame = build_from_layout_name(parent, "graph_tab", self)
         self.data_tab = data_tab
         self.config_manager = get_config_manager()
@@ -37,7 +37,6 @@ class GraphTab:
         self.last_render_time = 0
         self.series_widgets = []
 
-                          
         self.y_entries = []
         for i in range(1, 6):
             entry = getattr(self, f"y{i}_entry", None)
@@ -76,10 +75,10 @@ class GraphTab:
         return self.frame
 
     def _create_chart_area(self):
-                                                                     
+
         chart_parent = getattr(self, "chart_frame", None)
         if not chart_parent or not widget_exists(chart_parent):
-                                                                
+
             return
 
         self.graph_manager = GraphManager(chart_parent)
@@ -100,7 +99,7 @@ class GraphTab:
                 )
         elif group == "stacked":
             self.series_config_frame.config(text=t("ui.graph_tab.stacked_settings"))
-                                         
+
             spec = {
                 "widget": "PrefCheckbutton",
                 "name": "normalize_100_checkbox",
@@ -122,7 +121,7 @@ class GraphTab:
             build_from_spec(self.series_config_frame, spec, self)
 
     def _create_time_series_row(self, parent, row, label, index):
-               
+
         build_from_spec(
             parent,
             {
@@ -139,7 +138,6 @@ class GraphTab:
             self,
         )
 
-                       
         type_combo = build_from_spec(
             parent,
             {
@@ -166,7 +164,6 @@ class GraphTab:
             self,
         )
 
-                         
         marker_combo = build_from_spec(
             parent,
             {

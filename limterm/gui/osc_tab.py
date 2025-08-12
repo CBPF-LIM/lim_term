@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class OscTab:
 
     def __init__(self, parent, data_tab):
-                                                                              
+
         self.frame = build_from_layout_name(parent, "osc_tab", self)
         self.data_tab = data_tab
         self.config_manager = get_config_manager()
@@ -43,7 +43,6 @@ class OscTab:
             if hasattr(self, "settings_button"):
                 self.settings_button.config(text=t("ui.osc_tab.hide_settings"))
 
-                                                                       
         graph_parent = getattr(self, "graph_frame", None)
         if graph_parent and widget_exists(graph_parent):
             self.graph_manager = GraphManager(graph_parent)

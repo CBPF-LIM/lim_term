@@ -8,7 +8,7 @@ class PreferenceWidget:
 
     def __init__(
         self,
-        widget_class,
+        widget_or_class,
         parent,
         pref_key: str,
         default_value: Any = None,
@@ -27,12 +27,29 @@ class PreferenceWidget:
         self.reverse_mapping = (
             {v: k for k, v in self.value_mapping.items()} if value_mapping else {}
         )
-                                                                                
+
         self._current_value: Any = default_value
 
         self._parse_pref_key()
 
-        self.widget = widget_class(parent, **widget_kwargs)
+                                                                                       
+                                                                                           
+                                                 
+        try:
+            if isinstance(widget_or_class, (tk.Widget, ttk.Widget)):
+                self.widget = widget_or_class
+            elif isinstance(widget_or_class, type):
+                                                                                      
+                self.widget = widget_or_class(parent, **widget_kwargs)
+            else:
+                                                           
+                self.widget = widget_or_class
+        except Exception:
+                                                                   
+            if callable(widget_or_class):
+                self.widget = widget_or_class(parent, **widget_kwargs)
+            else:
+                raise
 
         self._setup_preference_handling()
 
@@ -95,7 +112,7 @@ class PreferenceWidget:
 
     def _on_change_event(self, event=None):
         try:
-                                                
+
             try:
                 self._current_value = self._get_widget_value_direct()
             except Exception:
@@ -108,13 +125,13 @@ class PreferenceWidget:
 
     def _on_checkbutton_change(self, original_command):
         try:
-                                                                             
+
             val = False
             try:
                 if self._tkinter_var and hasattr(self._tkinter_var, "get"):
                     val = bool(self._tkinter_var.get())
                 else:
-                                                
+
                     val = bool(self.widget.instate(["selected"]))
             except Exception:
                 pass
@@ -179,10 +196,9 @@ class PreferenceWidget:
         widget_type = type(self.widget).__name__
 
         if widget_type in ["Checkbutton"]:
-                                                   
+
             return bool(self._current_value)
 
-                                                      
         return self._get_widget_value_direct()
 
     def _set_widget_value(self, value: Any):
@@ -200,7 +216,7 @@ class PreferenceWidget:
                 self.widget.set(str(value))
 
         elif widget_type in ["Checkbutton"]:
-                                                               
+
             if self._tkinter_var and hasattr(self._tkinter_var, "set"):
                 try:
                     self._tkinter_var.set(bool(value))
@@ -225,7 +241,6 @@ class PreferenceWidget:
                     f"Don't know how to set value for {widget_type}"
                 )
 
-                      
         try:
             if widget_type == "Checkbutton":
                 self._current_value = bool(value)

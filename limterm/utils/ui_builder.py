@@ -54,7 +54,7 @@ def _get_widget_class(widget_type: str):
         "PanedWindow": ttk.Panedwindow,
         "Canvas": tk.Canvas,
         "Toplevel": tk.Toplevel,
-                           
+                                     
         "Menu": tk.Menu,
     }
     return mapping.get(widget_type)
@@ -87,18 +87,18 @@ def _bind_handlers_in_options(options: Dict[str, Any], context: Any, keys: List[
 
 
 def _build_menu(widget_parent, spec: WidgetSpec, context):
-                            
+                                                                          
     options = _resolve_i18n(spec.get("options", {}))
     menu_widget = tk.Menu(widget_parent, **options)
 
-                                                                  
+                                                       
     if spec.get("attach_to_parent") and hasattr(widget_parent, "config"):
         try:
             widget_parent.config(menu=menu_widget)
         except Exception:
             pass
 
-                   
+                 
     items: List[Dict[str, Any]] = spec.get("items", []) or []
                                                                      
     variables_attr_name = spec.get("variables_attr")
@@ -123,10 +123,10 @@ def _build_menu(widget_parent, spec: WidgetSpec, context):
             except Exception:
                 pass
         elif item_type == "checkbutton":
-                                                                                                  
+                                                                    
             initial = bool(item.get("initial", False))
             var = tk.BooleanVar(value=initial)
-                                         
+                                                
             vars_attr_local = item.get("variables_attr", variables_attr_name)
             var_key = item.get("var_key")
             if vars_attr_local and var_key:
@@ -144,11 +144,11 @@ def _build_menu(widget_parent, spec: WidgetSpec, context):
             except Exception:
                 pass
         elif item_type == "cascade":
-                                                                      
+                                       
             submenu_spec = item.get("submenu")
             submenu = None
             if isinstance(submenu_spec, dict):
-                                            
+                                         
                 submenu = _build_menu(menu_widget, submenu_spec, context)
             else:
                 try:
@@ -161,14 +161,27 @@ def _build_menu(widget_parent, spec: WidgetSpec, context):
             except Exception:
                 pass
         else:
-                                                               
+                                                    
             pass
 
-                                                  
+                                           
     name = spec.get("name")
     if name:
         setattr(context, name, menu_widget)
     return menu_widget
+
+
+def _split_pref_options(options: Dict[str, Any]) -> (Dict[str, Any], Dict[str, Any]):
+    pref_keys = {
+        "pref_key",
+        "default_value",
+        "value_type",
+        "on_change",
+        "value_mapping",
+    }
+    widget_opts = {k: v for k, v in options.items() if k not in pref_keys}
+    pref_opts = {k: v for k, v in options.items() if k in pref_keys}
+    return widget_opts, pref_opts
 
 
 def build_widget(parent, spec: WidgetSpec, context) -> Any:
@@ -189,34 +202,67 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
         pref_mod = importlib.import_module(pref_mod_name)
     except Exception:
         pref_mod = None
-    PrefEntry = getattr(pref_mod, "PrefEntry", None) if pref_mod else None
-    PrefCombobox = getattr(pref_mod, "PrefCombobox", None) if pref_mod else None
-    PrefCheckbutton = getattr(pref_mod, "PrefCheckbutton", None) if pref_mod else None
+    PreferenceWidget = getattr(pref_mod, "PreferenceWidget", None) if pref_mod else None
 
     widget = None
 
-                                       
+                              
     if widget_type == "Menu":
         widget = _build_menu(parent, spec, context)
-                            
+                                 
         return widget
 
+                                              
     cls = _get_widget_class(widget_type)
-    if cls is not None:
+
+                                                                          
+    if PreferenceWidget and widget_type in {
+        "PrefEntry",
+        "PrefCombobox",
+        "PrefCheckbutton",
+        "PrefScale",
+        "PrefSpinbox",
+    }:
+                                                                    
+        options = _resolve_option_references(options, context)
+        widget_opts, pref_opts = _split_pref_options(options)
+
+        base_cls_map = {
+            "PrefEntry": tk.Entry,
+            "PrefCombobox": ttk.Combobox,
+            "PrefCheckbutton": ttk.Checkbutton,
+            "PrefScale": tk.Scale,
+            "PrefSpinbox": tk.Spinbox,
+        }
+        base_cls = base_cls_map[widget_type]
+        base_widget = base_cls(parent, **widget_opts)
+
+                                                    
+        pref_key = pref_opts.get("pref_key")
+        default_value = pref_opts.get("default_value")
+        value_type = pref_opts.get("value_type", str)
+        on_change = pref_opts.get("on_change")
+        value_mapping = pref_opts.get("value_mapping")
+
+        widget = PreferenceWidget(
+            base_widget,
+            parent,
+            pref_key=pref_key,
+            default_value=default_value,
+            value_type=value_type,
+            on_change=on_change,
+            value_mapping=value_mapping,
+        )
+    elif cls is not None:
         options = _resolve_option_references(options, context)
         widget = cls(parent, **options)
-    elif widget_type == "PrefEntry" and PrefEntry is not None:
-        widget = PrefEntry(parent, **options)
-    elif widget_type == "PrefCombobox" and PrefCombobox is not None:
-        widget = PrefCombobox(parent, **options)
-    elif widget_type == "PrefCheckbutton" and PrefCheckbutton is not None:
-        widget = PrefCheckbutton(parent, **options)
     else:
         raise ValueError(f"Unsupported widget type: {widget_type}")
 
     if name:
         setattr(context, name, widget)
 
+                                              
     for bind_spec in spec.get("bindings", []):
         ev = bind_spec.get("event")
         handler_name = bind_spec.get("handler")
@@ -226,15 +272,17 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
             except Exception:
                 pass
 
+                                                                                                        
+    parent_for_children = getattr(widget, "widget", widget)
     for child in spec.get("children", []):
-        build_widget(widget, child, context)
+        build_widget(parent_for_children, child, context)
 
-                                                                    
+                                                                                  
     try:
         if not isinstance(parent, ttk.Notebook):
             _apply_layout(widget, layout)
     except Exception:
-                                                                    
+                                     
         try:
             _apply_layout(widget, layout)
         except Exception:

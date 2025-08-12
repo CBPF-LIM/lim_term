@@ -13,9 +13,7 @@ from .osc_tab import OscTab
 
 class MainWindow:
     def __init__(self):
-                                                                  
-                                                             
-                                                   
+
         try:
             self.root = build_from_spec(
                 None,
@@ -29,12 +27,11 @@ class MainWindow:
                 self,
             )
         except Exception:
-            import tkinter as tk                                     
+            import tkinter as tk
 
             self.root = tk.Tk()
             self.root.title(t("ui.main_window.title"))
 
-                  
         try:
             self.root.geometry(DEFAULT_GEOMETRY)
         except Exception:
@@ -51,7 +48,7 @@ class MainWindow:
         self._setup_serial_manager()
         self._build_layout()
         self._create_tabs()
-        self._create_menu()                                                         
+        self._create_menu()
         self._setup_keyboard_shortcuts()
 
     def _setup_serial_manager(self):
@@ -63,7 +60,7 @@ class MainWindow:
         try:
             build_from_layout_name(self.root, "main_window", self)
         except Exception:
-                                                                  
+
             if not hasattr(self, "tab_control"):
                 try:
                     build_from_spec(
@@ -80,16 +77,16 @@ class MainWindow:
                         self,
                     )
                 except Exception:
-                    import tkinter as tk                      
+                    import tkinter as tk
                     from tkinter import ttk
 
                     self.tab_control = ttk.Notebook(self.root)
                     self.tab_control.pack(expand=1, fill="both")
 
     def _create_menu(self):
-                                                
+
         try:
-                                                      
+
             language_order = ["en", "pt-br", "fr", "es", "de"]
             langs_by_code = {lang["code"]: lang for lang in get_available_languages()}
             lang_items = []
@@ -114,7 +111,7 @@ class MainWindow:
                 "widget": "Menu",
                 "name": "menubar",
                 "options": {"tearoff": 0},
-                "attach_to_parent": True,                       
+                "attach_to_parent": True,
                 "items": [
                     {
                         "type": "cascade",
@@ -159,7 +156,6 @@ class MainWindow:
             }
             build_from_spec(self.root, menu_spec, self)
 
-                                                   
             from ..i18n import get_current_language
 
             current_lang = get_current_language()
@@ -170,7 +166,7 @@ class MainWindow:
                     except Exception:
                         pass
         except Exception:
-            import tkinter as tk                      
+            import tkinter as tk
 
             menubar = tk.Menu(self.root)
             self.root.config(menu=menubar)
@@ -209,7 +205,7 @@ class MainWindow:
             for code in language_order:
                 if code in langs_by_code:
                     lang = langs_by_code[code]
-                                                                                   
+
                     var = tk.BooleanVar()
                     self.language_vars[lang["code"]] = var
                     self.language_menu.add_checkbutton(
@@ -225,7 +221,7 @@ class MainWindow:
                 self.language_vars[current_lang].set(True)
 
     def _change_language(self, language_code):
-                                                     
+
         if hasattr(self, "language_vars") and isinstance(self.language_vars, dict):
             try:
                 for code, var in self.language_vars.items():
@@ -255,7 +251,7 @@ class MainWindow:
                     self,
                 )
             except Exception:
-                import tkinter as tk                      
+                import tkinter as tk
                 from tkinter import ttk
 
                 self.tab_control = ttk.Notebook(self.root)

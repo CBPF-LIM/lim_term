@@ -5,7 +5,7 @@ from ..utils.ui_builder import build_from_spec
 
 class GraphOptionsWindow:
     def __init__(self, parent, serial_gui):
-                                                
+
         self.window = build_from_spec(
             parent,
             {
