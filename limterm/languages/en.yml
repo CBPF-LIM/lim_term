@@ -260,7 +260,13 @@ common:
   value: Value
   percentage: Percentage (%)
 dialogs:
+  info_title: Information
+  info_message: Exit?
+  ok: OK
   text_files: Text files
   all_files: All files
   windows_virtual_port_info: 'To simulate a virtual serial port on Windows, install the Null-modem emulator (com0com: https://com0com.sourceforge.net/).\n    After configuration, select ''Hardware'' mode and choose the created COM port.'
   language_changed: Language Changed
+  exit_title: Exit
+  exit_confirm: Exit the application?
+  cancel: Cancel
