@@ -1,0 +1,26 @@
+widget: Frame
+name: stacked_options_container
+layout:
+  method: grid
+  column: 0
+  row: 0
+  columnspan: 4
+  sticky: w
+  padx: 5
+  pady: 5
+children:
+  - widget: PrefCheckbutton
+    name: normalize_100_checkbox
+    options:
+      pref_key: graph.general.normalize_100
+      default_value: false
+      text: "${ui.graph_tab.normalize_100_percent}"
+      on_change: _on_setting_change
+    layout:
+      method: grid
+      column: 0
+      row: 0
+      columnspan: 4
+      padx: 5
+      pady: 10
+      sticky: w

@@ -321,11 +321,6 @@ def build_from_layout_name(parent, name: str, context) -> Any:
     return build_from_yaml(parent, yaml_path, context)
 
 
-def build_from_spec(parent, spec: WidgetSpec, context) -> Any:
-    spec = _resolve_i18n(spec)
-    return build_widget(parent, spec, context)
-
-
 def extend_menu(
     menu_widget: tk.Menu,
     items: List[Dict[str, Any]],
