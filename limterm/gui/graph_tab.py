@@ -138,7 +138,12 @@ class GraphTab:
             )
 
             setattr(ctx, "row_index", row)
-            build_from_layout_name(parent, "graph_time_series_row", ctx)
+            row_widget = build_from_layout_name(parent, "graph_time_series_row", ctx)
+            # Ensure proper layout since YAML variable rows may not be supported
+            try:
+                row_widget.grid(column=0, row=index, columnspan=4, sticky="w", padx=5, pady=2)
+            except Exception:
+                pass
             if hasattr(ctx, "type_combo") and hasattr(ctx, "marker_combo"):
                 self.series_widgets.append(
                     {"type": ctx.type_combo, "marker": ctx.marker_combo}
