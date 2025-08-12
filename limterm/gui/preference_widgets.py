@@ -32,20 +32,17 @@ class PreferenceWidget:
 
         self._parse_pref_key()
 
-                                                                                       
-                                                                                           
-                                                 
         try:
             if isinstance(widget_or_class, (tk.Widget, ttk.Widget)):
                 self.widget = widget_or_class
             elif isinstance(widget_or_class, type):
-                                                                                      
+
                 self.widget = widget_or_class(parent, **widget_kwargs)
             else:
-                                                           
+
                 self.widget = widget_or_class
         except Exception:
-                                                                   
+
             if callable(widget_or_class):
                 self.widget = widget_or_class(parent, **widget_kwargs)
             else:

@@ -1,4 +1,3 @@
-from tkinter import filedialog, messagebox, TclError
 from ..utils import format_elapsed_since, ensure_capture_dir
 from ..i18n import t, get_config_manager
 import logging
@@ -6,7 +5,12 @@ import os
 import datetime
 import time
 from collections import deque
-from ..utils.ui_builder import build_from_layout_name
+from ..utils.ui_builder import (
+    build_from_layout_name,
+    ask_yes_no,
+    ask_open_filename,
+    ask_save_as,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -185,7 +189,7 @@ class DataTab:
                     self.text_widget.insert("end", line + "\n")
 
             self.text_widget.see("end")
-        except TclError:
+        except Exception:
             pass
 
     def _add_message(self, message):
@@ -193,26 +197,25 @@ class DataTab:
             try:
                 self.text_widget.insert("end", f"[MSG] {message}\n")
                 self.text_widget.see("end")
-            except TclError:
+            except Exception:
                 pass
 
     def _load_data(self):
         if self.data_buffer:
-            result = messagebox.askquestion(
+            if not ask_yes_no(
+                self.frame,
                 t("ui.data_tab.overwrite_dialog_title"),
                 t("ui.data_tab.overwrite_dialog_message"),
-                icon="warning",
-            )
-            if result != "yes":
+            ):
                 return
 
-        file_path = filedialog.askopenfilename(
-            defaultextension=".txt",
+        file_path = ask_open_filename(
+            title=t("ui.graph_tab.load_dialog_title"),
             filetypes=[
                 (t("dialogs.text_files"), "*.txt"),
                 (t("dialogs.all_files"), "*.*"),
             ],
-            title=t("ui.graph_tab.load_dialog_title"),
+            defaultextension=".txt",
         )
 
         if file_path:
@@ -257,7 +260,7 @@ class DataTab:
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             default_filename = f"manual_save_{timestamp}.txt"
 
-            file_path = filedialog.asksaveasfilename(
+            file_path = ask_save_as(
                 defaultextension=".txt",
                 filetypes=[(t("dialogs.text_files"), "*.txt")],
                 initialdir=capture_dir,

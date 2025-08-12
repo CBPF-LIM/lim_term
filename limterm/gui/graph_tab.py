@@ -1,4 +1,4 @@
-from ..utils.ui_builder import build_from_layout_name, build_from_spec
+from ..utils.ui_builder import build_from_layout_name, build_from_spec, ask_save_as
 from ..core import GraphManager
 from ..utils import DataParser, FileManager
 from ..config import DEFAULT_X_COLUMN
@@ -230,9 +230,7 @@ class GraphTab:
             self.pause_button.config(text=t("ui.graph_tab.pause"))
 
     def _save_chart(self):
-        from tkinter import filedialog
-
-        file_path = filedialog.asksaveasfilename(
+        file_path = ask_save_as(
             defaultextension=".png",
             filetypes=[("PNG files", "*.png"), ("All files", "*.*")],
             title=t("ui.graph_tab.save_dialog_title"),

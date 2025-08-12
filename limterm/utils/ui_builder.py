@@ -6,6 +6,7 @@ from ..i18n import t
 import importlib
 import os
 import sys
+from tkinter import filedialog
 
 WidgetSpec = Dict[str, Any]
 
@@ -41,6 +42,7 @@ def _apply_layout(widget, layout: Dict[str, Any]):
 
 def _get_widget_class(widget_type: str):
     mapping = {
+        "Tk": tk.Tk,
         "Frame": ttk.Frame,
         "LabelFrame": ttk.LabelFrame,
         "Label": ttk.Label,
@@ -54,7 +56,6 @@ def _get_widget_class(widget_type: str):
         "PanedWindow": ttk.Panedwindow,
         "Canvas": tk.Canvas,
         "Toplevel": tk.Toplevel,
-                                     
         "Menu": tk.Menu,
     }
     return mapping.get(widget_type)
@@ -87,20 +88,18 @@ def _bind_handlers_in_options(options: Dict[str, Any], context: Any, keys: List[
 
 
 def _build_menu(widget_parent, spec: WidgetSpec, context):
-                                                                          
+
     options = _resolve_i18n(spec.get("options", {}))
     menu_widget = tk.Menu(widget_parent, **options)
 
-                                                       
     if spec.get("attach_to_parent") and hasattr(widget_parent, "config"):
         try:
             widget_parent.config(menu=menu_widget)
         except Exception:
             pass
 
-                 
     items: List[Dict[str, Any]] = spec.get("items", []) or []
-                                                                     
+
     variables_attr_name = spec.get("variables_attr")
 
     for item in items:
@@ -123,10 +122,10 @@ def _build_menu(widget_parent, spec: WidgetSpec, context):
             except Exception:
                 pass
         elif item_type == "checkbutton":
-                                                                    
+
             initial = bool(item.get("initial", False))
             var = tk.BooleanVar(value=initial)
-                                                
+
             vars_attr_local = item.get("variables_attr", variables_attr_name)
             var_key = item.get("var_key")
             if vars_attr_local and var_key:
@@ -144,11 +143,11 @@ def _build_menu(widget_parent, spec: WidgetSpec, context):
             except Exception:
                 pass
         elif item_type == "cascade":
-                                       
+
             submenu_spec = item.get("submenu")
             submenu = None
             if isinstance(submenu_spec, dict):
-                                         
+
                 submenu = _build_menu(menu_widget, submenu_spec, context)
             else:
                 try:
@@ -161,10 +160,9 @@ def _build_menu(widget_parent, spec: WidgetSpec, context):
             except Exception:
                 pass
         else:
-                                                    
+
             pass
 
-                                           
     name = spec.get("name")
     if name:
         setattr(context, name, menu_widget)
@@ -206,16 +204,13 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
 
     widget = None
 
-                              
     if widget_type == "Menu":
         widget = _build_menu(parent, spec, context)
-                                 
+
         return widget
 
-                                              
     cls = _get_widget_class(widget_type)
 
-                                                                          
     if PreferenceWidget and widget_type in {
         "PrefEntry",
         "PrefCombobox",
@@ -223,7 +218,7 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
         "PrefScale",
         "PrefSpinbox",
     }:
-                                                                    
+
         options = _resolve_option_references(options, context)
         widget_opts, pref_opts = _split_pref_options(options)
 
@@ -237,7 +232,6 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
         base_cls = base_cls_map[widget_type]
         base_widget = base_cls(parent, **widget_opts)
 
-                                                    
         pref_key = pref_opts.get("pref_key")
         default_value = pref_opts.get("default_value")
         value_type = pref_opts.get("value_type", str)
@@ -255,14 +249,22 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
         )
     elif cls is not None:
         options = _resolve_option_references(options, context)
+                                                                                               
+        _title = None
+        if widget_type in {"Tk", "Toplevel"} and isinstance(options, dict):
+            _title = options.pop("title", None)
         widget = cls(parent, **options)
+        if _title and hasattr(widget, "title"):
+            try:
+                widget.title(_title)
+            except Exception:
+                pass
     else:
         raise ValueError(f"Unsupported widget type: {widget_type}")
 
     if name:
         setattr(context, name, widget)
 
-                                              
     for bind_spec in spec.get("bindings", []):
         ev = bind_spec.get("event")
         handler_name = bind_spec.get("handler")
@@ -272,17 +274,15 @@ def build_widget(parent, spec: WidgetSpec, context) -> Any:
             except Exception:
                 pass
 
-                                                                                                        
     parent_for_children = getattr(widget, "widget", widget)
     for child in spec.get("children", []):
         build_widget(parent_for_children, child, context)
 
-                                                                                  
     try:
         if not isinstance(parent, ttk.Notebook):
             _apply_layout(widget, layout)
     except Exception:
-                                     
+
         try:
             _apply_layout(widget, layout)
         except Exception:
@@ -315,3 +315,211 @@ def build_from_layout_name(parent, name: str, context) -> Any:
 def build_from_spec(parent, spec: WidgetSpec, context) -> Any:
     spec = _resolve_i18n(spec)
     return build_widget(parent, spec, context)
+
+
+class _InfoDialogContext:
+    def __init__(self):
+        self._dialog = None
+
+    def _on_ok(self):
+        try:
+            if self._dialog:
+                self._dialog.destroy()
+        except Exception:
+            pass
+
+
+def show_info_dialog(parent, title: str, message: str) -> None:
+    ctx = _InfoDialogContext()
+    spec = {
+        "widget": "Toplevel",
+        "name": "_dialog",
+        "options": {"title": title},
+        "children": [
+            {
+                "widget": "Frame",
+                "layout": {"method": "pack", "padx": 12, "pady": 12},
+                "children": [
+                    {
+                        "widget": "Label",
+                        "options": {
+                            "text": message,
+                            "justify": "left",
+                            "wraplength": 420,
+                        },
+                        "layout": {"method": "pack", "side": "top", "pady": 8},
+                    },
+                    {
+                        "widget": "Frame",
+                        "layout": {"method": "pack", "side": "bottom", "pady": 4},
+                        "children": [
+                            {
+                                "widget": "Button",
+                                "options": {"text": "OK", "command": "_on_ok"},
+                                "layout": {"method": "pack", "side": "left", "padx": 6},
+                            }
+                        ],
+                    },
+                ],
+            }
+        ],
+    }
+    try:
+        build_from_spec(parent, spec, ctx)
+        dlg = getattr(ctx, "_dialog", None)
+        if dlg is not None:
+            try:
+                dlg.transient(parent)
+            except Exception:
+                pass
+            try:
+                dlg.grab_set()
+            except Exception:
+                pass
+            try:
+                dlg.focus_set()
+            except Exception:
+                pass
+            try:
+                parent.wait_window(dlg)
+            except Exception:
+                pass
+    except Exception:
+
+        pass
+
+
+class _YesNoDialogContext:
+    def __init__(self):
+        self._dialog = None
+        self.result = False
+
+    def _on_yes(self):
+        self.result = True
+        try:
+            if self._dialog:
+                self._dialog.destroy()
+        except Exception:
+            pass
+
+    def _on_no(self):
+        self.result = False
+        try:
+            if self._dialog:
+                self._dialog.destroy()
+        except Exception:
+            pass
+
+
+def ask_yes_no(parent, title: str, message: str) -> bool:
+    ctx = _YesNoDialogContext()
+    spec = {
+        "widget": "Toplevel",
+        "name": "_dialog",
+        "options": {"title": title},
+        "children": [
+            {
+                "widget": "Frame",
+                "layout": {"method": "pack", "padx": 12, "pady": 12},
+                "children": [
+                    {
+                        "widget": "Label",
+                        "options": {
+                            "text": message,
+                            "justify": "left",
+                            "wraplength": 420,
+                        },
+                        "layout": {"method": "pack", "side": "top", "pady": 8},
+                    },
+                    {
+                        "widget": "Frame",
+                        "layout": {"method": "pack", "side": "bottom", "pady": 4},
+                        "children": [
+                            {
+                                "widget": "Button",
+                                "options": {"text": "Yes", "command": "_on_yes"},
+                                "layout": {"method": "pack", "side": "left", "padx": 6},
+                            },
+                            {
+                                "widget": "Button",
+                                "options": {"text": "No", "command": "_on_no"},
+                                "layout": {"method": "pack", "side": "left", "padx": 6},
+                            },
+                        ],
+                    },
+                ],
+            }
+        ],
+    }
+    try:
+        build_from_spec(parent, spec, ctx)
+        dlg = getattr(ctx, "_dialog", None)
+        if dlg is not None:
+            try:
+                dlg.transient(parent)
+            except Exception:
+                pass
+            try:
+                dlg.grab_set()
+            except Exception:
+                pass
+            try:
+                dlg.focus_set()
+            except Exception:
+                pass
+            try:
+                parent.wait_window(dlg)
+            except Exception:
+                pass
+        return bool(getattr(ctx, "result", False))
+    except Exception:
+
+        return False
+
+
+                                                                                        
+                                                                   
+
+
+def ask_open_filename(
+    parent=None,
+    title: Optional[str] = None,
+    initialdir: Optional[str] = None,
+    filetypes: Optional[List[tuple]] = None,
+    defaultextension: Optional[str] = None,
+) -> Optional[str]:
+    try:
+        return (
+            filedialog.askopenfilename(
+                title=title or "",
+                initialdir=initialdir or None,
+                filetypes=filetypes or [("All files", "*.*")],
+                defaultextension=defaultextension or None,
+            )
+            or None
+        )
+    except Exception:
+        return None
+
+
+def ask_save_as(
+    parent=None,
+    title: Optional[str] = None,
+    initialdir: Optional[str] = None,
+    initialfile: Optional[str] = None,
+    filetypes: Optional[List[tuple]] = None,
+    defaultextension: Optional[str] = None,
+) -> Optional[str]:
+    try:
+        return (
+            filedialog.asksaveasfilename(
+                title=title or "",
+                initialdir=initialdir or None,
+                initialfile=initialfile or None,
+                filetypes=filetypes or [("All files", "*.*")],
+                defaultextension=defaultextension or None,
+            )
+            or None
+        )
+    except Exception:
+        return None

@@ -1,6 +1,6 @@
 import signal
 import sys
-from tkinter import messagebox
+from .ui_builder import build_from_spec
 
 
 class SignalHandler:
@@ -9,6 +9,8 @@ class SignalHandler:
         self.app_instance = app_instance
         self.shutdown_requested = False
         self.is_busy = False
+        self._exit_result = False
+        self._exit_dialog = None
 
     def setup_signal_handlers(self):
         signal.signal(signal.SIGTERM, self._handle_signal)
@@ -24,10 +26,108 @@ class SignalHandler:
         if self.app_instance and hasattr(self.app_instance, "root"):
             try:
                 self.app_instance.root.after_idle(self._show_exit_confirmation)
-            except:
+            except Exception:
                 sys.exit(0)
         else:
             sys.exit(0)
+
+    def _on_exit_ok(self):
+        self._exit_result = True
+        try:
+            if self._exit_dialog and hasattr(self._exit_dialog, "destroy"):
+                self._exit_dialog.destroy()
+        except Exception:
+            pass
+
+    def _on_exit_cancel(self):
+        self._exit_result = False
+        try:
+            if self._exit_dialog and hasattr(self._exit_dialog, "destroy"):
+                self._exit_dialog.destroy()
+        except Exception:
+            pass
+
+    def _show_exit_confirmation_dialog(self) -> bool:
+        if not (self.app_instance and hasattr(self.app_instance, "root")):
+            return True
+        parent = self.app_instance.root
+        self._exit_result = False
+
+        spec = {
+            "widget": "Toplevel",
+            "name": "_exit_dialog",
+            "options": {"title": "Exit Confirmation"},
+            "children": [
+                {
+                    "widget": "Frame",
+                    "layout": {"method": "pack", "padx": 10, "pady": 10},
+                    "children": [
+                        {
+                            "widget": "Label",
+                            "options": {
+                                "text": "Are you sure you want to exit?",
+                                "justify": "left",
+                                "wraplength": 400,
+                            },
+                            "layout": {"method": "pack", "side": "top", "pady": 10},
+                        },
+                        {
+                            "widget": "Frame",
+                            "layout": {"method": "pack", "side": "bottom", "pady": 5},
+                            "children": [
+                                {
+                                    "widget": "Button",
+                                    "options": {"text": "OK", "command": "_on_exit_ok"},
+                                    "layout": {
+                                        "method": "pack",
+                                        "side": "left",
+                                        "padx": 5,
+                                    },
+                                },
+                                {
+                                    "widget": "Button",
+                                    "options": {
+                                        "text": "Cancel",
+                                        "command": "_on_exit_cancel",
+                                    },
+                                    "layout": {
+                                        "method": "pack",
+                                        "side": "left",
+                                        "padx": 5,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                }
+            ],
+        }
+        try:
+            build_from_spec(parent, spec, self)
+
+            if hasattr(self._exit_dialog, "transient"):
+                try:
+                    self._exit_dialog.transient(parent)
+                except Exception:
+                    pass
+            if hasattr(self._exit_dialog, "grab_set"):
+                try:
+                    self._exit_dialog.grab_set()
+                except Exception:
+                    pass
+            if hasattr(self._exit_dialog, "focus_set"):
+                try:
+                    self._exit_dialog.focus_set()
+                except Exception:
+                    pass
+            try:
+                parent.wait_window(self._exit_dialog)
+            except Exception:
+                pass
+        except Exception:
+
+            return True
+        return bool(self._exit_result)
 
     def _show_exit_confirmation(self):
         try:
@@ -38,11 +138,9 @@ class SignalHandler:
                 sys.exit(0)
                 return
 
-            result = messagebox.askokcancel(
-                "Exit Confirmation", "Are you sure you want to exit?", icon="warning"
-            )
+            confirm = self._show_exit_confirmation_dialog()
 
-            if result:
+            if confirm:
 
                 if self.app_instance and hasattr(self.app_instance, "root"):
                     self.app_instance.root.quit()

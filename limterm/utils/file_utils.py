@@ -1,11 +1,11 @@
-from tkinter import filedialog
 from ..i18n import t
+from ..utils.ui_builder import ask_save_as
 
 
 class FileManager:
     @staticmethod
     def save_data_to_file(data, default_extension=".txt"):
-        file_path = filedialog.asksaveasfilename(
+        file_path = ask_save_as(
             defaultextension=default_extension,
             filetypes=[(t("dialogs.text_files"), "*.txt")],
         )
