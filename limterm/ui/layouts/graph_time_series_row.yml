@@ -24,8 +24,8 @@ children:
       pref_key: graph.time_series.y${row_index}_type
       default_value: line
       state: readonly
-      values: ["${graph_types.line}", "${graph_types.scatter}"]
-      value_mapping: {"${graph_types.line}": line, "${graph_types.scatter}": scatter}
+      values: ["${ui.graph_types.line}", "${ui.graph_types.scatter}"]
+      value_mapping: {"${ui.graph_types.line}": line, "${ui.graph_types.scatter}": scatter}
       on_change: _on_series_change
       width: 10
     layout:
@@ -40,8 +40,8 @@ children:
       pref_key: graph.time_series.y${row_index}_marker
       default_value: circle
       state: readonly
-      values: ["${markers.circle}", "${markers.square}", "${markers.triangle}", "${markers.diamond}", "${markers.plus}", "${markers.x}"]
-      value_mapping: {"${markers.circle}": circle, "${markers.square}": square, "${markers.triangle}": triangle, "${markers.diamond}": diamond, "${markers.plus}": plus, "${markers.x}": x}
+      values: ["${ui.markers.circle}", "${ui.markers.square}", "${ui.markers.triangle}", "${ui.markers.diamond}", "${ui.markers.plus}", "${ui.markers.x}"]
+      value_mapping: {"${ui.markers.circle}": circle, "${ui.markers.square}": square, "${ui.markers.triangle}": triangle, "${ui.markers.diamond}": diamond, "${ui.markers.plus}": plus, "${ui.markers.x}": x}
       on_change: _on_series_change
       width: 10
     layout:
