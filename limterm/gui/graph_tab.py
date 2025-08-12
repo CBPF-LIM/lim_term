@@ -100,13 +100,32 @@ class GraphTab:
         elif group == "stacked":
             self.series_config_frame.config(text=t("ui.graph_tab.stacked_settings"))
 
-            if hasattr(self, "normalize_100_checkbox"):
-                try:
-                    self.normalize_100_checkbox.grid(
-                        column=0, row=0, columnspan=4, padx=5, pady=10
-                    )
-                except Exception:
-                    pass
+            # Build normalize to 100% checkbox via builder (YAML/dict spec)
+            try:
+                from ..utils.ui_builder import build_from_spec
+
+                spec = {
+                    "widget": "PrefCheckbutton",
+                    "name": "normalize_100_checkbox",
+                    "options": {
+                        "pref_key": "graph.general.normalize_100",
+                        "default_value": False,
+                        "text": "${ui.graph_tab.normalize_100_percent}",
+                        "on_change": "_on_setting_change",
+                    },
+                    "layout": {
+                        "method": "grid",
+                        "column": 0,
+                        "row": 0,
+                        "columnspan": 4,
+                        "padx": 5,
+                        "pady": 10,
+                        "sticky": "w",
+                    },
+                }
+                build_from_spec(self.series_config_frame, spec, self)
+            except Exception:
+                pass
 
     def _create_time_series_row(self, parent, row, label, index):
 

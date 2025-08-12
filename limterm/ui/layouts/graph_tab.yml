@@ -285,35 +285,35 @@ children:
                     layout: {method: grid, column: 0, row: 0, padx: 5, pady: 2, sticky: w}
                   - widget: PrefCombobox
                     name: y1_color
-                    options: {pref_key: graph.general.y1_color, default_value: blue, state: readonly, values: [blue, red, green, orange, magenta], width: 10, on_change: _on_color_setting_change}
+                    options: {pref_key: graph.general.y1_color, default_value: blue, state: readonly, values: ["${ui.colors.blue}", "${ui.colors.red}", "${ui.colors.green}", "${ui.colors.orange}", "${ui.colors.magenta}"], value_mapping: {"${ui.colors.blue}": blue, "${ui.colors.red}": red, "${ui.colors.green}": green, "${ui.colors.orange}": orange, "${ui.colors.magenta}": magenta}, width: 12, on_change: _on_color_setting_change}
                     layout: {method: grid, column: 1, row: 0, padx: 5, pady: 2, sticky: w}
                   - widget: Label
                     options: {text: "Y2:"}
                     layout: {method: grid, column: 0, row: 1, padx: 5, pady: 2, sticky: w}
                   - widget: PrefCombobox
                     name: y2_color
-                    options: {pref_key: graph.general.y2_color, default_value: red, state: readonly, values: [blue, red, green, orange, magenta], width: 10, on_change: _on_color_setting_change}
+                    options: {pref_key: graph.general.y2_color, default_value: red, state: readonly, values: ["${ui.colors.blue}", "${ui.colors.red}", "${ui.colors.green}", "${ui.colors.orange}", "${ui.colors.magenta}"], value_mapping: {"${ui.colors.blue}": blue, "${ui.colors.red}": red, "${ui.colors.green}": green, "${ui.colors.orange}": orange, "${ui.colors.magenta}": magenta}, width: 12, on_change: _on_color_setting_change}
                     layout: {method: grid, column: 1, row: 1, padx: 5, pady: 2, sticky: w}
                   - widget: Label
                     options: {text: "Y3:"}
                     layout: {method: grid, column: 0, row: 2, padx: 5, pady: 2, sticky: w}
                   - widget: PrefCombobox
                     name: y3_color
-                    options: {pref_key: graph.general.y3_color, default_value: green, state: readonly, values: [blue, red, green, orange, magenta], width: 10, on_change: _on_color_setting_change}
+                    options: {pref_key: graph.general.y3_color, default_value: green, state: readonly, values: ["${ui.colors.blue}", "${ui.colors.red}", "${ui.colors.green}", "${ui.colors.orange}", "${ui.colors.magenta}"], value_mapping: {"${ui.colors.blue}": blue, "${ui.colors.red}": red, "${ui.colors.green}": green, "${ui.colors.orange}": orange, "${ui.colors.magenta}": magenta}, width: 12, on_change: _on_color_setting_change}
                     layout: {method: grid, column: 1, row: 2, padx: 5, pady: 2, sticky: w}
                   - widget: Label
                     options: {text: "Y4:"}
                     layout: {method: grid, column: 0, row: 3, padx: 5, pady: 2, sticky: w}
                   - widget: PrefCombobox
                     name: y4_color
-                    options: {pref_key: graph.general.y4_color, default_value: orange, state: readonly, values: [blue, red, green, orange, magenta], width: 10, on_change: _on_color_setting_change}
+                    options: {pref_key: graph.general.y4_color, default_value: orange, state: readonly, values: ["${ui.colors.blue}", "${ui.colors.red}", "${ui.colors.green}", "${ui.colors.orange}", "${ui.colors.magenta}"], value_mapping: {"${ui.colors.blue}": blue, "${ui.colors.red}": red, "${ui.colors.green}": green, "${ui.colors.orange}": orange, "${ui.colors.magenta}": magenta}, width: 12, on_change: _on_color_setting_change}
                     layout: {method: grid, column: 1, row: 3, padx: 5, pady: 2, sticky: w}
                   - widget: Label
                     options: {text: "Y5:"}
                     layout: {method: grid, column: 0, row: 4, padx: 5, pady: 2, sticky: w}
                   - widget: PrefCombobox
                     name: y5_color
-                    options: {pref_key: graph.general.y5_color, default_value: magenta, state: readonly, values: [blue, red, green, orange, magenta], width: 10, on_change: _on_color_setting_change}
+                    options: {pref_key: graph.general.y5_color, default_value: magenta, state: readonly, values: ["${ui.colors.blue}", "${ui.colors.red}", "${ui.colors.green}", "${ui.colors.orange}", "${ui.colors.magenta}"], value_mapping: {"${ui.colors.blue}": blue, "${ui.colors.red}": red, "${ui.colors.green}": green, "${ui.colors.orange}": orange, "${ui.colors.magenta}": magenta}, width: 12, on_change: _on_color_setting_change}
                     layout: {method: grid, column: 1, row: 4, padx: 5, pady: 2, sticky: w}
               - widget: LabelFrame
                 name: series_config_frame
