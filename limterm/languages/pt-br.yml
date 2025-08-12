@@ -78,8 +78,8 @@ ui:
     preview_limit_label: 'Visualização Limit:'
     pause_preview: Pause Visualização
     resume_preview: Resume Visualização
-    enable_timestamp: Add Tempostamp
-    reset_timestamp: Reset Tempostamp
+    enable_timestamp: Add Timestamp
+    reset_timestamp: Reset Timestamp
   graph_tab:
     column_x: 'Coluna X:'
     column_y: 'Coluna Y:'
